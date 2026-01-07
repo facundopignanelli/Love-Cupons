@@ -1,4 +1,4 @@
-# Multi-User Coupon Assignment Implementation
+﻿# Multi-User Coupon Assignment Implementation
 
 ## Overview
 This document outlines the changes made to support multiple users creating and assigning coupons to specific users.
@@ -11,8 +11,8 @@ This document outlines the changes made to support multiple users creating and a
 - Admins can always see all coupons
 
 ### 2. **User Tracking**
-- `_pup_coupon_created_by` - Tracks which user created the coupon (set on first save)
-- `_pup_coupon_assigned_to` - Stores an array of user IDs who can access/redeem the coupon
+- `_love_coupon_created_by` - Tracks which user created the coupon (set on first save)
+- `_love_coupon_assigned_to` - Stores an array of user IDs who can access/redeem the coupon
 
 ### 3. **Admin Interface Enhancements**
 - New meta box: "Assign To Users" - allows creators to select specific users
@@ -30,14 +30,14 @@ This document outlines the changes made to support multiple users creating and a
 ### 1. **includes/class-config.php**
 **New Meta Fields:**
 ```php
-'_pup_coupon_created_by' => array(
+'_love_coupon_created_by' => array(
     'type' => 'number',
     'sanitize' => 'absint',
     'label' => 'Created By (User ID)',
 ),
-'_pup_coupon_assigned_to' => array(
+'_love_coupon_assigned_to' => array(
     'type' => 'array',
-    'sanitize' => array( 'Pup_Coupons_Config', 'sanitize_user_ids' ),
+    'sanitize' => array( 'love_coupons_Config', 'sanitize_user_ids' ),
     'label' => 'Assigned To (User IDs)',
 ),
 ```
@@ -50,7 +50,7 @@ public static function sanitize_user_ids( $user_ids )
 - Checks that users exist in the database
 - Removes duplicates
 
-### 2. **pup-coupons.php**
+### 2. **love-coupons.php**
 
 **Modified Methods:**
 
@@ -75,9 +75,9 @@ public static function sanitize_user_ids( $user_ids )
 - Lists assigned user names comma-separated
 
 #### `save_meta()`
-- Now saves `_pup_coupon_assigned_to` meta field
+- Now saves `_love_coupon_assigned_to` meta field
 - Validates user IDs when saving
-- Automatically tracks creator on first save via `_pup_coupon_created_by`
+- Automatically tracks creator on first save via `_love_coupon_created_by`
 
 #### `display_coupons_shortcode()`
 - Added user access check before displaying coupons
@@ -123,8 +123,8 @@ private function user_can_access_coupon( $coupon_id, $user_id )
 ```
 Post Meta Key               | Type    | Description
 ---------------------------|---------|----------------------------------
-_pup_coupon_created_by      | int     | User ID of coupon creator
-_pup_coupon_assigned_to     | array   | Array of user IDs with access
+_love_coupon_created_by      | int     | User ID of coupon creator
+_love_coupon_assigned_to     | array   | Array of user IDs with access
 ```
 
 ## Security Considerations

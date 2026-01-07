@@ -457,7 +457,7 @@
     $(document).ready(function() {
         // Check if our AJAX object exists
         if (typeof loveCouponsAjax === 'undefined') {
-            console.warn('Pup Coupons: AJAX configuration not found');
+            console.warn('Love Coupons: AJAX configuration not found');
             return;
         }
 

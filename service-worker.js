@@ -1,5 +1,5 @@
 ﻿/**
- * Pup Coupons Service Worker
+ * Love Coupons Service Worker
  * Enhanced with better error handling, logging, and performance optimization
  */
 
@@ -29,18 +29,18 @@ const CACHE_CONFIG = {
  * Install Event - Cache static assets
  */
 self.addEventListener('install', event => {
-    console.log('[Pup Coupons SW] Installing service worker...');
+    console.log('[Love Coupons SW] Installing service worker...');
     
     event.waitUntil(
         Promise.all([
             // Cache static assets
             caches.open(STATIC_CACHE_NAME)
                 .then(cache => {
-                    console.log('[Pup Coupons SW] Caching static assets...');
+                    console.log('[Love Coupons SW] Caching static assets...');
                     return cache.addAll(STATIC_ASSETS);
                 })
                 .catch(error => {
-                    console.error('[Pup Coupons SW] Failed to cache static assets:', error);
+                    console.error('[Love Coupons SW] Failed to cache static assets:', error);
                     // Don't fail installation if caching fails
                     return Promise.resolve();
                 }),
@@ -55,7 +55,7 @@ self.addEventListener('install', event => {
  * Activate Event - Clean up old caches
  */
 self.addEventListener('activate', event => {
-    console.log('[Pup Coupons SW] Activating service worker...');
+    console.log('[Love Coupons SW] Activating service worker...');
     
     event.waitUntil(
         Promise.all([
@@ -85,7 +85,7 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    console.log('[Pup Coupons SW] Handling request:', url.pathname);
+    console.log('[Love Coupons SW] Handling request:', url.pathname);
 
     // Route requests based on type
     if (isStaticAsset(url.pathname)) {
@@ -103,7 +103,7 @@ self.addEventListener('fetch', event => {
  * Message Event - Handle messages from main thread
  */
 self.addEventListener('message', event => {
-    console.log('[Pup Coupons SW] Received message:', event.data);
+    console.log('[Love Coupons SW] Received message:', event.data);
     
     if (event.data && event.data.type) {
         switch (event.data.type) {
@@ -117,7 +117,7 @@ self.addEventListener('message', event => {
                 clearCache();
                 break;
             default:
-                console.warn('[Pup Coupons SW] Unknown message type:', event.data.type);
+                console.warn('[Love Coupons SW] Unknown message type:', event.data.type);
         }
     }
 });
@@ -129,7 +129,7 @@ function isPluginRequest(url) {
     return url.pathname.startsWith(PLUGIN_SCOPE) ||
            url.pathname.includes('love-coupons') ||
            url.pathname.includes('love_coupon') ||
-           url.searchParams.has('pup-coupon');
+           url.searchParams.has('love-coupon');
 }
 
 /**
@@ -168,7 +168,7 @@ async function handleStaticAsset(request) {
         });
         
         if (cachedResponse) {
-            console.log('[Pup Coupons SW] Serving from cache:', request.url);
+            console.log('[Love Coupons SW] Serving from cache:', request.url);
             
             // Update cache in background for next time
             updateCacheInBackground(request);
@@ -177,7 +177,7 @@ async function handleStaticAsset(request) {
         }
 
         // Fallback to network
-        console.log('[Pup Coupons SW] Fetching from network:', request.url);
+        console.log('[Love Coupons SW] Fetching from network:', request.url);
         const networkResponse = await fetchWithTimeout(request);
         
         // Cache successful responses
@@ -189,7 +189,7 @@ async function handleStaticAsset(request) {
         return networkResponse;
         
     } catch (error) {
-        console.error('[Pup Coupons SW] Error handling static asset:', error);
+        console.error('[Love Coupons SW] Error handling static asset:', error);
         return createErrorResponse('Static asset not available');
     }
 }
@@ -221,7 +221,7 @@ async function handleImageRequest(request) {
         return networkResponse;
         
     } catch (error) {
-        console.error('[Pup Coupons SW] Error handling image:', error);
+        console.error('[Love Coupons SW] Error handling image:', error);
         
         // Return cached version even if expired as fallback
         const cachedResponse = await caches.match(request, {
@@ -241,7 +241,7 @@ async function handleApiRequest(request) {
         return networkResponse;
         
     } catch (error) {
-        console.error('[Pup Coupons SW] API request failed:', error);
+        console.error('[Love Coupons SW] API request failed:', error);
         
         // For specific endpoints, try cache fallback
         if (request.url.includes('love_coupons')) {
@@ -271,7 +271,7 @@ async function handleOtherRequest(request) {
         return networkResponse;
         
     } catch (error) {
-        console.error('[Pup Coupons SW] Request failed:', error);
+        console.error('[Love Coupons SW] Request failed:', error);
         
         const cachedResponse = await caches.match(request);
         return cachedResponse || createErrorResponse('Content not available');
@@ -303,7 +303,7 @@ function updateCacheInBackground(request) {
             }
         })
         .catch(error => {
-            console.warn('[Pup Coupons SW] Background cache update failed:', error);
+            console.warn('[Love Coupons SW] Background cache update failed:', error);
         });
 }
 
@@ -344,14 +344,14 @@ async function cleanupOldCaches() {
             name !== DYNAMIC_CACHE_NAME
         );
         
-        console.log('[Pup Coupons SW] Cleaning up old caches:', oldCacheNames);
+        console.log('[Love Coupons SW] Cleaning up old caches:', oldCacheNames);
         
         await Promise.all(
             oldCacheNames.map(name => caches.delete(name))
         );
         
     } catch (error) {
-        console.error('[Pup Coupons SW] Error cleaning up caches:', error);
+        console.error('[Love Coupons SW] Error cleaning up caches:', error);
     }
 }
 
@@ -369,11 +369,11 @@ async function cleanupCache(cacheName, maxEntries) {
                 entriesToDelete.map(key => cache.delete(key))
             );
             
-            console.log(`[Pup Coupons SW] Cleaned up ${entriesToDelete.length} entries from ${cacheName}`);
+            console.log(`[Love Coupons SW] Cleaned up ${entriesToDelete.length} entries from ${cacheName}`);
         }
         
     } catch (error) {
-        console.error('[Pup Coupons SW] Error cleaning up cache entries:', error);
+        console.error('[Love Coupons SW] Error cleaning up cache entries:', error);
     }
 }
 
@@ -386,10 +386,10 @@ async function updateCache(url) {
         if (response.ok) {
             const cache = await caches.open(STATIC_CACHE_NAME);
             await cache.put(url, response);
-            console.log('[Pup Coupons SW] Cache updated for:', url);
+            console.log('[Love Coupons SW] Cache updated for:', url);
         }
     } catch (error) {
-        console.error('[Pup Coupons SW] Error updating cache:', error);
+        console.error('[Love Coupons SW] Error updating cache:', error);
     }
 }
 
@@ -402,9 +402,9 @@ async function clearCache() {
         await Promise.all(
             cacheNames.map(name => caches.delete(name))
         );
-        console.log('[Pup Coupons SW] All caches cleared');
+        console.log('[Love Coupons SW] All caches cleared');
     } catch (error) {
-        console.error('[Pup Coupons SW] Error clearing caches:', error);
+        console.error('[Love Coupons SW] Error clearing caches:', error);
     }
 }
 
@@ -427,7 +427,7 @@ function createErrorResponse(message, status = 404) {
  */
 function logPerformance(startTime, url, source) {
     const duration = performance.now() - startTime;
-    console.log(`[Pup Coupons SW] ${url} served from ${source} in ${duration.toFixed(2)}ms`);
+    console.log(`[Love Coupons SW] ${url} served from ${source} in ${duration.toFixed(2)}ms`);
 }
 
-console.log('[Pup Coupons SW] Service worker loaded successfully');
+console.log('[Love Coupons SW] Service worker loaded successfully');

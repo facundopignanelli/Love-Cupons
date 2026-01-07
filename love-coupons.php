@@ -917,17 +917,6 @@ class Love_Coupons_Plugin {
             return $uid !== $user_id && in_array( $uid, $all_users );
         });
     }
-                $this->render_coupon_item( $coupon_id );
-            }
-            
-            echo '</div>'; // .love-coupons-grid
-            echo '</div>'; // .love-coupons-section
-        }
-        
-        echo '</div>'; // .love-coupons-container
-        
-        return ob_get_clean();
-    }
     
     /**
      * Render individual coupon item
@@ -1038,9 +1027,9 @@ class Love_Coupons_Plugin {
                 navigator.serviceWorker.register( '<?php echo esc_url( LOVE_COUPONS_PLUGIN_URL . 'service-worker.js' ); ?>', {
                     scope: '<?php echo esc_url( LOVE_COUPONS_PLUGIN_URL ); ?>'
                 } ).then( function( registration ) {
-                    console.log( 'Pup Coupons SW registered: ', registration.scope );
+                    console.log( 'Love Coupons SW registered: ', registration.scope );
                 } ).catch( function( error ) {
-                    console.warn( 'Pup Coupons SW registration failed: ', error );
+                    console.warn( 'Love Coupons SW registration failed: ', error );
                 } );
             } );
         }

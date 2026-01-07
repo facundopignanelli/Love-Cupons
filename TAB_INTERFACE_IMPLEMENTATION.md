@@ -1,4 +1,4 @@
-# Multi-User Tab-Based Coupon System - Implementation Guide
+﻿# Multi-User Tab-Based Coupon System - Implementation Guide
 
 ## Overview
 Complete redesign of the Love Coupons plugin to support a peer-to-peer coupon system with an intuitive tab-based interface. All users can create and redeem coupons, with admin control over posting permissions.
@@ -53,17 +53,17 @@ Admins can control:
 ### 5. **One-to-One Coupon System**
 - Each coupon is created for ONE specific user
 - User selects recipient when creating coupon
-- Recipient is stored in `_pup_coupon_assigned_to` array (single user)
+- Recipient is stored in `_love_coupon_assigned_to` array (single user)
 - Cannot be shared with multiple users per coupon
 
 ## Files Modified
 
-### **pup-coupons.php** (Main Plugin File)
+### **love-coupons.php** (Main Plugin File)
 **New Hooks:**
 - `admin_menu` - Register admin settings page
 
 **New AJAX Actions:**
-- `wp_ajax_pup_coupons_create` - Handle frontend coupon creation
+- `wp_ajax_love_coupons_create` - Handle frontend coupon creation
 
 **New Methods:**
 
@@ -79,19 +79,19 @@ Admins can control:
 - `add_admin_settings_page()` - Register admin menu item
 - `render_admin_settings_page()` - Admin permissions UI and form handling
 
-### **assets/css/pup-coupons.css**
+### **assets/css/love-coupons.css**
 **New Styles:**
-- `.pup-coupons-tabs` - Tab navigation bar
-- `.pup-tab-button` - Individual tab buttons
-- `.pup-tab-pane` - Tab content containers
-- `.pup-create-coupon-form` - Form styling
+- `.love-coupons-tabs` - Tab navigation bar
+- `.love-tab-button` - Individual tab buttons
+- `.love-tab-pane` - Tab content containers
+- `.love-create-coupon-form` - Form styling
 - `.form-group`, `.form-row` - Form layout
-- `.pup-coupon-posted-item` - Posted coupon display
-- `.pup-posted-coupons-wrapper` - Container for posted coupons section
+- `.love-coupon-posted-item` - Posted coupon display
+- `.love-posted-coupons-wrapper` - Container for posted coupons section
 - Form focus states and validation styles
 - Mobile responsive adjustments
 
-### **pup-coupons.js**
+### **love-coupons.js**
 **New Methods:**
 - `handleCreateCoupon()` - Form submission handler
 - `showFormError()` - Display form error messages
@@ -112,7 +112,7 @@ No changes required - existing meta fields support new functionality
 
 ### WordPress Options
 ```
-Option Name: pup_coupons_posting_restrictions
+Option Name: love_coupons_posting_restrictions
 Structure: array(
     $user_id => array(
         'all',  // Can post to everyone, OR
@@ -125,14 +125,14 @@ Structure: array(
 
 ### Post Meta
 Existing meta fields used:
-- `_pup_coupon_created_by` - Creator user ID
-- `_pup_coupon_assigned_to` - Array with single recipient user ID
-- `_pup_coupon_terms` - Terms & conditions
-- `_pup_coupon_expiry_date` - Expiry date
-- `_pup_coupon_usage_limit` - Usage count limit
-- `_pup_coupon_redeemed` - Redemption status
-- `_pup_coupon_redemption_date` - When redeemed
-- `_pup_coupon_redemption_count` - Times redeemed
+- `_love_coupon_created_by` - Creator user ID
+- `_love_coupon_assigned_to` - Array with single recipient user ID
+- `_love_coupon_terms` - Terms & conditions
+- `_love_coupon_expiry_date` - Expiry date
+- `_love_coupon_usage_limit` - Usage count limit
+- `_love_coupon_redeemed` - Redemption status
+- `_love_coupon_redemption_date` - When redeemed
+- `_love_coupon_redemption_count` - Times redeemed
 
 ## How It Works
 
@@ -203,7 +203,7 @@ Existing meta fields used:
 ## Frontend Shortcode
 
 ```
-[pup_coupons]
+[love_coupons]
 ```
 
 Attributes (optional):
@@ -218,12 +218,12 @@ Main colors:
 - Success: `#00a32a` (green)
 
 Key CSS classes for customization:
-- `.pup-coupons-wrapper` - Main container
-- `.pup-coupons-tabs` - Tab navigation
-- `.pup-tab-button` - Tab buttons
-- `.pup-tab-pane` - Tab content
-- `.pup-create-coupon-form` - Creation form
-- `.pup-coupons-grid` - Coupon grid layout
+- `.love-coupons-wrapper` - Main container
+- `.love-coupons-tabs` - Tab navigation
+- `.love-tab-button` - Tab buttons
+- `.love-tab-pane` - Tab content
+- `.love-create-coupon-form` - Creation form
+- `.love-coupons-grid` - Coupon grid layout
 
 ## Future Enhancements
 
