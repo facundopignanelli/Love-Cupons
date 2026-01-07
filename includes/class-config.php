@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Plugin Configuration
  * Centralized configuration for the Love Coupons plugin
@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class Pup_Coupons_Config {
+class Love_Coupons_Config {
     
     /**
      * Plugin settings
@@ -17,16 +17,16 @@ class Pup_Coupons_Config {
         'version' => '1.1',
         'min_wp_version' => '5.0',
         'min_php_version' => '7.4',
-        'text_domain' => 'pup-coupons',
-        'cache_group' => 'pup_coupons',
-        'option_prefix' => 'pup_coupons_',
+        'text_domain' => 'love-coupons',
+        'cache_group' => 'love_coupons',
+        'option_prefix' => 'love_coupons_',
     );
     
     /**
      * Post type configuration
      */
     const POST_TYPE = array(
-        'name' => 'pup_coupon',
+        'name' => 'love_coupon',
         'slug' => 'coupons',
         'capability_type' => 'post',
         'supports' => array( 'title', 'thumbnail', 'custom-fields' ),
@@ -36,42 +36,52 @@ class Pup_Coupons_Config {
      * Meta field configuration
      */
     const META_FIELDS = array(
-        '_pup_coupon_terms' => array(
+        '_love_coupon_terms' => array(
             'type' => 'textarea',
             'sanitize' => 'sanitize_textarea_field',
             'label' => 'Terms & Conditions',
         ),
-        '_pup_coupon_expiry_date' => array(
+        '_love_coupon_expiry_date' => array(
             'type' => 'date',
             'sanitize' => 'sanitize_text_field',
             'label' => 'Expiry Date',
         ),
-        '_pup_coupon_usage_limit' => array(
+        '_love_coupon_usage_limit' => array(
             'type' => 'number',
             'sanitize' => 'absint',
             'label' => 'Usage Limit',
             'default' => 1,
         ),
-        '_pup_coupon_redeemed' => array(
+        '_love_coupon_redeemed' => array(
             'type' => 'boolean',
             'sanitize' => 'rest_sanitize_boolean',
             'label' => 'Redeemed Status',
         ),
-        '_pup_coupon_redemption_date' => array(
+        '_love_coupon_redemption_date' => array(
             'type' => 'datetime',
             'sanitize' => 'sanitize_text_field',
             'label' => 'Redemption Date',
         ),
-        '_pup_coupon_redemption_count' => array(
+        '_love_coupon_redemption_count' => array(
             'type' => 'number',
             'sanitize' => 'absint',
             'label' => 'Redemption Count',
             'default' => 0,
         ),
-        '_pup_coupon_redemption_data' => array(
+        '_love_coupon_redemption_data' => array(
             'type' => 'array',
-            'sanitize' => array( 'Pup_Coupons_Config', 'sanitize_redemption_data' ),
+            'sanitize' => array( 'love_coupons_Config', 'sanitize_redemption_data' ),
             'label' => 'Redemption Data',
+        ),
+        '_love_coupon_created_by' => array(
+            'type' => 'number',
+            'sanitize' => 'absint',
+            'label' => 'Created By (User ID)',
+        ),
+        '_love_coupon_assigned_to' => array(
+            'type' => 'array',
+            'sanitize' => array( 'love_coupons_Config', 'sanitize_user_ids' ),
+            'label' => 'Assigned To (User IDs)',
         ),
     );
     
@@ -79,21 +89,21 @@ class Pup_Coupons_Config {
      * Capability configuration
      */
     const CAPABILITIES = array(
-        'manage_pup_coupons',
-        'edit_pup_coupon',
-        'read_pup_coupon',
-        'delete_pup_coupon',
-        'edit_pup_coupons',
-        'edit_others_pup_coupons',
-        'publish_pup_coupons',
-        'read_private_pup_coupons',
+        'manage_love_coupons',
+        'edit_love_coupon',
+        'read_love_coupon',
+        'delete_love_coupon',
+        'edit_love_coupons',
+        'edit_others_love_coupons',
+        'publish_love_coupons',
+        'read_private_love_coupons',
     );
     
     /**
      * Email configuration
      */
     const EMAIL_SETTINGS = array(
-        'from_name' => 'Pup Coupons',
+        'from_name' => 'Love Coupons',
         'content_type' => 'text/html',
         'charset' => 'UTF-8',
     );
@@ -168,6 +178,25 @@ class Pup_Coupons_Config {
         }
         
         return $sanitized;
+    }
+    
+    /**
+     * Sanitize user IDs array
+     */
+    public static function sanitize_user_ids( $user_ids ) {
+        if ( ! is_array( $user_ids ) ) {
+            return array();
+        }
+        
+        $sanitized = array();
+        foreach ( $user_ids as $user_id ) {
+            $user_id = absint( $user_id );
+            if ( $user_id > 0 && get_user_by( 'id', $user_id ) ) {
+                $sanitized[] = $user_id;
+            }
+        }
+        
+        return array_unique( $sanitized );
     }
     
     /**

@@ -1,18 +1,18 @@
-/**
+﻿/**
  * Pup Coupons Service Worker
  * Enhanced with better error handling, logging, and performance optimization
  */
 
-const CACHE_NAME = 'pup-coupons-plugin-v1.1';
-const STATIC_CACHE_NAME = 'pup-coupons-static-v1.1';
-const DYNAMIC_CACHE_NAME = 'pup-coupons-dynamic-v1.1';
-const PLUGIN_SCOPE = '/wp-content/plugins/pup-coupons/';
+const CACHE_NAME = 'love-coupons-plugin-v1.1';
+const STATIC_CACHE_NAME = 'love-coupons-static-v1.1';
+const DYNAMIC_CACHE_NAME = 'love-coupons-dynamic-v1.1';
+const PLUGIN_SCOPE = '/wp-content/plugins/love-coupons/';
 
 // Static assets to cache immediately
 const STATIC_ASSETS = [
     PLUGIN_SCOPE,
-    PLUGIN_SCOPE + 'assets/js/pup-coupons.js',
-    PLUGIN_SCOPE + 'assets/css/pup-coupons.css',
+    PLUGIN_SCOPE + 'assets/js/love-coupons.js',
+    PLUGIN_SCOPE + 'assets/css/love-coupons.css',
     PLUGIN_SCOPE + 'manifest.json',
     PLUGIN_SCOPE + 'assets/images/icon192.png',
     PLUGIN_SCOPE + 'assets/images/icon512.png'
@@ -127,8 +127,8 @@ self.addEventListener('message', event => {
  */
 function isPluginRequest(url) {
     return url.pathname.startsWith(PLUGIN_SCOPE) ||
-           url.pathname.includes('pup-coupons') ||
-           url.pathname.includes('pup_coupon') ||
+           url.pathname.includes('love-coupons') ||
+           url.pathname.includes('love_coupon') ||
            url.searchParams.has('pup-coupon');
 }
 
@@ -244,7 +244,7 @@ async function handleApiRequest(request) {
         console.error('[Pup Coupons SW] API request failed:', error);
         
         // For specific endpoints, try cache fallback
-        if (request.url.includes('pup_coupons')) {
+        if (request.url.includes('love_coupons')) {
             const cachedResponse = await caches.match(request);
             if (cachedResponse) {
                 return cachedResponse;
@@ -339,7 +339,7 @@ async function cleanupOldCaches() {
     try {
         const cacheNames = await caches.keys();
         const oldCacheNames = cacheNames.filter(name => 
-            name.startsWith('pup-coupons') && 
+            name.startsWith('love-coupons') && 
             name !== STATIC_CACHE_NAME && 
             name !== DYNAMIC_CACHE_NAME
         );

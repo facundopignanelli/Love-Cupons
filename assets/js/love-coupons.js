@@ -1,5 +1,5 @@
-/**
- * Pup Coupons JavaScript
+﻿/**
+ * Love Coupons JavaScript
  * Enhanced with modern JavaScript practices, error handling, and accessibility
  */
 
@@ -7,9 +7,9 @@
     'use strict';
 
     /**
-     * Pup Coupons Handler Class
+     * Love Coupons Handler Class
      */
-    class PupCouponsHandler {
+    class LoveCouponsHandler {
         constructor() {
             this.init();
         }
@@ -42,8 +42,8 @@
             // Add ARIA labels to buttons
             $('.redeem-button').each(function() {
                 const $button = $(this);
-                const couponTitle = $button.closest('.pup-coupon').find('.coupon-title').text();
-                $button.attr('aria-label', pupCouponsAjax.strings.redeem + ' ' + couponTitle);
+                const couponTitle = $button.closest('.love-coupon').find('.coupon-title').text();
+                $button.attr('aria-label', loveCouponsAjax.strings.redeem + ' ' + couponTitle);
             });
 
             // Add ARIA expanded to terms summaries
@@ -102,7 +102,7 @@
 
             // Validate coupon ID
             if (!couponId || !this.isValidCouponId(couponId)) {
-                this.showError(pupCouponsAjax.strings.error + ' Invalid coupon ID.');
+                this.showError(loveCouponsAjax.strings.error + ' Invalid coupon ID.');
                 return;
             }
 
@@ -130,7 +130,7 @@
          * Show confirmation dialog
          */
         confirmRedemption() {
-            return confirm(pupCouponsAjax.strings.confirm_redeem);
+            return confirm(loveCouponsAjax.strings.confirm_redeem);
         }
 
         /**
@@ -144,14 +144,14 @@
 
             // Prepare AJAX data
             const ajaxData = {
-                action: 'pup_coupons_redeem',
-                security: pupCouponsAjax.nonce,
+                action: 'love_coupons_redeem',
+                security: loveCouponsAjax.nonce,
                 coupon_id: couponId
             };
 
             // Make AJAX request with timeout
             const xhr = $.ajax({
-                url: pupCouponsAjax.ajax_url,
+                url: loveCouponsAjax.ajax_url,
                 type: 'POST',
                 data: ajaxData,
                 timeout: 30000, // 30 second timeout
@@ -179,7 +179,7 @@
                 $button
                     .prop('disabled', true)
                     .addClass('loading disabled')
-                    .text(pupCouponsAjax.strings.redeeming)
+                    .text(loveCouponsAjax.strings.redeeming)
                     .attr('aria-busy', 'true');
             } else {
                 $button
@@ -205,7 +205,7 @@
                 }, 1000);
                 
                 // Show success message
-                this.showSuccess(response.data || pupCouponsAjax.strings.redeemed);
+                this.showSuccess(response.data || loveCouponsAjax.strings.redeemed);
             } else {
                 this.handleRedemptionError(null, 'server_error', response.data, $button);
             }
@@ -231,10 +231,10 @@
                     errorMessage = 'Invalid server response.';
                     break;
                 default:
-                    errorMessage = pupCouponsAjax.strings.ajax_failed;
+                    errorMessage = loveCouponsAjax.strings.ajax_failed;
             }
 
-            this.showError(pupCouponsAjax.strings.error + ' ' + errorMessage);
+            this.showError(loveCouponsAjax.strings.error + ' ' + errorMessage);
             
             // Reset button state
             if (originalText) {
@@ -252,7 +252,7 @@
             $button
                 .removeClass('loading')
                 .addClass('button-redeemed')
-                .html('<span class="dashicons dashicons-yes"></span>' + pupCouponsAjax.strings.redeemed)
+                .html('<span class="dashicons dashicons-yes"></span>' + loveCouponsAjax.strings.redeemed)
                 .prop('disabled', true);
         }
 
@@ -260,12 +260,12 @@
          * Update coupon UI without page reload
          */
         updateCouponUI($button) {
-            const $coupon = $button.closest('.pup-coupon');
+            const $coupon = $button.closest('.love-coupon');
             
             $coupon
                 .addClass('redeemed')
                 .find('.redeem-button')
-                .replaceWith('<button class="button button-redeemed" disabled><span class="dashicons dashicons-yes"></span>' + pupCouponsAjax.strings.redeemed + '</button>');
+                .replaceWith('<button class="button button-redeemed" disabled><span class="dashicons dashicons-yes"></span>' + loveCouponsAjax.strings.redeemed + '</button>');
 
             // Announce to screen readers
             this.announceToScreenReader('Coupon redeemed successfully');
@@ -300,7 +300,7 @@
         showNotification(message, type = 'info') {
             // Create notification element
             const $notification = $('<div>', {
-                class: `pup-coupon-notification pup-coupon-notification-${type}`,
+                class: `love-coupon-notification love-coupon-notification-${type}`,
                 text: message,
                 role: 'alert',
                 'aria-live': 'polite'
@@ -368,7 +368,7 @@
          */
         logError(error, context = '') {
             if (console && console.error) {
-                console.error('Pup Coupons Error' + (context ? ' (' + context + ')' : '') + ':', error);
+                console.error('Love Coupons Error' + (context ? ' (' + context + ')' : '') + ':', error);
             }
         }
     }
@@ -378,13 +378,13 @@
      */
     $(document).ready(function() {
         // Check if our AJAX object exists
-        if (typeof pupCouponsAjax === 'undefined') {
-            console.warn('Pup Coupons: AJAX configuration not found');
+        if (typeof loveCouponsAjax === 'undefined') {
+            console.warn('Love Coupons: AJAX configuration not found');
             return;
         }
 
         // Initialize the handler
-        new PupCouponsHandler();
+        new LoveCouponsHandler();
 
         // Add loading indicator for page reloads
         $(window).on('beforeunload', function() {
@@ -398,7 +398,7 @@
      * Expose handler to global scope for debugging (development only)
      */
     if (window.location.hostname === 'localhost' || window.location.hostname.includes('dev')) {
-        window.PupCouponsHandler = PupCouponsHandler;
+        window.LoveCouponsHandler = LoveCouponsHandler;
     }
 
 })(jQuery);

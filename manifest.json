@@ -1,9 +1,9 @@
-{
+﻿{
   "name": "Love Coupons",
   "short_name": "Love Coupons",
-  "description": "Manage and redeem digital coupons for your favorite pup-related rewards!",
-  "start_url": "/pup-coupons/",
-  "scope": "/pup-coupons/",
+  "description": "Manage and redeem digital coupons for sharing love and appreciation!",
+  "start_url": "/love-coupons/",
+  "scope": "/love-coupons/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#ffffff",
@@ -13,13 +13,13 @@
   "dir": "ltr",
   "icons": [
     {
-      "src": "/wp-content/plugins/pup-coupons/assets/images/icon192.png",
+      "src": "/wp-content/plugins/love-coupons/assets/images/icon192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/wp-content/plugins/pup-coupons/assets/images/icon512.png",
+      "src": "/wp-content/plugins/love-coupons/assets/images/icon512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -27,14 +27,14 @@
   ],
   "screenshots": [
     {
-      "src": "/wp-content/plugins/pup-coupons/assets/images/screenshot-wide.png",
+      "src": "/wp-content/plugins/love-coupons/assets/images/screenshot-wide.png",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
       "label": "Coupon grid view on desktop"
     },
     {
-      "src": "/wp-content/plugins/pup-coupons/assets/images/screenshot-portrait.png",
+      "src": "/wp-content/plugins/love-coupons/assets/images/screenshot-portrait.png",
       "sizes": "720x1280",
       "type": "image/png",
       "form_factor": "narrow",
@@ -46,10 +46,10 @@
       "name": "View Coupons",
       "short_name": "Coupons",
       "description": "View all available coupons",
-      "url": "/wp-content/plugins/pup-coupons/?action=view",
+      "url": "/wp-content/plugins/love-coupons/?action=view",
       "icons": [
         {
-          "src": "/wp-content/plugins/pup-coupons/assets/images/icon192.png",
+          "src": "/wp-content/plugins/love-coupons/assets/images/icon192.png",
           "sizes": "192x192",
           "type": "image/png"
         }
