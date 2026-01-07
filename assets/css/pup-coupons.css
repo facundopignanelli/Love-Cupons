@@ -1,0 +1,421 @@
+/**
+ * Pup Coupons Styles
+ * Professional CSS with better organization and responsive design
+ */
+
+/* ==========================================================================
+   Container and Sections
+   ========================================================================== */
+
+.pup-coupons-container {
+    margin: 2rem 0;
+}
+
+.pup-coupons-section {
+    margin-bottom: 3rem;
+}
+
+.pup-coupons-section:last-child {
+    margin-bottom: 0;
+}
+
+.pup-coupons-section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c6e49;
+    margin: 0 0 1.5rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #2c6e49;
+}
+
+.pup-coupons-separator {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #dee2e6, transparent);
+    margin: 3rem 0;
+}
+
+/* ==========================================================================
+   Grid Layout
+   ========================================================================== */
+
+.pup-coupons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .pup-coupons-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin: 1rem 0;
+    }
+}
+
+/* ==========================================================================
+   Coupon Cards
+   ========================================================================== */
+
+.pup-coupon {
+    background: #ffffff;
+    border: 1px solid #e1e1e1;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.pup-coupon:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.pup-coupon.redeemed {
+    opacity: 0.7;
+    background: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.pup-coupon.expired {
+    opacity: 0.7;
+    background: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.pup-coupon.redeemed::after {
+    content: "✓ REDEEMED";
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #2c6e49;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.pup-coupon.expired::after {
+    content: "⏰ EXPIRED";
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #ff9900;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   Coupon Image
+   ========================================================================== */
+
+.coupon-image {
+    position: relative;
+    overflow: hidden;
+    background: #f8f9fa;
+}
+
+.coupon-image img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.pup-coupon:hover .coupon-image img {
+    transform: scale(1.05);
+}
+
+@media (max-width: 480px) {
+    .coupon-image img {
+        height: 150px;
+    }
+}
+
+/* ==========================================================================
+   Coupon Content
+   ========================================================================== */
+
+.coupon-content {
+    padding: 1.5rem;
+}
+
+.coupon-title {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c6e49;
+    line-height: 1.3;
+}
+
+.coupon-expiry {
+    margin-bottom: 1rem;
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.coupon-expiry small {
+    background: #e9ecef;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* ==========================================================================
+   Terms & Conditions
+   ========================================================================== */
+
+.coupon-terms {
+    margin-bottom: 1.5rem;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+}
+
+.coupon-terms summary {
+    padding: 0.75rem 1rem;
+    background: #f8f9fa;
+    cursor: pointer;
+    font-weight: 500;
+    color: #495057;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+.coupon-terms summary:hover {
+    background: #e9ecef;
+}
+
+.coupon-terms summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Hide default marker in Firefox */
+.coupon-terms summary {
+    list-style: none;
+}
+
+.coupon-terms summary::-moz-list-bullet {
+    list-style-type: none;
+}
+
+.coupon-terms summary::before {
+    content: "▶";
+    margin-right: 0.5rem;
+    transition: transform 0.2s ease;
+    display: inline-block;
+}
+
+.coupon-terms[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.terms-content {
+    padding: 1rem;
+    background: white;
+    color: #495057;
+    line-height: 1.5;
+    font-size: 0.875rem;
+}
+
+/* ==========================================================================
+   Action Buttons
+   ========================================================================== */
+
+.coupon-actions {
+    margin-top: 1.5rem;
+}
+
+.coupon-actions .button {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.button-primary {
+    background: #2c6e49;
+    color: white;
+}
+
+.button-primary:hover:not(:disabled) {
+    background: #1e4d32;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(44, 110, 73, 0.3);
+}
+
+.button-redeemed {
+    background: #6c757d;
+    color: white;
+    cursor: not-allowed;
+}
+
+.button-expired {
+    background: #6c757d;
+    color: white;
+    cursor: not-allowed;
+}
+
+.button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.button .dashicons {
+    font-size: 1.1em;
+    width: auto;
+    height: auto;
+}
+
+/* Loading state */
+.button.loading {
+    position: relative;
+    color: transparent;
+}
+
+.button.loading::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Messages
+   ========================================================================== */
+
+.pup-coupons-login-message,
+.pup-coupons-empty {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    margin: 2rem 0;
+}
+
+.pup-coupons-login-message p,
+.pup-coupons-empty p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 1.125rem;
+}
+
+/* ==========================================================================
+   Admin Styles
+   ========================================================================== */
+
+.wp-admin .pup-coupon-status-available {
+    color: #00a32a;
+    font-weight: 600;
+}
+
+.wp-admin .pup-coupon-status-redeemed {
+    color: #d63638;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   Accessibility
+   ========================================================================== */
+
+.coupon-terms summary:focus {
+    outline: 2px solid #2c6e49;
+    outline-offset: 2px;
+}
+
+.button:focus {
+    outline: 2px solid #2c6e49;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .pup-coupon {
+        border-width: 2px;
+    }
+    
+    .button-primary {
+        border: 2px solid #000;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .pup-coupon,
+    .coupon-image img,
+    .button,
+    .coupon-terms summary::before {
+        transition: none;
+    }
+    
+    .pup-coupon:hover {
+        transform: none;
+    }
+    
+    .button.loading::after {
+        animation: none;
+    }
+}
+
+/* ==========================================================================
+   Print Styles
+   ========================================================================== */
+
+@media print {
+    .pup-coupons-grid {
+        display: block;
+    }
+    
+    .pup-coupon {
+        break-inside: avoid;
+        margin-bottom: 1rem;
+        box-shadow: none;
+        border: 2px solid #000;
+    }
+    
+    .coupon-actions {
+        display: none;
+    }
+    
+    .pup-coupon::after {
+        position: static;
+        display: block;
+        text-align: center;
+        margin-top: 1rem;
+    }
+}

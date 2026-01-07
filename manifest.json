@@ -1,0 +1,60 @@
+{
+  "name": "Love Coupons",
+  "short_name": "Love Coupons",
+  "description": "Manage and redeem digital coupons for your favorite pup-related rewards!",
+  "start_url": "/pup-coupons/",
+  "scope": "/pup-coupons/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#2c6e49",
+  "categories": ["lifestyle", "business"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/wp-content/plugins/pup-coupons/assets/images/icon192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/wp-content/plugins/pup-coupons/assets/images/icon512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/wp-content/plugins/pup-coupons/assets/images/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Coupon grid view on desktop"
+    },
+    {
+      "src": "/wp-content/plugins/pup-coupons/assets/images/screenshot-portrait.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Coupon list on mobile"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "View Coupons",
+      "short_name": "Coupons",
+      "description": "View all available coupons",
+      "url": "/wp-content/plugins/pup-coupons/?action=view",
+      "icons": [
+        {
+          "src": "/wp-content/plugins/pup-coupons/assets/images/icon192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
+}
