@@ -33,6 +33,12 @@
             
             // Handle focus management
             $(document).on('focus', '.redeem-button', this.handleButtonFocus.bind(this));
+
+            // Create form submit
+            $(document).on('submit', '#love-create-coupon-form', this.handleCreateFormSubmit.bind(this));
+
+            // Image ratio warning
+            $(document).on('change', '#coupon_hero_image', this.warnImageRatio.bind(this));
         }
 
         /**
@@ -370,6 +376,107 @@
             if (console && console.error) {
                 console.error('Love Coupons Error' + (context ? ' (' + context + ')' : '') + ':', error);
             }
+        }
+
+        /**
+         * Handle create form submit
+         */
+        handleCreateFormSubmit(event) {
+            event.preventDefault();
+            const $form = $(event.currentTarget);
+
+            const title = $form.find('#coupon_title').val().trim();
+            const recipient = $form.find('#coupon_recipient').val();
+            if (!title) {
+                this.showError(loveCouponsAjax.strings.error + ' Title is required.');
+                return;
+            }
+            if (!recipient) {
+                this.showError(loveCouponsAjax.strings.error + ' Please select a recipient.');
+                return;
+            }
+
+            const formData = new FormData($form[0]);
+            formData.append('action', 'love_coupons_create');
+            // Include the nonce under key expected by PHP handler
+            const nonceVal = $form.find('input[name="love_create_coupon_nonce"]').val();
+            formData.append('nonce', nonceVal);
+
+            this.processCreateCoupon($form, formData);
+        }
+
+        /**
+         * Submit create coupon AJAX
+         */
+        processCreateCoupon($form, formData) {
+            const $submit = $form.find('button[type="submit"]');
+            const $message = $form.find('.form-message');
+
+            // Loading state
+            this.setFormLoading($submit, true);
+            $message.hide().removeClass('success error').text('');
+
+            $.ajax({
+                url: loveCouponsAjax.ajax_url,
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                dataType: 'json',
+                timeout: 60000
+            })
+            .done((response) => this.handleCreateSuccess(response, $form))
+            .fail((jqXHR, textStatus, errorThrown) => this.handleCreateError(jqXHR, textStatus, errorThrown, $form))
+            .always(() => this.setFormLoading($submit, false));
+        }
+
+        setFormLoading($button, isLoading) {
+            if (isLoading) {
+                $button.prop('disabled', true).addClass('loading disabled').text(loveCouponsAjax.strings.creating);
+            } else {
+                $button.prop('disabled', false).removeClass('loading disabled').text('Create Coupon');
+            }
+        }
+
+        handleCreateSuccess(response, $form) {
+            const $message = $form.find('.form-message');
+            if (response && response.success) {
+                $message.addClass('success').removeClass('error').text(loveCouponsAjax.strings.created).show();
+                // Reload to show new coupon in lists
+                setTimeout(() => window.location.reload(), 800);
+            } else {
+                const msg = (response && response.data) ? response.data : loveCouponsAjax.strings.create_failed;
+                $message.addClass('error').removeClass('success').text(msg).show();
+            }
+        }
+
+        handleCreateError(jqXHR, textStatus, errorThrown, $form) {
+            const $message = $form.find('.form-message');
+            let msg = loveCouponsAjax.strings.create_failed;
+            if (textStatus === 'timeout') msg = 'Request timed out. Please try again.';
+            else if (errorThrown) msg = errorThrown;
+            $message.addClass('error').removeClass('success').text(msg).show();
+        }
+
+        /**
+         * Warn if image ratio differs from 16:9
+         */
+        warnImageRatio(event) {
+            const file = event.target.files && event.target.files[0];
+            const $note = $('#coupon_hero_image_note');
+            $note.hide().text('');
+            if (!file || !file.type.startsWith('image/')) return;
+            const img = new Image();
+            img.onload = () => {
+                const ratio = img.width / img.height;
+                const target = 16 / 9;
+                if (Math.abs(ratio - target) > 0.02) {
+                    $note.text(loveCouponsAjax.strings.image_ratio_warn).show();
+                }
+            };
+            const reader = new FileReader();
+            reader.onload = e => { img.src = e.target.result; };
+            reader.readAsDataURL(file);
         }
     }
 

@@ -14,17 +14,6 @@ This is a **hobby project** and **not production-ready**. It's an experimental s
 - 🔐 Login requirement for coupon access
 - ⚙️ Customizable coupon configuration
 
-## Requirements
-
-- WordPress 5.0 or higher
-- PHP 7.4 or higher
-
-## Installation
-
-1. Clone or download this repository
-2. Place the `lovecoupons` folder in your WordPress `wp-content/plugins/` directory
-3. Activate the plugin from the WordPress admin panel
-
 ## Project Status
 
 🚧 **In Development** - This plugin is actively being built and modified. Features and functionality may change without notice.

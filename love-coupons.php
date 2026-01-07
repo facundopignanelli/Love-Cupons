@@ -55,6 +55,7 @@ class Love_Coupons_Plugin {
         
         // Shortcode
         add_shortcode( 'love_coupons', array( $this, 'display_coupons_shortcode' ) );
+        add_shortcode( 'love_coupons_submit', array( $this, 'display_coupons_submit_shortcode' ) );
         
         // Activation/Deactivation
         register_activation_hook( LOVE_COUPONS_PLUGIN_FILE, array( $this, 'activate' ) );
@@ -198,6 +199,7 @@ class Love_Coupons_Plugin {
         
         $terms = get_post_meta( $post->ID, '_love_coupon_terms', true );
         $expiry_date = get_post_meta( $post->ID, '_love_coupon_expiry_date', true );
+        $start_date = get_post_meta( $post->ID, '_love_coupon_start_date', true );
         $usage_limit = get_post_meta( $post->ID, '_love_coupon_usage_limit', true );
         
         ?>
@@ -218,6 +220,15 @@ class Love_Coupons_Plugin {
                 <td>
                     <input type="date" id="love_coupon_expiry_date" name="love_coupon_expiry_date" value="<?php echo esc_attr( $expiry_date ); ?>" />
                     <p class="description"><?php _e( 'Optional: Set an expiry date for this coupon.', 'love-coupons' ); ?></p>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">
+                    <label for="love_coupon_start_date"><?php _e( 'Start Date', 'love-coupons' ); ?></label>
+                </th>
+                <td>
+                    <input type="date" id="love_coupon_start_date" name="love_coupon_start_date" value="<?php echo esc_attr( $start_date ); ?>" />
+                    <p class="description"><?php _e( 'Optional: Schedule this coupon to start on a specific date.', 'love-coupons' ); ?></p>
                 </td>
             </tr>
             <tr>
@@ -343,6 +354,7 @@ class Love_Coupons_Plugin {
         $fields = array(
             '_love_coupon_terms' => 'sanitize_textarea_field',
             '_love_coupon_expiry_date' => 'sanitize_text_field',
+            '_love_coupon_start_date' => 'sanitize_text_field',
             '_love_coupon_usage_limit' => 'absint',
         );
         
@@ -411,6 +423,10 @@ class Love_Coupons_Plugin {
                 'error'        => __( 'Error:', 'love-coupons' ),
                 'ajax_failed'  => __( 'Request failed. Please try again.', 'love-coupons' ),
                 'confirm_redeem' => __( 'Are you sure you want to redeem this coupon?', 'love-coupons' ),
+                'creating'     => __( 'Creating...', 'love-coupons' ),
+                'created'      => __( 'Coupon created successfully!', 'love-coupons' ),
+                'create_failed'=> __( 'Failed to create coupon.', 'love-coupons' ),
+                'image_ratio_warn' => __( 'Image is not 16:9. It will be center-cropped automatically.', 'love-coupons' ),
             )
         ) );
         
@@ -433,7 +449,7 @@ class Love_Coupons_Plugin {
         }
         
         // Check if current page has the shortcode
-        if ( $post && has_shortcode( $post->post_content, 'love_coupons' ) ) {
+        if ( $post && ( has_shortcode( $post->post_content, 'love_coupons' ) || has_shortcode( $post->post_content, 'love_coupons_submit' ) ) ) {
             return true;
         }
         
@@ -482,6 +498,12 @@ class Love_Coupons_Plugin {
             wp_send_json_error( __( 'This coupon has already been redeemed.', 'love-coupons' ) );
         }
         
+        // Check start date
+        $start_date = get_post_meta( $coupon_id, '_love_coupon_start_date', true );
+        if ( $start_date && strtotime( $start_date ) > time() ) {
+            wp_send_json_error( __( 'This coupon is not yet available.', 'love-coupons' ) );
+        }
+
         // Check expiry date
         $expiry_date = get_post_meta( $coupon_id, '_love_coupon_expiry_date', true );
         if ( $expiry_date && strtotime( $expiry_date ) < time() ) {
@@ -673,6 +695,12 @@ class Love_Coupons_Plugin {
                 continue;
             }
             
+            // Skip coupons that haven't started yet
+            $start_date = get_post_meta( $coupon_id, '_love_coupon_start_date', true );
+            if ( $start_date && strtotime( $start_date ) > time() ) {
+                continue;
+            }
+
             $redeemed = get_post_meta( $coupon_id, '_love_coupon_redeemed', true );
             $expiry_date = get_post_meta( $coupon_id, '_love_coupon_expiry_date', true );
             $is_expired = $expiry_date && strtotime( $expiry_date ) < time();
@@ -772,13 +800,6 @@ class Love_Coupons_Plugin {
         $query = new WP_Query( $args );
         
         echo '<div class="love-posted-coupons-wrapper">';
-        
-        // New Coupon Form
-        echo '<div class="love-create-coupon-form-wrapper">';
-        echo '<h3>' . __( 'Create New Coupon', 'love-coupons' ) . '</h3>';
-        $this->render_create_coupon_form( $user_id );
-        echo '</div>';
-        
         // Posted Coupons List
         echo '<div class="love-posted-coupons-list">';
         echo '<h3>' . __( 'Your Coupons', 'love-coupons' ) . '</h3>';
@@ -866,7 +887,18 @@ class Love_Coupons_Plugin {
                 <textarea name="coupon_terms" id="coupon_terms" rows="4" placeholder="<?php _e( 'Enter terms and conditions', 'love-coupons' ); ?>"></textarea>
             </div>
             
+            <div class="form-group">
+                <label for="coupon_hero_image"><?php _e( 'Hero Image (16:9)', 'love-coupons' ); ?></label>
+                <input type="file" name="coupon_hero_image" id="coupon_hero_image" accept="image/*" />
+                <small class="description"><?php _e( 'A 16:9 image works best. Non-16:9 images are center-cropped automatically.', 'love-coupons' ); ?></small>
+                <div id="coupon_hero_image_note" style="margin-top:6px;color:#6c757d;display:none;"></div>
+            </div>
+
             <div class="form-row">
+                <div class="form-group">
+                    <label for="coupon_start_date"><?php _e( 'Start Date', 'love-coupons' ); ?></label>
+                    <input type="date" name="coupon_start_date" id="coupon_start_date" />
+                </div>
                 <div class="form-group">
                     <label for="coupon_expiry_date"><?php _e( 'Expiry Date', 'love-coupons' ); ?></label>
                     <input type="date" name="coupon_expiry_date" id="coupon_expiry_date" />
@@ -992,9 +1024,29 @@ class Love_Coupons_Plugin {
         
         global $post;
         
-        if ( is_page() && $post && has_shortcode( $post->post_content, 'love_coupons' ) ) {
+        if ( is_page() && $post && ( has_shortcode( $post->post_content, 'love_coupons' ) || has_shortcode( $post->post_content, 'love_coupons_submit' ) ) ) {
             auth_redirect();
         }
+    }
+
+    /**
+     * Display only the submission form via shortcode
+     */
+    public function display_coupons_submit_shortcode( $atts ) {
+        if ( ! is_user_logged_in() ) {
+            return '<div class="love-coupons-login-message"><p>' . __( 'Please log in to create coupons!', 'love-coupons' ) . '</p></div>';
+        }
+
+        $current_user_id = get_current_user_id();
+
+        ob_start();
+        echo '<div class="love-coupons-wrapper">';
+        echo '<div class="love-create-coupon-form-wrapper">';
+        echo '<h3>' . __( 'Create New Coupon', 'love-coupons' ) . '</h3>';
+        $this->render_create_coupon_form( $current_user_id );
+        echo '</div>';
+        echo '</div>';
+        return ob_get_clean();
     }
     
     /**
@@ -1058,6 +1110,7 @@ class Love_Coupons_Plugin {
         $recipient_id = isset( $_POST['coupon_recipient'] ) ? absint( $_POST['coupon_recipient'] ) : 0;
         $terms = isset( $_POST['coupon_terms'] ) ? sanitize_textarea_field( $_POST['coupon_terms'] ) : '';
         $expiry_date = isset( $_POST['coupon_expiry_date'] ) ? sanitize_text_field( $_POST['coupon_expiry_date'] ) : '';
+        $start_date  = isset( $_POST['coupon_start_date'] ) ? sanitize_text_field( $_POST['coupon_start_date'] ) : '';
         $usage_limit = isset( $_POST['coupon_usage_limit'] ) ? absint( $_POST['coupon_usage_limit'] ) : 1;
         
         // Validate title
@@ -1095,8 +1148,59 @@ class Love_Coupons_Plugin {
         update_post_meta( $coupon_id, '_love_coupon_assigned_to', array( $recipient_id ) );
         update_post_meta( $coupon_id, '_love_coupon_terms', $terms );
         update_post_meta( $coupon_id, '_love_coupon_expiry_date', $expiry_date );
+        if ( ! empty( $start_date ) ) {
+            update_post_meta( $coupon_id, '_love_coupon_start_date', $start_date );
+        }
         update_post_meta( $coupon_id, '_love_coupon_usage_limit', $usage_limit );
         update_post_meta( $coupon_id, '_love_coupon_redemption_count', 0 );
+
+        // Handle hero image upload (enforce 16:9 center-crop)
+        if ( isset( $_FILES['coupon_hero_image'] ) && isset( $_FILES['coupon_hero_image']['tmp_name'] ) && ! empty( $_FILES['coupon_hero_image']['tmp_name'] ) ) {
+            $file = $_FILES['coupon_hero_image'];
+            $overrides = array( 'test_form' => false );
+            $uploaded = wp_handle_upload( $file, $overrides );
+            if ( isset( $uploaded['file'] ) && empty( $uploaded['error'] ) ) {
+                $file_path = $uploaded['file'];
+                $editor = wp_get_image_editor( $file_path );
+                if ( ! is_wp_error( $editor ) ) {
+                    $size = $editor->get_size();
+                    if ( isset( $size['width'], $size['height'] ) && $size['width'] > 0 && $size['height'] > 0 ) {
+                        $target_ratio = 16 / 9;
+                        $width  = (int) $size['width'];
+                        $height = (int) $size['height'];
+                        $ratio  = $width / $height;
+                        if ( abs( $ratio - $target_ratio ) > 0.001 ) {
+                            if ( $ratio > $target_ratio ) {
+                                $new_width = (int) round( $height * $target_ratio );
+                                $src_x = (int) max( 0, floor( ( $width - $new_width ) / 2 ) );
+                                $editor->crop( $src_x, 0, $new_width, $height );
+                            } else {
+                                $new_height = (int) round( $width / $target_ratio );
+                                $src_y = (int) max( 0, floor( ( $height - $new_height ) / 2 ) );
+                                $editor->crop( 0, $src_y, $width, $new_height );
+                            }
+                        }
+                        $saved = $editor->save( $file_path );
+                        if ( ! is_wp_error( $saved ) ) {
+                            $filetype = wp_check_filetype( basename( $file_path ), null );
+                            $attachment = array(
+                                'post_mime_type' => $filetype['type'],
+                                'post_title'     => sanitize_file_name( basename( $file_path ) ),
+                                'post_content'   => '',
+                                'post_status'    => 'inherit',
+                            );
+                            $attach_id = wp_insert_attachment( $attachment, $file_path, $coupon_id );
+                            if ( ! is_wp_error( $attach_id ) ) {
+                                require_once ABSPATH . 'wp-admin/includes/image.php';
+                                $attach_data = wp_generate_attachment_metadata( $attach_id, $file_path );
+                                wp_update_attachment_metadata( $attach_id, $attach_data );
+                                set_post_thumbnail( $coupon_id, $attach_id );
+                            }
+                        }
+                    }
+                }
+            }
+        }
         
         wp_send_json_success( array(
             'message' => __( 'Coupon created successfully!', 'love-coupons' ),
