@@ -620,8 +620,8 @@ class Love_Coupons_Plugin {
         
         <script>
         (function() {
-            const tabButtons = document.querySelectorAll('.pup-tab-button');
-            const tabPanes = document.querySelectorAll('.pup-tab-pane');
+            const tabButtons = document.querySelectorAll('.love-tab-button');
+            const tabPanes = document.querySelectorAll('.love-tab-pane');
             
             tabButtons.forEach(button => {
                 button.addEventListener('click', function() {
@@ -1285,4 +1285,4 @@ class Love_Coupons_Plugin {
 }
 
 // Initialize the plugin
-love_coupons_Plugin::get_instance();
+Love_Coupons_Plugin::get_instance();
