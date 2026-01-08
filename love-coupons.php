@@ -34,7 +34,29 @@ class Love_Coupons_Plugin {
 
     private function __construct() {
         $this->load_dependencies();
+
+        // Serve service worker with correct headers and root scope allowance
+        add_action( 'template_redirect', array( $this, 'maybe_serve_service_worker' ) );
         $this->init_hooks();
+
+    /**
+     * Serve service worker JS with Service-Worker-Allowed header for root scope.
+     */
+    public function maybe_serve_service_worker() {
+        if ( isset( $_GET['love_coupons_sw'] ) && '1' === $_GET['love_coupons_sw'] ) {
+            // Allow SW to control root scope
+            header( 'Content-Type: application/javascript; charset=utf-8' );
+            header( 'Service-Worker-Allowed: /' );
+            header( 'Cache-Control: no-store, no-cache, must-revalidate' );
+            $sw_path = LOVE_COUPONS_PLUGIN_DIR . 'service-worker.js';
+            if ( file_exists( $sw_path ) ) {
+                readfile( $sw_path );
+            } else {
+                echo "// Service worker file not found";
+            }
+            exit;
+        }
+    }
     }
 
     private function get_menu_icon() {

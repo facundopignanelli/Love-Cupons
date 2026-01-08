@@ -85,6 +85,7 @@ class Love_Coupons_Assets {
         echo '<link rel="manifest" href="' . esc_url( LOVE_COUPONS_PLUGIN_URL . 'manifest.json' ) . '">' . "\n";
         echo '<meta name="theme-color" content="#2c6e49">' . "\n";
         echo '<meta name="apple-mobile-web-app-capable" content="yes">' . "\n";
+        echo '<meta name="mobile-web-app-capable" content="yes">' . "\n";
         echo '<meta name="apple-mobile-web-app-status-bar-style" content="default">' . "\n";
         echo '<link rel="apple-touch-icon" href="' . esc_url( LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon192.png' ) . '">' . "\n";
     }
@@ -92,13 +93,14 @@ class Love_Coupons_Assets {
     public function register_service_worker() {
         if ( ! $this->should_load_pwa() ) { return; }
         ?>
+        $sw_url = esc_url( add_query_arg( 'love_coupons_sw', '1', site_url( '/' ) ) );
         <script>
         if ( 'serviceWorker' in navigator ) {
             window.addEventListener( 'load', function() {
                 navigator.serviceWorker.register( '<?php echo esc_url( LOVE_COUPONS_PLUGIN_URL . 'service-worker.js' ); ?>', {
+                navigator.serviceWorker.register( '<?php echo $sw_url; ?>', {
                     scope: '/'
                 } ).then( function( registration ) {
-                    console.log( 'Love Coupons SW registered: ', registration.scope );
                 } ).catch( function( error ) {
                     console.warn( 'Love Coupons SW registration failed: ', error );
                 } );
