@@ -1,4 +1,3 @@
-1. Showing "my coupons" and "posted coupons" view
 2. in-website interface to post new coupons (title, terms and conditions, hero image (with an enforced aspect ratio check of 16:9 and maybe having the app prompt the user to crop the image accordingly), schedule coupons to show starting a certain date, expiration date and the number of times they can be redeemed). 
 3. login redirect
 4. Push notifications instead of email ones for redepmtion

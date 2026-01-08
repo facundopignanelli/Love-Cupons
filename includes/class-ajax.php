@@ -86,14 +86,19 @@ class Love_Coupons_Ajax {
         update_post_meta( $coupon_id, '_love_coupon_created_by', $current_user_id );
         $restrictions = get_option( 'love_coupons_posting_restrictions', array() );
         $assigned_to  = array();
-        if ( ! empty( $restrictions[ $current_user_id ] ) && is_array( $restrictions[ $current_user_id ] ) ) {
+        
+        if ( ! empty( $restrictions[ $current_user_id ] ) && in_array( 'all', $restrictions[ $current_user_id ], true ) ) {
+            // Admin set to 'all' - leave assigned_to empty to allow all users
+            delete_post_meta( $coupon_id, '_love_coupon_assigned_to' );
+        } elseif ( ! empty( $restrictions[ $current_user_id ] ) && is_array( $restrictions[ $current_user_id ] ) ) {
             $assigned_to = array_filter( array_map( 'absint', $restrictions[ $current_user_id ] ), function( $uid ) use ( $current_user_id ) {
                 return $uid > 0 && $uid !== $current_user_id && get_user_by( 'id', $uid );
             } );
-        }
-
-        if ( ! empty( $assigned_to ) ) {
-            update_post_meta( $coupon_id, '_love_coupon_assigned_to', array_values( array_unique( $assigned_to ) ) );
+            if ( ! empty( $assigned_to ) ) {
+                update_post_meta( $coupon_id, '_love_coupon_assigned_to', array_values( array_unique( $assigned_to ) ) );
+            } else {
+                delete_post_meta( $coupon_id, '_love_coupon_assigned_to' );
+            }
         } else {
             delete_post_meta( $coupon_id, '_love_coupon_assigned_to' );
         }
