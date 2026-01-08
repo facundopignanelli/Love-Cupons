@@ -161,9 +161,9 @@ class Love_Coupons_Shortcodes {
     private function render_create_coupon_form( $user_id ) {
         $allowed_recipients = Love_Coupons_Core::get_allowed_recipients_for_user( $user_id );
         if ( empty( $allowed_recipients ) ) { echo '<p style="color:#d63638;">' . __( 'You don\'t have permission to post coupons to any user.', 'love-coupons' ) . '</p>'; return; }
-        wp_nonce_field( 'love_create_coupon', 'love_create_coupon_nonce' );
         ?>
         <form class="love-create-coupon-form" id="love-create-coupon-form">
+            <?php wp_nonce_field( 'love_create_coupon', 'love_create_coupon_nonce' ); ?>
             <div class="form-group"><label for="coupon_title"><?php _e( 'Coupon Title', 'love-coupons' ); ?> <span class="required">*</span></label><input type="text" name="coupon_title" id="coupon_title" required placeholder="<?php _e( 'Enter coupon title', 'love-coupons' ); ?>" /></div>
             <div class="form-group"><label for="coupon_recipient"><?php _e( 'Send To', 'love-coupons' ); ?> <span class="required">*</span></label>
                 <select name="coupon_recipient" id="coupon_recipient" required>
