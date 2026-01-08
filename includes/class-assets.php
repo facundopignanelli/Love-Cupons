@@ -15,6 +15,7 @@ class Love_Coupons_Assets {
         wp_localize_script( 'love-coupons-js', 'loveCouponsAjax', array(
             'ajax_url' => admin_url( 'admin-ajax.php' ),
             'nonce'    => wp_create_nonce( 'love_coupons_nonce' ),
+            'created_page_url' => $this->get_created_coupons_page_url(),
             'strings'  => array(
                 'redeeming'    => __( 'Redeeming...', 'love-coupons' ),
                 'redeem'       => __( 'Redeem', 'love-coupons' ),
@@ -23,6 +24,7 @@ class Love_Coupons_Assets {
                 'ajax_failed'  => __( 'Request failed. Please try again.', 'love-coupons' ),
                 'confirm_redeem' => __( 'Are you sure you want to redeem this coupon?', 'love-coupons' ),
                 'creating'     => __( 'Creating...', 'love-coupons' ),
+                'create_coupon'=> __( 'Create Coupon', 'love-coupons' ),
                 'created'      => __( 'Coupon created successfully!', 'love-coupons' ),
                 'create_failed'=> __( 'Failed to create coupon.', 'love-coupons' ),
                 'image_ratio_warn' => __( 'Image is not 16:9. It will be center-cropped automatically.', 'love-coupons' ),
@@ -100,5 +102,34 @@ class Love_Coupons_Assets {
 
     private function should_load_pwa() {
         return is_user_logged_in() && $this->should_enqueue_assets();
+    }
+
+    private function get_created_coupons_page_url() {
+        $pages = get_posts( array(
+            'post_type'   => 'page',
+            'post_status' => 'publish',
+            'numberposts' => 1,
+            's'           => '[love_coupons_created]',
+        ) );
+
+        if ( ! empty( $pages ) ) {
+            return get_permalink( $pages[0]->ID );
+        }
+
+        // Fallback: search by content
+        global $wpdb;
+        $page_id = $wpdb->get_var(
+            "SELECT ID FROM {$wpdb->posts} 
+            WHERE post_type = 'page' 
+            AND post_status = 'publish' 
+            AND post_content LIKE '%[love_coupons_created]%' 
+            LIMIT 1"
+        );
+
+        if ( $page_id ) {
+            return get_permalink( $page_id );
+        }
+
+        return '';
     }
 }

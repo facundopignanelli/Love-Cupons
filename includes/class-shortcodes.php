@@ -212,8 +212,8 @@ class Love_Coupons_Shortcodes {
             <form class="love-create-coupon-form" id="love-create-coupon-form">
                 <?php wp_nonce_field( 'love_create_coupon', 'love_create_coupon_nonce' ); ?>
                 <div class="form-group"><label for="coupon_title"><?php _e( 'Coupon Title', 'love-coupons' ); ?> <span class="required">*</span></label><input type="text" name="coupon_title" id="coupon_title" required placeholder="<?php _e( 'Enter coupon title', 'love-coupons' ); ?>" /></div>
-                <div class="form-group"><label for="coupon_terms"><?php _e( 'Terms & Conditions', 'love-coupons' ); ?></label>
-                    <textarea name="coupon_terms" id="coupon_terms" rows="4" placeholder="<?php _e( 'Add any details or terms', 'love-coupons' ); ?>"></textarea>
+                <div class="form-group"><label for="coupon_terms"><?php _e( 'Terms & Conditions', 'love-coupons' ); ?> <span class="required">*</span></label>
+                    <textarea name="coupon_terms" id="coupon_terms" rows="4" required placeholder="<?php _e( 'Add any details or terms', 'love-coupons' ); ?>"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="coupon_hero_image"><?php _e( 'Image', 'love-coupons' ); ?> <span class="required">*</span></label>

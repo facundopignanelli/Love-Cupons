@@ -622,22 +622,25 @@
 /* Loading state */
 .button.loading {
     position: relative;
-    color: transparent;
+    pointer-events: none;
 }
 
-.button.loading::after {
+.button.loading::before {
     content: "";
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    top: 50%;
-    left: 50%;
-    margin-left: -10px;
-    margin-top: -10px;
-    border: 2px solid transparent;
-    border-top-color: currentColor;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 0.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    animation: spin 0.8s linear infinite;
+    vertical-align: text-bottom;
+}
+
+.button-primary.loading::before {
+    border-color: rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
 }
 
 @keyframes spin {
@@ -682,6 +685,7 @@
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 .love-modal-header, .love-modal-footer { padding: 0.75rem 1rem; background: #f8f9fa; }
+.love-modal-footer { display: flex; gap: 0.75rem; justify-content: flex-end; }
 .love-modal-body { padding: 1rem; }
 .love-modal-close { background: none; border: none; font-size: 1.25rem; cursor: pointer; float: right; }
 .love-cropper-container { width: 100%; max-height: 65vh; }

@@ -452,6 +452,11 @@
                 this.showError(loveCouponsAjax.strings.error + ' Title is required.');
                 return;
             }
+            const terms = $form.find('#coupon_terms').val().trim();
+            if (!terms) {
+                this.showError(loveCouponsAjax.strings.error + ' Terms & Conditions are required.');
+                return;
+            }
             const expiry = $form.find('#coupon_expiry_date').val();
             if (!expiry) {
                 this.showError(loveCouponsAjax.strings.error + ' Valid until date is required.');
@@ -520,7 +525,7 @@
             if (isLoading) {
                 $button.prop('disabled', true).addClass('loading disabled').text(loveCouponsAjax.strings.creating);
             } else {
-                $button.prop('disabled', false).removeClass('loading disabled').text('Create Coupon');
+                $button.prop('disabled', false).removeClass('loading disabled').text(loveCouponsAjax.strings.create_coupon || 'Create Coupon');
             }
         }
 
@@ -528,8 +533,14 @@
             const $message = $form.find('.form-message');
             if (response && response.success) {
                 $message.addClass('success').removeClass('error').text(loveCouponsAjax.strings.created).show();
-                // Reload to show new coupon in lists
-                setTimeout(() => window.location.reload(), 800);
+                // Redirect to created coupons page if available, otherwise reload
+                setTimeout(() => {
+                    if (loveCouponsAjax.created_page_url) {
+                        window.location.href = loveCouponsAjax.created_page_url;
+                    } else {
+                        window.location.reload();
+                    }
+                }, 800);
             } else {
                 const msg = (response && response.data) ? response.data : loveCouponsAjax.strings.create_failed;
                 $message.addClass('error').removeClass('success').text(msg).show();
