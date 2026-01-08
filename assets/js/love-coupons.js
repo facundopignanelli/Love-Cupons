@@ -621,14 +621,20 @@
         }
 
         toggleScheduleDate(event) {
-            const choice = $(event.currentTarget).val();
-            const $group = $('#schedule_date_group');
-            if (choice === 'schedule') {
-                $group.slideDown(150);
-            } else {
-                $('#coupon_start_date').val('');
-                $group.slideUp(150);
-            }
+            // Use setTimeout to ensure the radio value has updated after label click
+            setTimeout(() => {
+                const $checkedRadio = $('input[name="coupon_schedule_option"]:checked');
+                const choice = $checkedRadio.val();
+                const $group = $('#schedule_date_group');
+                
+                if (choice === 'schedule') {
+                    $group.slideDown(150);
+                    $('#coupon_start_date').focus();
+                } else {
+                    $('#coupon_start_date').val('');
+                    $group.slideUp(150);
+                }
+            }, 10);
         }
 
         handleDropzoneClick(event) {
