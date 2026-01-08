@@ -124,11 +124,11 @@
     .love-tab-button {
         padding: 0.75rem 0.5rem;
         font-size: 0.85rem;
-        min-width: 0;
-        flex: 1;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        min-width: auto;
+        flex: 1 1 auto;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
     }
 }
 
@@ -136,6 +136,7 @@
     .love-tab-button {
         padding: 0.625rem 0.4rem;
         font-size: 0.8rem;
+        white-space: normal;
     }
 
     .love-coupons-tabs {
