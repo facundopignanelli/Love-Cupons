@@ -29,29 +29,90 @@
          * Initialize push notifications
          */
         async initPushNotifications() {
-            // Check if service worker and push notifications are supported
-            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
                 console.log('[Love Coupons] Push notifications not supported');
                 return;
             }
-
             try {
                 const registration = await navigator.serviceWorker.ready;
-                
-                // Check current permission status
                 if (Notification.permission === 'granted') {
                     await this.subscribeToPushNotifications(registration);
+                    this.removePushPromptBanner();
                 } else if (Notification.permission === 'default') {
-                    // Request permission on first interaction
-                    $(document).one('click', async () => {
-                        const permission = await Notification.requestPermission();
-                        if (permission === 'granted') {
-                            await this.subscribeToPushNotifications(registration);
-                        }
-                    });
+                    this.showPushPromptBanner(registration);
+                } else {
+                    // denied
+                    this.showPushDeniedBanner();
                 }
             } catch (error) {
                 console.error('[Love Coupons] Error initializing push notifications:', error);
+            }
+        }
+
+        /** Show prompt banner to enable notifications */
+        showPushPromptBanner(registration) {
+            // Avoid duplicating
+            if ($('#love-push-banner').length) return;
+            const $container = $('.love-coupons-wrapper').first().length ? $('.love-coupons-wrapper').first() : $('body');
+            const $banner = $('<div>', { id: 'love-push-banner', class: 'love-push-banner', 'aria-live': 'polite' })
+                .append($('<div>', { class: 'love-push-banner-content' })
+                    .append($('<strong>', { text: loveCouponsAjax.strings?.enable_notifications_title || 'Enable Notifications' }))
+                    .append($('<p>', { text: loveCouponsAjax.strings?.enable_notifications_desc || 'Stay updated: allow notifications for coupon activity.' }))
+                    .append($('<div>', { class: 'love-push-actions' })
+                        .append($('<button>', { id: 'love-enable-notifications', class: 'button button-primary', text: loveCouponsAjax.strings?.enable_notifications_cta || 'Enable notifications' }))
+                        .append($('<button>', { id: 'love-dismiss-notifications', class: 'button', text: loveCouponsAjax.strings?.not_now || 'Not now' }))
+                    )
+                );
+            // Insert at top
+            if ($container.is('body')) {
+                $('body').prepend($banner);
+            } else {
+                $container.prepend($banner);
+            }
+            // Bind actions
+            $('#love-enable-notifications').on('click', async () => {
+                try {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        await this.subscribeToPushNotifications(registration);
+                        this.showNotification(loveCouponsAjax.strings?.notifications_enabled || 'Notifications enabled', 'success');
+                        this.removePushPromptBanner();
+                    } else if (permission === 'denied') {
+                        this.showPushDeniedBanner();
+                    }
+                } catch (e) {
+                    console.error('[Love Coupons] Permission request failed:', e);
+                }
+            });
+            $('#love-dismiss-notifications').on('click', () => {
+                this.removePushPromptBanner(true);
+            });
+        }
+
+        /** Remove banner */
+        removePushPromptBanner(dismiss = false) {
+            const $banner = $('#love-push-banner');
+            if (!$banner.length) return;
+            if (dismiss) {
+                $banner.fadeOut(200, () => $banner.remove());
+            } else {
+                $banner.remove();
+            }
+        }
+
+        /** Show denied banner with guidance */
+        showPushDeniedBanner() {
+            if ($('#love-push-banner').length) return;
+            const $container = $('.love-coupons-wrapper').first().length ? $('.love-coupons-wrapper').first() : $('body');
+            const $banner = $('<div>', { id: 'love-push-banner', class: 'love-push-banner love-push-banner-denied' })
+                .append($('<div>', { class: 'love-push-banner-content' })
+                    .append($('<strong>', { text: loveCouponsAjax.strings?.notifications_blocked_title || 'Notifications blocked' }))
+                    .append($('<p>', { text: loveCouponsAjax.strings?.notifications_blocked_desc || 'Please enable notifications in your browser/app settings to receive updates.' }))
+                );
+            if ($container.is('body')) {
+                $('body').prepend($banner);
+            } else {
+                $container.prepend($banner);
             }
         }
 

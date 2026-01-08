@@ -752,6 +752,38 @@
     font-size: 1.125rem;
 }
 
+/* Notification permission banner */
+.love-push-banner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #fff3cd;
+    color: #664d03;
+    border: 1px solid #ffec9c;
+    border-left: 4px solid #f59f00;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+}
+.love-push-banner-denied {
+    background: #fde2e4;
+    color: #842029;
+    border-color: #f8d7da;
+    border-left-color: #dc3545;
+}
+.love-push-banner-content {
+    flex: 1;
+}
+.love-push-banner-content strong {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+.love-push-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
 /* ==========================================================================
    Modal & Cropper
    ========================================================================== */
