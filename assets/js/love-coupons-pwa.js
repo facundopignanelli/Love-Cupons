@@ -70,7 +70,10 @@
             this.enableBtn.prop('disabled', true).text('Requesting permission...');
             this.messageEl.hide();
             try {
+                console.log('[Love Coupons PWA] Requesting notification permission...');
                 const permission = await Notification.requestPermission();
+                console.log('[Love Coupons PWA] Permission result:', permission);
+                
                 if (permission === 'granted') {
                     await this.subscribe();
                     this.setStatus('✓ Enabled', 'Notifications enabled successfully!');
@@ -84,27 +87,64 @@
                 }
             } catch (e) {
                 console.error('[Love Coupons PWA] Permission request failed:', e);
-                this.setStatus('Error', 'Failed to enable notifications. Please try again.', true);
+                const errorMsg = e.message || e.toString();
+                console.error('[Love Coupons PWA] Error details:', errorMsg);
+                this.setStatus('Error', `Failed: ${errorMsg.substring(0, 50)}`, true);
                 this.enableBtn.prop('disabled', false).text('Enable Notifications');
             }
         },
 
         async subscribe() {
-            const registration = await navigator.serviceWorker.getRegistration('/');
-            if (!registration) throw new Error('Service worker not registered');
+            console.log('[Love Coupons PWA] Starting subscription process...');
+            
+            // Try multiple scopes - PWA might use a different scope than regular site
+            let registration = await navigator.serviceWorker.getRegistration('/');
+            if (!registration) {
+                console.log('[Love Coupons PWA] No registration at /, trying ready...');
+                registration = await navigator.serviceWorker.ready;
+            }
+            
+            if (!registration) {
+                throw new Error('Service worker not registered');
+            }
+            
+            console.log('[Love Coupons PWA] Using SW registration:', registration.scope);
 
-            // If already subscribed, reuse
+            // Check if already subscribed
             let sub = await registration.pushManager.getSubscription();
-            if (!sub) {
-                const vapidKey = (loveCouponsAjax && loveCouponsAjax.vapid_public_key) ? loveCouponsAjax.vapid_public_key : '';
-                const convertedKey = vapidKey ? this.urlBase64ToUint8Array(vapidKey) : undefined;
-                sub = await registration.pushManager.subscribe({
-                    userVisibleOnly: true,
+            if (sub) {
+                console.log('[Love Coupons PWA] Already subscribed, reusing existing subscription');
+            } elconsole.log('[Love Coupons PWA] Sending AJAX request to:', loveCouponsAjax.ajax_url);
+                $.ajax({
+                    url: loveCouponsAjax.ajax_url,
+                    method: 'POST',
+                    data: {
+                        action: 'love_coupons_save_push_subscription',
+                        nonce: loveCouponsAjax.nonce,
+                        subscription: JSON.stringify(subscription)
+                    },
+                    success: (response) => {
+                        console.log('[Love Coupons PWA] Server response:', response);
+                        if (response && response.success) {
+                            resolve(true);
+                        } else {
+                            const error = response && response.data ? response.data : 'Failed to save subscription';
+                            console.error('[Love Coupons PWA] Save failed:', error);
+                            reject(error);
+                        }
+                    },
+                    error: (xhr, status, error) => {
+                        console.error('[Love Coupons PWA] AJAX error:', status, error);
+                        console.error('[Love Coupons PWA] Response text:', xhr.responseText);true,
                     applicationServerKey: convertedKey
                 });
+                
+                console.log('[Love Coupons PWA] Subscription created:', sub.endpoint);
             }
 
+            console.log('[Love Coupons PWA] Sending subscription to server...');
             await this.sendSubscriptionToServer(sub);
+            console.log('[Love Coupons PWA] Subscription saved successfully!');
         },
 
         async sendSubscriptionToServer(subscription) {
