@@ -21,6 +21,7 @@
             this.bindEvents();
             this.setupAccessibility();
             this.syncPreferencesUI();
+            this.enhanceDatePlaceholders();
         }
 
         /**
@@ -655,6 +656,23 @@
             event.preventDefault();
             event.stopPropagation();
             $('#coupon_image_dropzone').removeClass('is-dragover');
+        }
+
+        /**
+         * Enhance date inputs with visible placeholders on mobile/webkit
+         */
+        enhanceDatePlaceholders() {
+            const toggle = ($input) => {
+                if ($input.val()) {
+                    $input.addClass('has-value');
+                } else {
+                    $input.removeClass('has-value');
+                }
+            };
+
+            const $dates = $('input[type="date"]');
+            $dates.each(function() { toggle($(this)); });
+            $(document).on('change input', 'input[type="date"]', function() { toggle($(this)); });
         }
 
         handleDropzoneDrop(event) {

@@ -84,6 +84,7 @@
 
 .love-create-coupon-form {
     max-width: 600px;
+    margin: 0 auto;
 }
 
 .form-group {
@@ -223,6 +224,7 @@
     font-size: 1rem;
     font-family: inherit;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
 }
 
 .schedule-date input[type="date"]:focus {
@@ -239,6 +241,27 @@
     outline: none;
     border-color: #2c6e49;
     box-shadow: 0 0 0 3px rgba(44, 110, 73, 0.1);
+}
+
+/* Date input placeholder hack for mobile/webkit */
+.form-group input[type="date"] {
+    position: relative;
+}
+.form-group input[type="date"]:not(.has-value)::-webkit-datetime-edit {
+    color: transparent;
+}
+.form-group input[type="date"]::before {
+    content: attr(data-placeholder);
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #757b82;
+    pointer-events: none;
+}
+.form-group input[type="date"].has-value::before,
+.form-group input[type="date"]:focus::before {
+    content: '';
 }
 
 .form-message {
@@ -370,6 +393,7 @@
 
 .love-coupons-container {
     margin: 2rem 0;
+    padding: 0 1rem;
 }
 
 .love-coupons-section {
@@ -497,11 +521,12 @@
     position: relative;
     overflow: hidden;
     background: #f8f9fa;
+    aspect-ratio: 16 / 9;
 }
 
 .coupon-image img {
     width: 100%;
-    height: 200px;
+    height: 100%;
     object-fit: cover;
     display: block;
     transition: transform 0.3s ease;
@@ -512,8 +537,11 @@
 }
 
 @media (max-width: 480px) {
+    .coupon-image {
+        aspect-ratio: 16 / 9;
+    }
     .coupon-image img {
-        height: 150px;
+        height: 100%;
     }
 }
 
