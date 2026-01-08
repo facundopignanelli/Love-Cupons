@@ -104,7 +104,10 @@ class Love_Coupons_Assets {
         echo '<meta name="theme-color" content="' . esc_attr( $theme_color ) . '">' . "\n";
         echo '<meta name="apple-mobile-web-app-capable" content="yes">' . "\n";
         echo '<meta name="mobile-web-app-capable" content="yes">' . "\n";
-        echo '<meta name="apple-mobile-web-app-status-bar-style" content="default">' . "\n";
+        echo '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">' . "\n";
+        echo '<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">' . "\n";
+        echo '<meta name="theme-color" media="(prefers-color-scheme: light)" content="' . esc_attr( $theme_color ) . '">' . "\n";
+        echo '<meta name="theme-color" media="(prefers-color-scheme: dark)" content="' . esc_attr( $theme_color ) . '">' . "\n";
         echo '<link rel="apple-touch-icon" href="' . esc_url( LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon192.png' ) . '">' . "\n";
     }
 
