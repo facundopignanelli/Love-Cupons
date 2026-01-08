@@ -1103,12 +1103,14 @@
     align-items: center;
     justify-content: space-between;
     gap: 1.25rem;
+    flex-wrap: wrap;
 }
 
 .love-menu-greeting-left {
     display: flex;
     align-items: center;
     gap: 0.875rem;
+    flex-shrink: 0;
 }
 
 .love-menu-top {
@@ -1295,7 +1297,6 @@
 
     .love-menu-greeting-left {
         gap: 0.65rem;
-        flex-wrap: wrap;
     }
 
     .love-menu-greeting {
@@ -1324,6 +1325,7 @@
 
     .love-menu-actions {
         gap: 0.4rem;
+        margin-left: auto;
     }
 }
 
@@ -1346,6 +1348,10 @@
     }
 
     .love-menu-greeting-left {
+        gap: 0.5rem;
+    }
+
+    .love-menu-greeting-row {
         gap: 0.5rem;
     }
 
