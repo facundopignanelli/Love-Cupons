@@ -58,6 +58,9 @@
             // Cropper modal buttons
             $(document).on('click', '#love-cropper-apply', this.applyCrop.bind(this));
             $(document).on('click', '#love-cropper-cancel, #love-cropper-modal [data-dismiss]', this.dismissCropper.bind(this));
+
+            // Remove image button
+            $(document).on('click', '#love-remove-image', this.removeImage.bind(this));
         }
 
         /**
@@ -705,14 +708,31 @@
             canvas.toBlob((blob) => {
                 if (blob) {
                     this.croppedBlob = blob;
-                    // Show preview
+                    // Show preview and hide dropzone
                     const url = URL.createObjectURL(blob);
                     const $preview = $('#coupon_hero_preview');
+                    const $dropzone = $('#coupon_image_dropzone');
                     $preview.find('img').attr('src', url);
+                    $dropzone.hide();
                     $preview.show();
                 }
                 this.dismissCropper();
             }, 'image/jpeg', 0.9);
+        }
+
+        removeImage() {
+            // Clear the cropped blob
+            this.croppedBlob = null;
+            
+            // Reset file input
+            const $input = $('#coupon_hero_image');
+            $input.val('');
+            
+            // Hide preview and show dropzone
+            const $preview = $('#coupon_hero_preview');
+            const $dropzone = $('#coupon_image_dropzone');
+            $preview.hide().find('img').attr('src', '');
+            $dropzone.show();
         }
     }
 

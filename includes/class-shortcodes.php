@@ -77,7 +77,7 @@ class Love_Coupons_Shortcodes {
                         <?php endforeach; ?>
                     </div>
                 </div>
-                <button type="submit" class="button button-primary" id="love-save-preferences"><?php _e( 'Save Preferences', 'love-coupons' ); ?></button>
+                <button type="submit" class="wp-element-button button button-primary" id="love-save-preferences"><?php _e( 'Save Preferences', 'love-coupons' ); ?></button>
                 <div class="form-message" style="display:none;"></div>
             </form>
         </div>
@@ -212,39 +212,42 @@ class Love_Coupons_Shortcodes {
             <form class="love-create-coupon-form" id="love-create-coupon-form">
                 <?php wp_nonce_field( 'love_create_coupon', 'love_create_coupon_nonce' ); ?>
                 <div class="form-group"><label for="coupon_title"><?php _e( 'Coupon Title', 'love-coupons' ); ?> <span class="required">*</span></label><input type="text" name="coupon_title" id="coupon_title" required placeholder="<?php _e( 'Enter coupon title', 'love-coupons' ); ?>" /></div>
-                <div class="form-group"><label for="coupon_terms"><?php _e( 'Details', 'love-coupons' ); ?></label>
+                <div class="form-group"><label for="coupon_terms"><?php _e( 'Terms & Conditions', 'love-coupons' ); ?></label>
                     <textarea name="coupon_terms" id="coupon_terms" rows="4" placeholder="<?php _e( 'Add any details or terms', 'love-coupons' ); ?>"></textarea>
                 </div>
-                <div class="form-group"><label for="coupon_hero_image"><?php _e( 'Image', 'love-coupons' ); ?> <span class="required">*</span></label>
+                <div class="form-group">
+                    <label for="coupon_hero_image"><?php _e( 'Image', 'love-coupons' ); ?> <span class="required">*</span></label>
                     <div class="love-image-dropzone" id="coupon_image_dropzone">
                         <div class="dropzone-instructions"><span class="dashicons dashicons-format-image"></span><p><?php _e( 'Drag and drop an image, or click to upload.', 'love-coupons' ); ?></p></div>
                         <input type="file" name="coupon_hero_image" id="coupon_hero_image" accept="image/*" required />
                     </div>
-                    <div id="coupon_hero_preview" class="love-crop-preview" style="display:none;"><img alt="<?php esc_attr_e('Image preview','love-coupons'); ?>" /></div>
+                    <div id="coupon_hero_preview" class="love-image-preview" style="display:none;">
+                        <img alt="<?php esc_attr_e('Image preview','love-coupons'); ?>" />
+                        <button type="button" class="button love-image-remove" id="love-remove-image"><?php _e( 'Remove Image', 'love-coupons' ); ?></button>
+                    </div>
                 </div>
                 <div class="form-group"><label><?php _e( 'Schedule', 'love-coupons' ); ?></label>
                     <div class="schedule-options">
                         <label><input type="radio" name="coupon_schedule_option" value="now" checked /> <?php _e( 'Post immediately', 'love-coupons' ); ?></label>
                         <label><input type="radio" name="coupon_schedule_option" value="schedule" /> <?php _e( 'Schedule for later', 'love-coupons' ); ?></label>
                     </div>
-                    <div class="form-group schedule-date" id="schedule_date_group" style="display:none;">
-                        <label for="coupon_start_date"><?php _e( 'Start Date', 'love-coupons' ); ?></label>
+                    <div class="schedule-date" id="schedule_date_group" style="display:none;">
                         <input type="date" name="coupon_start_date" id="coupon_start_date" />
                     </div>
                 </div>
-                <div class="form-row">
+                <div class="form-row form-row-spaced">
                     <div class="form-group"><label for="coupon_expiry_date"><?php _e( 'Valid until', 'love-coupons' ); ?> <span class="required">*</span></label><input type="date" name="coupon_expiry_date" id="coupon_expiry_date" required /></div>
                     <div class="form-group"><label for="coupon_usage_limit"><?php _e( 'Usage Limit', 'love-coupons' ); ?></label><input type="number" name="coupon_usage_limit" id="coupon_usage_limit" value="1" min="1" /></div>
                 </div>
-                <button type="submit" class="button button-primary"><?php _e( 'Create Coupon', 'love-coupons' ); ?></button>
+                <button type="submit" class="wp-element-button button button-primary"><?php _e( 'Create Coupon', 'love-coupons' ); ?></button>
                 <div class="form-message" style="display: none;"></div>
             </form>
             <div class="love-modal" id="love-cropper-modal" aria-hidden="true" style="display:none;">
                 <div class="love-modal-overlay" data-dismiss></div>
                     <div class="love-modal-content" role="dialog" aria-modal="true" aria-labelledby="love-cropper-title">
-                        <div class="love-modal-header"><h4 id="love-cropper-title"><?php _e('Crop Image','love-coupons');?></h4><button type="button" class="button love-modal-close" data-dismiss aria-label="<?php esc_attr_e('Close','love-coupons');?>"><?php _e('Close','love-coupons'); ?></button></div>
+                        <div class="love-modal-header"><h4 id="love-cropper-title"><?php _e('Crop Image','love-coupons');?></h4><button type="button" class="wp-element-button button love-modal-close" data-dismiss aria-label="<?php esc_attr_e('Close','love-coupons');?>"><?php _e('Close','love-coupons'); ?></button></div>
                         <div class="love-modal-body"><div class="love-cropper-container"><img id="love-cropper-image" alt="<?php esc_attr_e('Image to crop','love-coupons');?>" /></div><p class="description"><?php _e('Drag to select.','love-coupons');?></p></div>
-                    <div class="love-modal-footer"><button type="button" class="button" id="love-cropper-cancel"><?php _e('Cancel','love-coupons');?></button><button type="button" class="button button-primary" id="love-cropper-apply"><?php _e('Crop & Use','love-coupons');?></button></div>
+                    <div class="love-modal-footer"><button type="button" class="wp-element-button button" id="love-cropper-cancel"><?php _e('Cancel','love-coupons');?></button><button type="button" class="wp-element-button button button-primary" id="love-cropper-apply"><?php _e('Crop & Use','love-coupons');?></button></div>
                 </div>
         <?php
     }
@@ -267,19 +270,19 @@ class Love_Coupons_Shortcodes {
                 <div class="coupon-actions">
                     <?php if ( ! $suppress_redeem ) : ?>
                         <?php if ( $redeemed ) : ?>
-                            <button class="button button-redeemed" disabled><span class="dashicons dashicons-yes"></span><?php _e( 'Redeemed', 'love-coupons' ); ?></button>
+                            <button class="wp-element-button button button-redeemed" disabled><span class="dashicons dashicons-yes"></span><?php _e( 'Redeemed', 'love-coupons' ); ?></button>
                         <?php elseif ( $is_expired ) : ?>
-                            <button class="button button-expired" disabled><span class="dashicons dashicons-clock"></span><?php _e( 'Expired', 'love-coupons' ); ?></button>
+                            <button class="wp-element-button button button-expired" disabled><span class="dashicons dashicons-clock"></span><?php _e( 'Expired', 'love-coupons' ); ?></button>
                         <?php else : ?>
                             <?php if ( $is_upcoming ) : ?>
-                                <button class="button button-expired" disabled><span class="dashicons dashicons-clock"></span><?php _e( 'Upcoming', 'love-coupons' ); ?></button>
+                                <button class="wp-element-button button button-expired" disabled><span class="dashicons dashicons-clock"></span><?php _e( 'Upcoming', 'love-coupons' ); ?></button>
                             <?php else : ?>
-                                <button class="button button-primary redeem-button" data-coupon-id="<?php echo esc_attr( $coupon_id ); ?>"><span class="dashicons dashicons-tickets-alt"></span><?php _e( 'Redeem', 'love-coupons' ); ?></button>
+                                <button class="wp-element-button button button-primary redeem-button" data-coupon-id="<?php echo esc_attr( $coupon_id ); ?>"><span class="dashicons dashicons-tickets-alt"></span><?php _e( 'Redeem', 'love-coupons' ); ?></button>
                             <?php endif; ?>
                         <?php endif; ?>
                     <?php endif; ?>
                     <?php if ( $show_delete ) : ?>
-                        <button class="button button-danger delete-coupon" data-coupon-id="<?php echo esc_attr( $coupon_id ); ?>"><?php _e( 'Remove', 'love-coupons' ); ?></button>
+                        <button class="wp-element-button button button-danger delete-coupon" data-coupon-id="<?php echo esc_attr( $coupon_id ); ?>"><?php _e( 'Remove', 'love-coupons' ); ?></button>
                     <?php endif; ?>
                 </div>
             </div>

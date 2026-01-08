@@ -95,6 +95,10 @@
     gap: 1rem;
 }
 
+.form-row-spaced {
+    gap: 2rem;
+}
+
 .form-group label {
     display: block;
     margin-bottom: 0.5rem;
@@ -163,6 +167,40 @@
     box-shadow: inset 0 0 0 2px rgba(25, 135, 84, 0.35);
 }
 
+.love-image-preview {
+    border: 2px solid #dee2e6;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.love-image-preview img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    max-height: 400px;
+}
+
+.love-image-remove {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0.75rem;
+    border: none;
+    border-top: 1px solid #dee2e6;
+    background: #f8f9fa;
+    color: #d63638;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+    font-weight: 500;
+}
+
+.love-image-remove:hover {
+    background: #fff5f5;
+    color: #b02a37;
+}
+
 .schedule-options {
     display: flex;
     gap: 1rem;
@@ -170,7 +208,23 @@
 }
 
 .schedule-date {
-    margin-top: 0.75rem;
+    margin-top: 1rem;
+}
+
+.schedule-date input[type="date"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.schedule-date input[type="date"]:focus {
+    outline: none;
+    border-color: #2c6e49;
+    box-shadow: 0 0 0 3px rgba(44, 110, 73, 0.1);
 }
 
 .form-group input[type="text"]:focus,
