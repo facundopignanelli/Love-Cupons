@@ -23,10 +23,7 @@ class Love_Coupons_Ajax {
         if ( ! Love_Coupons_Core::user_can_access_coupon( $coupon_id, $current_user->ID ) ) {
             wp_send_json_error( __( 'You do not have access to this coupon.', 'love-coupons' ) );
         }
-        $redeemed = get_post_meta( $coupon_id, '_love_coupon_redeemed', true );
-        if ( $redeemed ) {
-            wp_send_json_error( __( 'This coupon has already been redeemed.', 'love-coupons' ) );
-        }
+
         $start_date = get_post_meta( $coupon_id, '_love_coupon_start_date', true );
         if ( $start_date && strtotime( $start_date ) > time() ) {
             wp_send_json_error( __( 'This coupon is not yet available.', 'love-coupons' ) );
@@ -35,24 +32,52 @@ class Love_Coupons_Ajax {
         if ( $expiry_date && strtotime( $expiry_date ) < time() ) {
             wp_send_json_error( __( 'This coupon has expired.', 'love-coupons' ) );
         }
-        $usage_limit = get_post_meta( $coupon_id, '_love_coupon_usage_limit', true );
-        $redemption_count = get_post_meta( $coupon_id, '_love_coupon_redemption_count', true );
-        if ( $usage_limit && $redemption_count >= $usage_limit ) {
+
+        $usage_limit = absint( get_post_meta( $coupon_id, '_love_coupon_usage_limit', true ) );
+        $redemption_count = intval( get_post_meta( $coupon_id, '_love_coupon_redemption_count', true ) );
+        $legacy_redeemed = get_post_meta( $coupon_id, '_love_coupon_redeemed', true );
+
+        $is_fully_redeemed = $usage_limit > 0 ? ( $redemption_count >= $usage_limit ) : (bool) $legacy_redeemed;
+        if ( $is_fully_redeemed ) {
             wp_send_json_error( __( 'This coupon has reached its usage limit.', 'love-coupons' ) );
         }
+
         $redemption_data = array(
             'user_id' => $current_user->ID,
             'user_email' => $current_user->user_email,
             'redemption_date' => current_time( 'mysql' ),
             'ip_address' => Love_Coupons_Core::get_user_ip(),
         );
-        update_post_meta( $coupon_id, '_love_coupon_redeemed', true );
+
+        $new_count      = $redemption_count + 1;
+        $remaining      = $usage_limit > 0 ? max( 0, $usage_limit - $new_count ) : null;
+        $fully_redeemed = $usage_limit > 0 ? ( $new_count >= $usage_limit ) : false;
+
+        if ( $fully_redeemed ) {
+            update_post_meta( $coupon_id, '_love_coupon_redeemed', true );
+        } else {
+            delete_post_meta( $coupon_id, '_love_coupon_redeemed' );
+        }
+
         update_post_meta( $coupon_id, '_love_coupon_redemption_date', current_time( 'mysql' ) );
-        update_post_meta( $coupon_id, '_love_coupon_redemption_count', intval( $redemption_count ) + 1 );
+        update_post_meta( $coupon_id, '_love_coupon_redemption_count', $new_count );
         update_post_meta( $coupon_id, '_love_coupon_redemption_data', $redemption_data );
+
         Love_Coupons_Core::send_redemption_email( $coupon_id, $current_user );
         Love_Coupons_Core::log_redemption( $coupon_id, $current_user );
-        wp_send_json_success( __( 'Coupon redeemed successfully!', 'love-coupons' ) );
+
+        $message = __( 'Coupon redeemed successfully!', 'love-coupons' );
+        if ( $usage_limit > 0 ) {
+            /* translators: 1: remaining uses, 2: total uses */
+            $message = sprintf( __( 'Coupon redeemed! %1$d of %2$d uses left.', 'love-coupons' ), max( 0, $remaining ), $usage_limit );
+        }
+
+        wp_send_json_success( array(
+            'message'   => $message,
+            'remaining' => $remaining,
+            'limit'     => $usage_limit,
+            'count'     => $new_count,
+        ) );
     }
 
     public function ajax_create_coupon() {

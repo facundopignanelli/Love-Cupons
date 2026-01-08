@@ -309,12 +309,25 @@ class Love_Coupons_Shortcodes {
     }
 
     private function render_coupon_item( $coupon_id, $show_delete = false, $suppress_redeem = false, $accent_user_id = null ) {
-        $redeemed = get_post_meta( $coupon_id, '_love_coupon_redeemed', true );
-        $terms = get_post_meta( $coupon_id, '_love_coupon_terms', true );
-        $expiry_date = get_post_meta( $coupon_id, '_love_coupon_expiry_date', true );
-        $start_date = get_post_meta( $coupon_id, '_love_coupon_start_date', true );
-        $now = time(); $is_upcoming = $start_date && strtotime( $start_date ) > $now; $is_expired = $expiry_date && strtotime( $expiry_date ) < $now;
-        $classes = array( 'love-coupon' ); if ( $redeemed ) $classes[] = 'redeemed'; if ( $is_expired ) $classes[] = 'expired'; if ( $is_upcoming ) $classes[] = 'upcoming';
+        $terms            = get_post_meta( $coupon_id, '_love_coupon_terms', true );
+        $expiry_date      = get_post_meta( $coupon_id, '_love_coupon_expiry_date', true );
+        $start_date       = get_post_meta( $coupon_id, '_love_coupon_start_date', true );
+        $usage_limit      = absint( get_post_meta( $coupon_id, '_love_coupon_usage_limit', true ) );
+        $redemption_count = intval( get_post_meta( $coupon_id, '_love_coupon_redemption_count', true ) );
+        $legacy_redeemed  = get_post_meta( $coupon_id, '_love_coupon_redeemed', true );
+
+        $now = time();
+        $is_upcoming = $start_date && strtotime( $start_date ) > $now;
+        $is_expired  = $expiry_date && strtotime( $expiry_date ) < $now;
+
+        $is_fully_redeemed = $usage_limit > 0 ? ( $redemption_count >= $usage_limit ) : (bool) $legacy_redeemed;
+        $remaining         = $usage_limit > 0 ? max( 0, $usage_limit - $redemption_count ) : null;
+
+        $classes = array( 'love-coupon' );
+        if ( $is_fully_redeemed ) { $classes[] = 'redeemed'; }
+        if ( $is_expired ) { $classes[] = 'expired'; }
+        if ( $is_upcoming ) { $classes[] = 'upcoming'; }
+
         $creator_id = get_post_meta( $coupon_id, '_love_coupon_created_by', true );
         if ( ! $creator_id ) { $creator_id = get_post_field( 'post_author', $coupon_id ); }
         $accent_user = $accent_user_id ? $accent_user_id : $creator_id;
@@ -326,10 +339,11 @@ class Love_Coupons_Shortcodes {
                 <h3 class="coupon-title"><?php echo esc_html( get_the_title( $coupon_id ) ); ?></h3>
                 <?php if ( $expiry_date ) : ?><div class="coupon-expiry"><small><?php printf( __( 'Expires: %s', 'love-coupons' ), date_i18n( get_option( 'date_format' ), strtotime( $expiry_date ) ) ); ?></small></div><?php endif; ?>
                 <?php if ( $is_upcoming && $start_date ) : ?><div class="coupon-expiry"><small><?php printf( __( 'Starts: %s', 'love-coupons' ), date_i18n( get_option( 'date_format' ), strtotime( $start_date ) ) ); ?></small></div><?php endif; ?>
+                <?php if ( $usage_limit > 0 ) : ?><div class="coupon-usage"><small><?php printf( __( 'Uses left: %1$d of %2$d', 'love-coupons' ), $remaining, $usage_limit ); ?></small></div><?php endif; ?>
                 <?php if ( $terms ) : ?><details class="coupon-terms"><summary><?php _e( 'Terms & Conditions', 'love-coupons' ); ?></summary><div class="terms-content"><?php echo wp_kses_post( nl2br( $terms ) ); ?></div></details><?php endif; ?>
                 <div class="coupon-actions">
                     <?php if ( ! $suppress_redeem ) : ?>
-                        <?php if ( $redeemed ) : ?>
+                        <?php if ( $is_fully_redeemed ) : ?>
                             <button class="wp-element-button button button-redeemed" disabled><span class="dashicons dashicons-yes"></span><?php _e( 'Redeemed', 'love-coupons' ); ?></button>
                         <?php elseif ( $is_expired ) : ?>
                             <button class="wp-element-button button button-expired" disabled><span class="dashicons dashicons-clock"></span><?php _e( 'Expired', 'love-coupons' ); ?></button>

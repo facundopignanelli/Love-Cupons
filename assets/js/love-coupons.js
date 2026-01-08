@@ -260,19 +260,23 @@
          */
         handleRedemptionSuccess(response, $button) {
             if (response.success) {
-                this.animateSuccess($button);
-                
-                // Delay reload to show success animation
-                setTimeout(() => {
-                    if (this.shouldReloadPage()) {
-                        window.location.reload();
-                    } else {
-                        this.updateCouponUI($button);
-                    }
-                }, 1000);
-                
-                // Show success message
-                this.showSuccess(response.data || loveCouponsAjax.strings.redeemed);
+                const payload = response.data;
+                let message = loveCouponsAjax.strings.redeemed;
+                let remaining = null;
+                let limit = null;
+
+                if (payload && typeof payload === 'object') {
+                    message = payload.message || message;
+                    if (typeof payload.remaining !== 'undefined') { remaining = payload.remaining; }
+                    if (typeof payload.limit !== 'undefined') { limit = payload.limit; }
+                } else if (payload) {
+                    message = payload;
+                }
+
+                const fullyRedeemed = limit > 0 ? (remaining !== null ? remaining <= 0 : false) : false;
+
+                this.animateSuccess($button, fullyRedeemed, remaining, limit);
+                this.showSuccess(message);
             } else {
                 this.handleRedemptionError(null, 'server_error', response.data, $button);
             }
@@ -315,36 +319,49 @@
         /**
          * Animate success state
          */
-        animateSuccess($button) {
-            $button
-                .removeClass('loading')
-                .addClass('button-redeemed')
-                .html('<span class="dashicons dashicons-yes"></span>' + loveCouponsAjax.strings.redeemed)
-                .prop('disabled', true);
+        animateSuccess($button, fullyRedeemed, remaining, limit) {
+            const $coupon = $button.closest('.love-coupon');
+
+            $button.removeClass('loading');
+
+            if (fullyRedeemed) {
+                $button
+                    .addClass('button-redeemed')
+                    .html('<span class="dashicons dashicons-yes"></span>' + loveCouponsAjax.strings.redeemed)
+                    .prop('disabled', true);
+                if ($coupon.length) { $coupon.addClass('redeemed'); }
+            } else {
+                const remainingLabel = (limit && remaining !== null) ? ` (${remaining} left)` : '';
+                $button
+                    .removeClass('button-redeemed disabled')
+                    .addClass('button-primary')
+                    .html('<span class="dashicons dashicons-tickets-alt"></span>' + loveCouponsAjax.strings.redeem + remainingLabel)
+                    .prop('disabled', false);
+                if ($coupon.length) { $coupon.removeClass('redeemed'); }
+            }
+
+            this.updateUsageUI($coupon, remaining, limit);
+            this.announceToScreenReader('Coupon redeemed successfully');
         }
 
         /**
-         * Update coupon UI without page reload
+         * Update coupon UI usage text
          */
-        updateCouponUI($button) {
-            const $coupon = $button.closest('.love-coupon');
-            
-            $coupon
-                .addClass('redeemed')
-                .find('.redeem-button')
-                .replaceWith('<button class="button button-redeemed" disabled><span class="dashicons dashicons-yes"></span>' + loveCouponsAjax.strings.redeemed + '</button>');
+        updateUsageUI($coupon, remaining, limit) {
+            if (!$coupon || !$coupon.length) return;
+            if (!limit || remaining === null || typeof remaining === 'undefined') return;
 
-            // Announce to screen readers
-            this.announceToScreenReader('Coupon redeemed successfully');
+            const $usage = $coupon.find('.coupon-usage small');
+            if ($usage.length) {
+                $usage.text('Uses left: ' + remaining + ' of ' + limit);
+            }
         }
 
         /**
          * Check if page should reload
          */
         shouldReloadPage() {
-            // You can add logic here to determine if page reload is necessary
-            // For now, we'll reload to ensure consistency
-            return true;
+            return false;
         }
 
         /**
