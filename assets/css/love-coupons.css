@@ -144,8 +144,9 @@
 }
 
 .love-create-coupon-form {
-    max-width: 600px;
-    margin: 0 auto;
+    max-width: none;
+    width: 100%;
+    margin: 0;
 }
 
 .form-group {
