@@ -313,6 +313,20 @@
     letter-spacing: 0.5px;
 }
 
+.love-coupon.upcoming::after {
+    content: "📅 UPCOMING";
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #0d6efd;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
 /* ==========================================================================
    Coupon Image
    ========================================================================== */
@@ -533,6 +547,29 @@
     color: #6c757d;
     font-size: 1.125rem;
 }
+
+/* ==========================================================================
+   Modal & Cropper
+   ========================================================================== */
+
+.love-modal { position: fixed; inset: 0; z-index: 10000; }
+.love-modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
+.love-modal-content {
+    position: relative;
+    margin: 5vh auto;
+    max-width: 900px;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+.love-modal-header, .love-modal-footer { padding: 0.75rem 1rem; background: #f8f9fa; }
+.love-modal-body { padding: 1rem; }
+.love-modal-close { background: none; border: none; font-size: 1.25rem; cursor: pointer; float: right; }
+.love-cropper-container { width: 100%; max-height: 65vh; }
+.love-cropper-container img { max-width: 100%; display: block; }
+.love-crop-preview { margin-top: 0.5rem; border: 1px dashed #ced4da; padding: 0.5rem; border-radius: 6px; max-width: 480px; }
+.love-crop-preview img { width: 100%; height: auto; display: block; border-radius: 4px; }
 
 /* ==========================================================================
    Admin Styles

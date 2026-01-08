@@ -39,6 +39,10 @@
 
             // Image ratio warning
             $(document).on('change', '#coupon_hero_image', this.warnImageRatio.bind(this));
+
+            // Cropper modal buttons
+            $(document).on('click', '#love-cropper-apply', this.applyCrop.bind(this));
+            $(document).on('click', '#love-cropper-cancel, #love-cropper-modal [data-dismiss]', this.dismissCropper.bind(this));
         }
 
         /**
@@ -402,6 +406,12 @@
             const nonceVal = $form.find('input[name="love_create_coupon_nonce"]').val();
             formData.append('nonce', nonceVal);
 
+            // If we have a cropped blob, use it instead of the original file
+            if (this.croppedBlob) {
+                formData.delete('coupon_hero_image');
+                formData.append('coupon_hero_image', this.croppedBlob, 'hero-cropped.jpg');
+            }
+
             this.processCreateCoupon($form, formData);
         }
 
@@ -466,17 +476,64 @@
             const $note = $('#coupon_hero_image_note');
             $note.hide().text('');
             if (!file || !file.type.startsWith('image/')) return;
-            const img = new Image();
-            img.onload = () => {
-                const ratio = img.width / img.height;
-                const target = 16 / 9;
-                if (Math.abs(ratio - target) > 0.02) {
-                    $note.text(loveCouponsAjax.strings.image_ratio_warn).show();
-                }
-            };
+
+            // Show modal and initialize cropper
+            this.openCropperWithFile(file);
+        }
+
+        openCropperWithFile(file) {
+            const modal = $('#love-cropper-modal');
+            const imgEl = document.getElementById('love-cropper-image');
             const reader = new FileReader();
-            reader.onload = e => { img.src = e.target.result; };
+            reader.onload = e => {
+                imgEl.src = e.target.result;
+                modal.show().attr('aria-hidden', 'false');
+                // Destroy previous
+                if (this.cropper) {
+                    try { this.cropper.destroy(); } catch(e) {}
+                }
+                this.cropper = new window.Cropper(imgEl, {
+                    aspectRatio: 16 / 9,
+                    viewMode: 1,
+                    autoCropArea: 1,
+                    movable: true,
+                    zoomable: true,
+                    rotatable: false,
+                    scalable: false,
+                });
+            };
             reader.readAsDataURL(file);
+        }
+
+        dismissCropper() {
+            const modal = $('#love-cropper-modal');
+            modal.hide().attr('aria-hidden', 'true');
+            if (this.cropper) {
+                try { this.cropper.destroy(); } catch(e) {}
+                this.cropper = null;
+            }
+        }
+
+        applyCrop() {
+            if (!this.cropper) return;
+            const canvas = this.cropper.getCroppedCanvas({
+                width: 1600,
+                height: 900,
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high'
+            });
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    this.croppedBlob = blob;
+                    // Show preview
+                    const url = URL.createObjectURL(blob);
+                    const $preview = $('#coupon_hero_preview');
+                    $preview.find('img').attr('src', url);
+                    $preview.show();
+                    $('#coupon_hero_image_note').text('Cropped image ready.').show();
+                }
+                this.dismissCropper();
+            }, 'image/jpeg', 0.9);
         }
     }
 
