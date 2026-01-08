@@ -156,8 +156,16 @@ class Love_Coupons_Plugin {
         }
 
         global $post;
-        if ( is_page() && $post && ( has_shortcode( $post->post_content, 'love_coupons' ) || has_shortcode( $post->post_content, 'love_coupons_submit' ) || has_shortcode( $post->post_content, 'love_coupons_created' ) ) ) {
-            auth_redirect();
+        if ( ! $post || ! is_page() ) {
+            return;
+        }
+
+        $shortcodes = array( 'love_coupons', 'love_coupons_submit', 'love_coupons_created', 'love_coupons_preferences' );
+        foreach ( $shortcodes as $code ) {
+            if ( has_shortcode( $post->post_content, $code ) ) {
+                auth_redirect();
+                break;
+            }
         }
     }
 

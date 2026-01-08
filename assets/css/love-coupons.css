@@ -203,6 +203,7 @@
     cursor: pointer;
     transition: background 0.2s ease, color 0.2s ease;
     font-weight: 500;
+    border-radius: 15px;
 }
 
 .love-image-remove:hover {
@@ -324,6 +325,12 @@
 
 .love-preference-color input[type="radio"] {
     margin: 0;
+    accent-color: var(--love-accent);
+}
+
+.love-preferences-list input[type="checkbox"],
+.love-preferences-colors input[type="radio"],
+.schedule-options input[type="radio"] {
     accent-color: var(--love-accent);
 }
 
@@ -700,11 +707,17 @@
     margin-top: 1.5rem;
 }
 
+.love-coupons-wrapper .button,
+.love-coupons-wrapper .wp-element-button,
+.love-coupons-wrapper button {
+    border-radius: 15px;
+}
+
 .coupon-actions .button {
     width: 100%;
     padding: 0.75rem 1.5rem;
     border: none;
-    border-radius: 8px;
+        border-radius: 15px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
@@ -720,6 +733,7 @@
 .button-primary {
     background: var(--love-accent);
     color: var(--love-accent-contrast);
+    border-radius: 15px;
 }
 
 .button-primary:hover:not(:disabled) {
@@ -731,6 +745,7 @@
 .button-danger {
     background: #dc3545;
     color: white;
+    border-radius: 15px;
 }
 
 .button-danger:hover:not(:disabled) {
@@ -743,12 +758,14 @@
     background: #6c757d;
     color: white;
     cursor: not-allowed;
+    border-radius: 15px;
 }
 
 .button-expired {
     background: #6c757d;
     color: white;
     cursor: not-allowed;
+    border-radius: 15px;
 }
 
 .button:disabled {

@@ -173,10 +173,11 @@ class Love_Coupons_Shortcodes {
             return ob_get_clean();
         }
         echo '<div class="love-coupons-container">';
-        if ( ! empty( $upcoming ) ) { echo '<div class="love-coupons-section"><h3 class="love-coupons-section-title">' . __( 'Upcoming', 'love-coupons' ) . '</h3><div class="love-coupons-grid">'; foreach ( $upcoming as $id ) { $this->render_coupon_item( $id ); } echo '</div></div><hr class="love-coupons-separator">'; }
-        if ( ! empty( $available ) ) { echo '<div class="love-coupons-section"><h3 class="love-coupons-section-title">' . __( 'Available', 'love-coupons' ) . '</h3><div class="love-coupons-grid">'; foreach ( $available as $id ) { $this->render_coupon_item( $id ); } echo '</div></div>'; }
-        if ( ! empty( $redeemed ) ) { if ( ! empty( $available ) ) echo '<hr class="love-coupons-separator">'; echo '<div class="love-coupons-section"><h3 class="love-coupons-section-title">' . __( 'Redeemed', 'love-coupons' ) . '</h3><div class="love-coupons-grid">'; foreach ( $redeemed as $id ) { $this->render_coupon_item( $id ); } echo '</div></div>'; }
-        if ( ! empty( $expired ) && 'yes' === $atts['show_expired'] ) { if ( ! empty( $available ) || ! empty( $redeemed ) ) echo '<hr class="love-coupons-separator">'; echo '<div class="love-coupons-section"><h3 class="love-coupons-section-title">' . __( 'Expired', 'love-coupons' ) . '</h3><div class="love-coupons-grid">'; foreach ( $expired as $id ) { $this->render_coupon_item( $id ); } echo '</div></div>'; }
+        $viewer_id = $user_id;
+        if ( ! empty( $upcoming ) ) { echo '<div class="love-coupons-section"><h3 class="love-coupons-section-title">' . __( 'Upcoming', 'love-coupons' ) . '</h3><div class="love-coupons-grid">'; foreach ( $upcoming as $id ) { $this->render_coupon_item( $id, false, false, $viewer_id ); } echo '</div></div><hr class="love-coupons-separator">'; }
+        if ( ! empty( $available ) ) { echo '<div class="love-coupons-section"><h3 class="love-coupons-section-title">' . __( 'Available', 'love-coupons' ) . '</h3><div class="love-coupons-grid">'; foreach ( $available as $id ) { $this->render_coupon_item( $id, false, false, $viewer_id ); } echo '</div></div>'; }
+        if ( ! empty( $redeemed ) ) { if ( ! empty( $available ) ) echo '<hr class="love-coupons-separator">'; echo '<div class="love-coupons-section"><h3 class="love-coupons-section-title">' . __( 'Redeemed', 'love-coupons' ) . '</h3><div class="love-coupons-grid">'; foreach ( $redeemed as $id ) { $this->render_coupon_item( $id, false, false, $viewer_id ); } echo '</div></div>'; }
+        if ( ! empty( $expired ) && 'yes' === $atts['show_expired'] ) { if ( ! empty( $available ) || ! empty( $redeemed ) ) echo '<hr class="love-coupons-separator">'; echo '<div class="love-coupons-section"><h3 class="love-coupons-section-title">' . __( 'Expired', 'love-coupons' ) . '</h3><div class="love-coupons-grid">'; foreach ( $expired as $id ) { $this->render_coupon_item( $id, false, false, $viewer_id ); } echo '</div></div>'; }
         echo '</div>';
         return ob_get_clean();
     }
@@ -225,7 +226,7 @@ class Love_Coupons_Shortcodes {
             echo '<div class="love-coupons-section">';
             echo '<h3 class="love-coupons-section-title">' . __( 'Upcoming', 'love-coupons' ) . '</h3>';
             echo '<div class="love-coupons-grid">';
-            foreach ( $upcoming as $id ) { $this->render_coupon_item( $id, true, true ); }
+            foreach ( $upcoming as $id ) { $this->render_coupon_item( $id, true, true, $user_id ); }
             echo '</div></div><hr class="love-coupons-separator">';
         }
 
@@ -233,7 +234,7 @@ class Love_Coupons_Shortcodes {
             echo '<div class="love-coupons-section">';
             echo '<h3 class="love-coupons-section-title">' . __( 'Available', 'love-coupons' ) . '</h3>';
             echo '<div class="love-coupons-grid">';
-            foreach ( $available as $id ) { $this->render_coupon_item( $id, true, true ); }
+            foreach ( $available as $id ) { $this->render_coupon_item( $id, true, true, $user_id ); }
             echo '</div></div>';
         }
 
@@ -242,7 +243,7 @@ class Love_Coupons_Shortcodes {
             echo '<div class="love-coupons-section">';
             echo '<h3 class="love-coupons-section-title">' . __( 'Redeemed', 'love-coupons' ) . '</h3>';
             echo '<div class="love-coupons-grid">';
-            foreach ( $redeemed as $id ) { $this->render_coupon_item( $id, true, true ); }
+            foreach ( $redeemed as $id ) { $this->render_coupon_item( $id, true, true, $user_id ); }
             echo '</div></div>';
         }
 
@@ -251,7 +252,7 @@ class Love_Coupons_Shortcodes {
             echo '<div class="love-coupons-section">';
             echo '<h3 class="love-coupons-section-title">' . __( 'Expired', 'love-coupons' ) . '</h3>';
             echo '<div class="love-coupons-grid">';
-            foreach ( $expired as $id ) { $this->render_coupon_item( $id, true, true ); }
+            foreach ( $expired as $id ) { $this->render_coupon_item( $id, true, true, $user_id ); }
             echo '</div></div>';
         }
 
@@ -304,7 +305,7 @@ class Love_Coupons_Shortcodes {
         <?php
     }
 
-    private function render_coupon_item( $coupon_id, $show_delete = false, $suppress_redeem = false ) {
+    private function render_coupon_item( $coupon_id, $show_delete = false, $suppress_redeem = false, $accent_user_id = null ) {
         $redeemed = get_post_meta( $coupon_id, '_love_coupon_redeemed', true );
         $terms = get_post_meta( $coupon_id, '_love_coupon_terms', true );
         $expiry_date = get_post_meta( $coupon_id, '_love_coupon_expiry_date', true );
@@ -312,10 +313,9 @@ class Love_Coupons_Shortcodes {
         $now = time(); $is_upcoming = $start_date && strtotime( $start_date ) > $now; $is_expired = $expiry_date && strtotime( $expiry_date ) < $now;
         $classes = array( 'love-coupon' ); if ( $redeemed ) $classes[] = 'redeemed'; if ( $is_expired ) $classes[] = 'expired'; if ( $is_upcoming ) $classes[] = 'upcoming';
         $creator_id = get_post_meta( $coupon_id, '_love_coupon_created_by', true );
-        if ( ! $creator_id ) {
-            $creator_id = get_post_field( 'post_author', $coupon_id );
-        }
-        $accent_attrs = Love_Coupons_Core::get_accent_attributes_for_user( $creator_id );
+        if ( ! $creator_id ) { $creator_id = get_post_field( 'post_author', $coupon_id ); }
+        $accent_user = $accent_user_id ? $accent_user_id : $creator_id;
+        $accent_attrs = Love_Coupons_Core::get_accent_attributes_for_user( $accent_user );
         ?>
         <div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" data-coupon-id="<?php echo esc_attr( $coupon_id ); ?>" <?php echo $accent_attrs; ?>>
             <?php if ( has_post_thumbnail( $coupon_id ) ) : ?><div class="coupon-image"><?php echo get_the_post_thumbnail( $coupon_id, 'large' ); ?></div><?php endif; ?>
