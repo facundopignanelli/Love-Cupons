@@ -7,6 +7,82 @@ class Love_Coupons_Shortcodes {
         add_shortcode( 'love_coupons', array( $this, 'display_coupons_shortcode' ) );
         add_shortcode( 'love_coupons_submit', array( $this, 'display_coupons_submit_shortcode' ) );
         add_shortcode( 'love_coupons_created', array( $this, 'display_coupons_created_shortcode' ) );
+        add_shortcode( 'love_coupons_preferences', array( $this, 'display_preferences_shortcode' ) );
+    }
+
+    public function display_coupons_submit_shortcode( $atts ) {
+        if ( ! is_user_logged_in() ) {
+            return '<div class="love-coupons-login-message"><p>' . __( 'Please log in to submit a coupon!', 'love-coupons' ) . '</p></div>';
+        }
+
+        $current_user_id = get_current_user_id();
+        ob_start();
+        ?>
+        <div class="love-coupons-wrapper">
+            <h2 class="love-coupons-section-title"><?php _e( 'Create a Coupon', 'love-coupons' ); ?></h2>
+            <?php $this->render_create_coupon_form( $current_user_id ); ?>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    public function display_coupons_created_shortcode( $atts ) {
+        $atts = shortcode_atts( array( 'limit' => -1 ), $atts, 'love_coupons_created' );
+        if ( ! is_user_logged_in() ) {
+            return '<div class="love-coupons-login-message"><p>' . __( 'Please log in to see your created coupons!', 'love-coupons' ) . '</p></div>';
+        }
+
+        $current_user_id = get_current_user_id();
+        ob_start();
+        ?>
+        <div class="love-coupons-wrapper">
+            <?php echo $this->render_posted_coupons( $current_user_id, $atts ); ?>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    public function display_preferences_shortcode() {
+        if ( ! is_user_logged_in() ) {
+            return '<div class="love-coupons-login-message"><p>' . __( 'Please log in to manage your posting preferences.', 'love-coupons' ) . '</p></div>';
+        }
+
+        $current_user_id = get_current_user_id();
+        $restrictions    = get_option( 'love_coupons_posting_restrictions', array() );
+        $current_setting = isset( $restrictions[ $current_user_id ] ) ? (array) $restrictions[ $current_user_id ] : array( 'all' );
+        $allow_all       = in_array( 'all', $current_setting, true ) || empty( $current_setting );
+        $selected_users  = $allow_all ? array() : array_map( 'absint', $current_setting );
+
+        $all_users = get_users( array( 'orderby' => 'display_name', 'order' => 'ASC' ) );
+
+        ob_start();
+        ?>
+        <div class="love-coupons-wrapper love-coupons-preferences">
+            <h2 class="love-coupons-section-title"><?php _e( 'Posting Preferences', 'love-coupons' ); ?></h2>
+            <p class="description"><?php _e( 'Control who your new coupons are assigned to.', 'love-coupons' ); ?></p>
+            <form id="love-coupons-preferences-form">
+                <?php wp_nonce_field( 'love_coupons_nonce', 'love_coupons_preferences_nonce' ); ?>
+                <label class="allow-all">
+                    <input type="checkbox" id="love-allow-all" name="love_allow_all" <?php checked( $allow_all ); ?> />
+                    <span><?php _e( 'Allow posting to all users', 'love-coupons' ); ?></span>
+                </label>
+                <div class="love-preferences-users" aria-live="polite">
+                    <p class="description"><?php _e( 'Or pick specific users:', 'love-coupons' ); ?></p>
+                    <div class="love-preferences-list">
+                        <?php foreach ( $all_users as $user ) : if ( $user->ID === $current_user_id ) { continue; } $checked = in_array( $user->ID, $selected_users, true ); ?>
+                            <label class="love-preference-user">
+                                <input type="checkbox" name="love_preference_recipients[]" value="<?php echo esc_attr( $user->ID ); ?>" <?php checked( $checked ); ?> />
+                                <span><?php echo esc_html( $user->display_name ); ?></span>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <button type="submit" class="button button-primary" id="love-save-preferences"><?php _e( 'Save Preferences', 'love-coupons' ); ?></button>
+                <div class="form-message" style="display:none;"></div>
+            </form>
+        </div>
+        <?php
+        return ob_get_clean();
     }
 
     public function display_coupons_shortcode( $atts ) {
@@ -21,33 +97,6 @@ class Love_Coupons_Shortcodes {
             <?php echo $this->render_my_coupons( $current_user_id, $atts ); ?>
         </div>
         <?php
-        return ob_get_clean();
-    }
-
-    public function display_coupons_submit_shortcode( $atts ) {
-        if ( ! is_user_logged_in() ) {
-            return '<div class="love-coupons-login-message"><p>' . __( 'Please log in to create coupons!', 'love-coupons' ) . '</p></div>';
-        }
-        $current_user_id = get_current_user_id();
-        ob_start();
-        echo '<div class="love-coupons-wrapper">';
-        echo '<div class="love-create-coupon-form-wrapper">';
-        echo '<h3>' . __( 'Create New Coupon', 'love-coupons' ) . '</h3>';
-        $this->render_create_coupon_form( $current_user_id );
-        echo '</div></div>';
-        return ob_get_clean();
-    }
-
-    public function display_coupons_created_shortcode( $atts ) {
-        $atts = shortcode_atts( array( 'limit' => -1, 'category' => '', 'show_expired' => 'yes' ), $atts, 'love_coupons_created' );
-        if ( ! is_user_logged_in() ) {
-            return '<div class="love-coupons-login-message"><p>' . __( 'Please log in to see the coupons you created!', 'love-coupons' ) . '</p></div>';
-        }
-        $current_user_id = get_current_user_id();
-        ob_start();
-        echo '<div class="love-coupons-wrapper">';
-        echo $this->render_posted_coupons( $current_user_id, $atts );
-        echo '</div>';
         return ob_get_clean();
     }
 
@@ -159,45 +208,44 @@ class Love_Coupons_Shortcodes {
     }
 
     private function render_create_coupon_form( $user_id ) {
-        $allowed_recipients = Love_Coupons_Core::get_allowed_recipients_for_user( $user_id );
-        if ( empty( $allowed_recipients ) ) { echo '<p style="color:#d63638;">' . __( 'You don\'t have permission to post coupons to any user.', 'love-coupons' ) . '</p>'; return; }
         ?>
-        <form class="love-create-coupon-form" id="love-create-coupon-form">
-            <?php wp_nonce_field( 'love_create_coupon', 'love_create_coupon_nonce' ); ?>
-            <div class="form-group"><label for="coupon_title"><?php _e( 'Coupon Title', 'love-coupons' ); ?> <span class="required">*</span></label><input type="text" name="coupon_title" id="coupon_title" required placeholder="<?php _e( 'Enter coupon title', 'love-coupons' ); ?>" /></div>
-            <div class="form-group"><label for="coupon_recipient"><?php _e( 'Send To', 'love-coupons' ); ?> <span class="required">*</span></label>
-                <select name="coupon_recipient" id="coupon_recipient" required>
-                    <option value=""><?php _e( 'Select a user', 'love-coupons' ); ?></option>
-                    <?php foreach ( $allowed_recipients as $recipient_id ) : $recipient = get_user_by( 'id', $recipient_id ); if ( $recipient ) : ?>
-                        <option value="<?php echo esc_attr( $recipient_id ); ?>"><?php echo esc_html( $recipient->display_name . ' (' . $recipient->user_email . ')' ); ?></option>
-                    <?php endif; endforeach; ?>
-                </select>
-            </div>
-            <div class="form-group"><label for="coupon_terms"><?php _e( 'Terms & Conditions', 'love-coupons' ); ?></label>
-                <textarea name="coupon_terms" id="coupon_terms" rows="4" placeholder="<?php _e( 'Enter terms and conditions', 'love-coupons' ); ?>"></textarea>
-            </div>
-            <div class="form-group"><label for="coupon_hero_image"><?php _e( 'Hero Image (16:9)', 'love-coupons' ); ?></label>
-                <input type="file" name="coupon_hero_image" id="coupon_hero_image" accept="image/*" />
-                <small class="description"><?php _e( 'A 16:9 image works best. Non-16:9 images are center-cropped automatically.', 'love-coupons' ); ?></small>
-                <div id="coupon_hero_image_note" style="margin-top:6px;color:#6c757d;display:none;"></div>
-                <div id="coupon_hero_preview" class="love-crop-preview" style="display:none;"><img alt="<?php esc_attr_e('Cropped preview','love-coupons');?>"/></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label for="coupon_start_date"><?php _e( 'Start Date', 'love-coupons' ); ?></label><input type="date" name="coupon_start_date" id="coupon_start_date" /></div>
-                <div class="form-group"><label for="coupon_expiry_date"><?php _e( 'Expiry Date', 'love-coupons' ); ?></label><input type="date" name="coupon_expiry_date" id="coupon_expiry_date" /></div>
-                <div class="form-group"><label for="coupon_usage_limit"><?php _e( 'Usage Limit', 'love-coupons' ); ?></label><input type="number" name="coupon_usage_limit" id="coupon_usage_limit" value="1" min="1" /></div>
-            </div>
-            <button type="submit" class="button button-primary"><?php _e( 'Create Coupon', 'love-coupons' ); ?></button>
-            <div class="form-message" style="display: none;"></div>
-        </form>
-        <div class="love-modal" id="love-cropper-modal" aria-hidden="true" style="display:none;">
-            <div class="love-modal-overlay" data-dismiss></div>
-            <div class="love-modal-content" role="dialog" aria-modal="true" aria-labelledby="love-cropper-title">
-                <div class="love-modal-header"><h4 id="love-cropper-title"><?php _e('Crop Image','love-coupons');?></h4><button type="button" class="love-modal-close" data-dismiss aria-label="<?php esc_attr_e('Close','love-coupons');?>">×</button></div>
-                <div class="love-modal-body"><div class="love-cropper-container"><img id="love-cropper-image" alt="<?php esc_attr_e('Image to crop','love-coupons');?>" /></div><p class="description"><?php _e('Drag to select. Aspect ratio fixed to 16:9.','love-coupons');?></p></div>
-                <div class="love-modal-footer"><button type="button" class="button" id="love-cropper-cancel"><?php _e('Cancel','love-coupons');?></button><button type="button" class="button button-primary" id="love-cropper-apply"><?php _e('Crop & Use','love-coupons');?></button></div>
-            </div>
-        </div>
+            <form class="love-create-coupon-form" id="love-create-coupon-form">
+                <?php wp_nonce_field( 'love_create_coupon', 'love_create_coupon_nonce' ); ?>
+                <div class="form-group"><label for="coupon_title"><?php _e( 'Coupon Title', 'love-coupons' ); ?> <span class="required">*</span></label><input type="text" name="coupon_title" id="coupon_title" required placeholder="<?php _e( 'Enter coupon title', 'love-coupons' ); ?>" /></div>
+                <div class="form-group"><label for="coupon_terms"><?php _e( 'Details', 'love-coupons' ); ?></label>
+                    <textarea name="coupon_terms" id="coupon_terms" rows="4" placeholder="<?php _e( 'Add any details or terms', 'love-coupons' ); ?>"></textarea>
+                </div>
+                <div class="form-group"><label for="coupon_hero_image"><?php _e( 'Image', 'love-coupons' ); ?> <span class="required">*</span></label>
+                    <div class="love-image-dropzone" id="coupon_image_dropzone">
+                        <div class="dropzone-instructions"><span class="dashicons dashicons-format-image"></span><p><?php _e( 'Drag and drop an image, or click to upload.', 'love-coupons' ); ?></p></div>
+                        <input type="file" name="coupon_hero_image" id="coupon_hero_image" accept="image/*" required />
+                    </div>
+                    <div id="coupon_hero_preview" class="love-crop-preview" style="display:none;"><img alt="<?php esc_attr_e('Image preview','love-coupons'); ?>" /></div>
+                </div>
+                <div class="form-group"><label><?php _e( 'Schedule', 'love-coupons' ); ?></label>
+                    <div class="schedule-options">
+                        <label><input type="radio" name="coupon_schedule_option" value="now" checked /> <?php _e( 'Post immediately', 'love-coupons' ); ?></label>
+                        <label><input type="radio" name="coupon_schedule_option" value="schedule" /> <?php _e( 'Schedule for later', 'love-coupons' ); ?></label>
+                    </div>
+                    <div class="form-group schedule-date" id="schedule_date_group" style="display:none;">
+                        <label for="coupon_start_date"><?php _e( 'Start Date', 'love-coupons' ); ?></label>
+                        <input type="date" name="coupon_start_date" id="coupon_start_date" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label for="coupon_expiry_date"><?php _e( 'Valid until', 'love-coupons' ); ?> <span class="required">*</span></label><input type="date" name="coupon_expiry_date" id="coupon_expiry_date" required /></div>
+                    <div class="form-group"><label for="coupon_usage_limit"><?php _e( 'Usage Limit', 'love-coupons' ); ?></label><input type="number" name="coupon_usage_limit" id="coupon_usage_limit" value="1" min="1" /></div>
+                </div>
+                <button type="submit" class="button button-primary"><?php _e( 'Create Coupon', 'love-coupons' ); ?></button>
+                <div class="form-message" style="display: none;"></div>
+            </form>
+            <div class="love-modal" id="love-cropper-modal" aria-hidden="true" style="display:none;">
+                <div class="love-modal-overlay" data-dismiss></div>
+                    <div class="love-modal-content" role="dialog" aria-modal="true" aria-labelledby="love-cropper-title">
+                        <div class="love-modal-header"><h4 id="love-cropper-title"><?php _e('Crop Image','love-coupons');?></h4><button type="button" class="button love-modal-close" data-dismiss aria-label="<?php esc_attr_e('Close','love-coupons');?>"><?php _e('Close','love-coupons'); ?></button></div>
+                        <div class="love-modal-body"><div class="love-cropper-container"><img id="love-cropper-image" alt="<?php esc_attr_e('Image to crop','love-coupons');?>" /></div><p class="description"><?php _e('Drag to select.','love-coupons');?></p></div>
+                    <div class="love-modal-footer"><button type="button" class="button" id="love-cropper-cancel"><?php _e('Cancel','love-coupons');?></button><button type="button" class="button button-primary" id="love-cropper-apply"><?php _e('Crop & Use','love-coupons');?></button></div>
+                </div>
         <?php
     }
 

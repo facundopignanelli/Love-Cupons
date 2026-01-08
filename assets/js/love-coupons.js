@@ -20,6 +20,7 @@
         init() {
             this.bindEvents();
             this.setupAccessibility();
+            this.syncPreferencesUI();
         }
 
         /**
@@ -38,8 +39,21 @@
             // Create form submit
             $(document).on('submit', '#love-create-coupon-form', this.handleCreateFormSubmit.bind(this));
 
+            // Preferences form
+            $(document).on('submit', '#love-coupons-preferences-form', this.handlePreferencesSubmit.bind(this));
+            $(document).on('change', '#love-allow-all', this.handleAllowAllToggle.bind(this));
+
             // Image ratio warning
             $(document).on('change', '#coupon_hero_image', this.warnImageRatio.bind(this));
+
+            // Scheduling toggle
+            $(document).on('change', 'input[name="coupon_schedule_option"]', this.toggleScheduleDate.bind(this));
+
+            // Dropzone interactions for image upload
+            $(document).on('click', '#coupon_image_dropzone', this.handleDropzoneClick.bind(this));
+            $(document).on('dragover dragenter', '#coupon_image_dropzone', this.handleDropzoneDrag.bind(this));
+            $(document).on('dragleave dragend', '#coupon_image_dropzone', this.handleDropzoneDragLeave.bind(this));
+            $(document).on('drop', '#coupon_image_dropzone', this.handleDropzoneDrop.bind(this));
 
             // Cropper modal buttons
             $(document).on('click', '#love-cropper-apply', this.applyCrop.bind(this));
@@ -431,14 +445,32 @@
             const $form = $(event.currentTarget);
 
             const title = $form.find('#coupon_title').val().trim();
-            const recipient = $form.find('#coupon_recipient').val();
             if (!title) {
                 this.showError(loveCouponsAjax.strings.error + ' Title is required.');
                 return;
             }
-            if (!recipient) {
-                this.showError(loveCouponsAjax.strings.error + ' Please select a recipient.');
+            const expiry = $form.find('#coupon_expiry_date').val();
+            if (!expiry) {
+                this.showError(loveCouponsAjax.strings.error + ' Valid until date is required.');
                 return;
+            }
+
+            const fileInput = $form.find('#coupon_hero_image')[0];
+            const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+            if (!hasFile && !this.croppedBlob) {
+                this.showError(loveCouponsAjax.strings.error + ' An image is required.');
+                return;
+            }
+
+            const scheduleChoice = $form.find('input[name="coupon_schedule_option"]:checked').val();
+            const startDateField = $form.find('#coupon_start_date');
+            if (scheduleChoice === 'schedule') {
+                if (!startDateField.val()) {
+                    this.showError(loveCouponsAjax.strings.error + ' Please pick a start date.');
+                    return;
+                }
+            } else {
+                startDateField.val('');
             }
 
             const formData = new FormData($form[0]);
@@ -509,17 +541,124 @@
             $message.addClass('error').removeClass('success').text(msg).show();
         }
 
+        syncPreferencesUI() {
+            const $toggle = $('#love-allow-all');
+            if ($toggle.length) {
+                const checked = $toggle.is(':checked');
+                $('.love-preferences-list input[type="checkbox"]').prop('disabled', checked);
+            }
+        }
+
+        handleAllowAllToggle(event) {
+            const checked = $(event.currentTarget).is(':checked');
+            $('.love-preferences-list input[type="checkbox"]').prop('disabled', checked);
+        }
+
+        handlePreferencesSubmit(event) {
+            event.preventDefault();
+            const $form = $(event.currentTarget);
+            const allowAll = $('#love-allow-all').is(':checked');
+            const recipients = [];
+
+            if (!allowAll) {
+                $('.love-preferences-list input[type="checkbox"]:checked').each(function() {
+                    recipients.push($(this).val());
+                });
+            }
+
+            const payload = {
+                action: 'love_coupons_save_preferences',
+                security: loveCouponsAjax.nonce,
+                allow_all: allowAll ? 'true' : 'false',
+                recipients
+            };
+
+            this.processPreferences($form, payload);
+        }
+
+        processPreferences($form, payload) {
+            const $button = $form.find('#love-save-preferences');
+            const $message = $form.find('.form-message');
+
+            this.setPreferencesLoading($button, true);
+            $message.hide().removeClass('success error').text('');
+
+            $.post(loveCouponsAjax.ajax_url, payload)
+                .done((response) => {
+                    if (response && response.success) {
+                        $message.addClass('success').text(loveCouponsAjax.strings.preferences_saved).show();
+                    } else {
+                        const msg = (response && response.data) ? response.data : loveCouponsAjax.strings.preferences_failed;
+                        $message.addClass('error').text(msg).show();
+                    }
+                })
+                .fail(() => {
+                    $message.addClass('error').text(loveCouponsAjax.strings.preferences_failed).show();
+                })
+                .always(() => this.setPreferencesLoading($button, false));
+        }
+
+        setPreferencesLoading($button, isLoading) {
+            if (isLoading) {
+                $button.prop('disabled', true).addClass('loading disabled').text(loveCouponsAjax.strings.preferences_saving);
+            } else {
+                $button.prop('disabled', false).removeClass('loading disabled').text(loveCouponsAjax.strings.save_preferences || 'Save Preferences');
+            }
+        }
+
         /**
          * Warn if image ratio differs from 16:9
          */
         warnImageRatio(event) {
             const file = event.target.files && event.target.files[0];
-            const $note = $('#coupon_hero_image_note');
-            $note.hide().text('');
             if (!file || !file.type.startsWith('image/')) return;
-
-            // Show modal and initialize cropper
             this.openCropperWithFile(file);
+        }
+
+        toggleScheduleDate(event) {
+            const choice = $(event.currentTarget).val();
+            const $group = $('#schedule_date_group');
+            if (choice === 'schedule') {
+                $group.slideDown(150);
+            } else {
+                $('#coupon_start_date').val('');
+                $group.slideUp(150);
+            }
+        }
+
+        handleDropzoneClick(event) {
+            if ($(event.target).is('input[type="file"]')) {
+                return;
+            }
+            event.preventDefault();
+            $('#coupon_hero_image').trigger('click');
+        }
+
+        handleDropzoneDrag(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            $('#coupon_image_dropzone').addClass('is-dragover');
+        }
+
+        handleDropzoneDragLeave(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            $('#coupon_image_dropzone').removeClass('is-dragover');
+        }
+
+        handleDropzoneDrop(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const dt = event.originalEvent && event.originalEvent.dataTransfer;
+            const files = dt && dt.files;
+            const $input = $('#coupon_hero_image');
+            if (files && files.length && $input.length) {
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(files[0]);
+                $input[0].files = dataTransfer.files;
+                $input.trigger('change');
+            }
+            $('#coupon_image_dropzone').removeClass('is-dragover');
         }
 
         openCropperWithFile(file) {
@@ -571,7 +710,6 @@
                     const $preview = $('#coupon_hero_preview');
                     $preview.find('img').attr('src', url);
                     $preview.show();
-                    $('#coupon_hero_image_note').text('Cropped image ready.').show();
                 }
                 this.dismissCropper();
             }, 'image/jpeg', 0.9);

@@ -64,7 +64,6 @@ class Love_Coupons_Ajax {
         }
         $current_user_id = get_current_user_id();
         $title = isset( $_POST['coupon_title'] ) ? sanitize_text_field( $_POST['coupon_title'] ) : '';
-        $recipient_id = isset( $_POST['coupon_recipient'] ) ? absint( $_POST['coupon_recipient'] ) : 0;
         $terms = isset( $_POST['coupon_terms'] ) ? sanitize_textarea_field( $_POST['coupon_terms'] ) : '';
         $expiry_date = isset( $_POST['coupon_expiry_date'] ) ? sanitize_text_field( $_POST['coupon_expiry_date'] ) : '';
         $start_date  = isset( $_POST['coupon_start_date'] ) ? sanitize_text_field( $_POST['coupon_start_date'] ) : '';
@@ -72,12 +71,8 @@ class Love_Coupons_Ajax {
         if ( empty( $title ) ) {
             wp_send_json_error( __( 'Coupon title is required.', 'love-coupons' ) );
         }
-        if ( ! $recipient_id || ! get_user_by( 'id', $recipient_id ) ) {
-            wp_send_json_error( __( 'Invalid recipient selected.', 'love-coupons' ) );
-        }
-        $allowed_recipients = Love_Coupons_Core::get_allowed_recipients_for_user( $current_user_id );
-        if ( ! in_array( $recipient_id, $allowed_recipients ) ) {
-            wp_send_json_error( __( 'You don\'t have permission to post coupons to this user.', 'love-coupons' ) );
+        if ( empty( $expiry_date ) ) {
+            wp_send_json_error( __( 'Valid until date is required.', 'love-coupons' ) );
         }
         $coupon_id = wp_insert_post( array(
             'post_type' => 'love_coupon',
@@ -88,8 +83,20 @@ class Love_Coupons_Ajax {
         if ( is_wp_error( $coupon_id ) ) {
             wp_send_json_error( __( 'Failed to create coupon.', 'love-coupons' ) );
         }
+        $restrictions = get_option( 'love_coupons_posting_restrictions', array() );
+        $assigned_to  = array();
+        if ( ! empty( $restrictions[ $current_user_id ] ) && ! in_array( 'all', $restrictions[ $current_user_id ], true ) ) {
+            $assigned_to = array_filter( array_map( 'absint', (array) $restrictions[ $current_user_id ] ), function( $uid ) use ( $current_user_id ) {
+                return $uid > 0 && $uid !== $current_user_id && get_user_by( 'id', $uid );
+            } );
+        }
+
         update_post_meta( $coupon_id, '_love_coupon_created_by', $current_user_id );
-        update_post_meta( $coupon_id, '_love_coupon_assigned_to', array( $recipient_id ) );
+        if ( ! empty( $assigned_to ) ) {
+            update_post_meta( $coupon_id, '_love_coupon_assigned_to', array_values( array_unique( $assigned_to ) ) );
+        } else {
+            delete_post_meta( $coupon_id, '_love_coupon_assigned_to' );
+        }
         update_post_meta( $coupon_id, '_love_coupon_terms', $terms );
         update_post_meta( $coupon_id, '_love_coupon_expiry_date', $expiry_date );
         if ( ! empty( $start_date ) ) { update_post_meta( $coupon_id, '_love_coupon_start_date', $start_date ); }
@@ -133,6 +140,41 @@ class Love_Coupons_Ajax {
         }
 
         wp_send_json_success( array( 'message' => __( 'Coupon created successfully!', 'love-coupons' ), 'coupon_id' => $coupon_id ) );
+    }
+
+    public function ajax_save_preferences() {
+        if ( ! check_ajax_referer( 'love_coupons_nonce', 'security', false ) ) {
+            wp_send_json_error( __( 'Security check failed.', 'love-coupons' ) );
+        }
+        if ( ! is_user_logged_in() ) {
+            wp_send_json_error( __( 'You must be logged in to update preferences.', 'love-coupons' ) );
+        }
+
+        $current_user_id = get_current_user_id();
+        $allow_all       = isset( $_POST['allow_all'] ) && 'true' === $_POST['allow_all'];
+        $recipients      = isset( $_POST['recipients'] ) ? (array) $_POST['recipients'] : array();
+
+        if ( ! $allow_all && empty( $recipients ) ) {
+            wp_send_json_error( __( 'Please choose at least one user or allow all.', 'love-coupons' ) );
+        }
+
+        $restrictions = get_option( 'love_coupons_posting_restrictions', array() );
+        $restrictions[ $current_user_id ] = array();
+
+        if ( $allow_all ) {
+            $restrictions[ $current_user_id ][] = 'all';
+        } else {
+            foreach ( $recipients as $recipient_id ) {
+                $recipient_id = absint( $recipient_id );
+                if ( $recipient_id > 0 && $recipient_id !== $current_user_id && get_user_by( 'id', $recipient_id ) ) {
+                    $restrictions[ $current_user_id ][] = $recipient_id;
+                }
+            }
+            $restrictions[ $current_user_id ] = array_values( array_unique( $restrictions[ $current_user_id ] ) );
+        }
+
+        update_option( 'love_coupons_posting_restrictions', $restrictions );
+        wp_send_json_success( __( 'Preferences saved.', 'love-coupons' ) );
     }
 
     public function ajax_delete_coupon() {
