@@ -66,34 +66,36 @@ class Love_Coupons_Shortcodes {
         ?>
         <header class="love-coupons-menu" style="--love-accent: <?php echo esc_attr( $accent_color ); ?>; --love-accent-contrast: <?php echo esc_attr( $accent_contrast ); ?>; --love-target-accent: <?php echo esc_attr( $target_accent ); ?>; --love-target-contrast: <?php echo esc_attr( $target_accent_contr ); ?>;">
             <div class="love-menu-container">
-                <!-- Top Row: Logo on Left, Greeting & Avatar on Right -->
-                <div class="love-menu-top">
-                    <div class="love-menu-left">
-                        <div class="love-menu-logo">
-                            <img src="<?php echo esc_url( LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon512.png' ); ?>" alt="Love Coupons" />
-                            <span class="love-menu-brand">Love Coupons</span>
-                        </div>
+                <!-- Logo Row -->
+                <div class="love-menu-logo-row">
+                    <div class="love-menu-logo">
+                        <img src="<?php echo esc_url( LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon512.png' ); ?>" alt="Love Coupons" />
+                        <span class="love-menu-brand">Love Coupons</span>
                     </div>
-                    <div class="love-menu-right">
-                        <span class="love-menu-greeting"><?php printf( esc_html__( 'Hello, %s!', 'love-coupons' ), esc_html( $current_user->display_name ) ); ?></span>
+                </div>
+
+                <!-- Greeting & Actions Row -->
+                <div class="love-menu-greeting-row">
+                    <div class="love-menu-greeting-left">
                         <div class="love-menu-avatar-wrapper">
                             <?php echo $avatar; ?>
                         </div>
-                        <div class="love-menu-actions">
-                            <?php if ( $submit_url ) : ?>
-                            <a href="<?php echo esc_url( $submit_url ); ?>" class="love-menu-icon-btn love-menu-icon-btn-new love-menu-nav-item-new" aria-label="<?php esc_attr_e( 'New Coupon', 'love-coupons' ); ?>" title="<?php esc_attr_e( 'New Coupon', 'love-coupons' ); ?>">
-                                <i class="fas fa-plus"></i>
-                            </a>
-                            <?php endif; ?>
-                            <?php if ( $prefs_url ) : ?>
-                            <a href="<?php echo esc_url( $prefs_url ); ?>" class="love-menu-icon-btn love-menu-preferences" aria-label="<?php esc_attr_e( 'Preferences', 'love-coupons' ); ?>" title="<?php esc_attr_e( 'Preferences', 'love-coupons' ); ?>">
-                                <i class="fas fa-cog"></i>
-                            </a>
-                            <?php endif; ?>
-                            <a href="<?php echo esc_url( wp_logout_url( home_url() ) ); ?>" class="love-menu-icon-btn love-menu-logout" aria-label="<?php esc_attr_e( 'Logout', 'love-coupons' ); ?>" title="<?php esc_attr_e( 'Logout', 'love-coupons' ); ?>">
-                                <i class="fas fa-sign-out-alt"></i>
-                            </a>
-                        </div>
+                        <span class="love-menu-greeting"><?php printf( esc_html__( 'Hello, %s!', 'love-coupons' ), esc_html( $current_user->display_name ) ); ?></span>
+                    </div>
+                    <div class="love-menu-actions">
+                        <?php if ( $submit_url ) : ?>
+                        <a href="<?php echo esc_url( $submit_url ); ?>" class="love-menu-icon-btn love-menu-icon-btn-new love-menu-nav-item-new" aria-label="<?php esc_attr_e( 'New Coupon', 'love-coupons' ); ?>" title="<?php esc_attr_e( 'New Coupon', 'love-coupons' ); ?>">
+                            <i class="fas fa-plus"></i>
+                        </a>
+                        <?php endif; ?>
+                        <?php if ( $prefs_url ) : ?>
+                        <a href="<?php echo esc_url( $prefs_url ); ?>" class="love-menu-icon-btn love-menu-preferences" aria-label="<?php esc_attr_e( 'Preferences', 'love-coupons' ); ?>" title="<?php esc_attr_e( 'Preferences', 'love-coupons' ); ?>">
+                            <i class="fas fa-cog"></i>
+                        </a>
+                        <?php endif; ?>
+                        <a href="<?php echo esc_url( wp_logout_url( home_url() ) ); ?>" class="love-menu-icon-btn love-menu-logout" aria-label="<?php esc_attr_e( 'Logout', 'love-coupons' ); ?>" title="<?php esc_attr_e( 'Logout', 'love-coupons' ); ?>">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -115,10 +117,10 @@ class Love_Coupons_Shortcodes {
         <div class="love-coupons-wrapper love-coupons-tabs-wrapper" <?php echo $wrapper_attrs; ?>>
             <div class="love-coupons-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Coupons', 'love-coupons' ); ?>">
                 <button type="button" class="love-tab-button active" role="tab" aria-selected="true" aria-controls="love-tab-available" data-target="love-tab-available">
-                    <?php esc_html_e( 'Available to me', 'love-coupons' ); ?>
+                    <?php esc_html_e( 'For me', 'love-coupons' ); ?>
                 </button>
                 <button type="button" class="love-tab-button" role="tab" aria-selected="false" aria-controls="love-tab-created" data-target="love-tab-created">
-                    <?php esc_html_e( 'My created coupons', 'love-coupons' ); ?>
+                    <?php esc_html_e( 'By Me', 'love-coupons' ); ?>
                 </button>
             </div>
             <div class="love-tabs-content">
