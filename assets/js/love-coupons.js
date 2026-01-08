@@ -47,14 +47,18 @@
                 return;
             }
 
-            // Wait for service worker with timeout
-            const swReadyPromise = navigator.serviceWorker.ready;
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Service worker timeout')), 5000)
-            );
+            // Check if service worker is registered
+            navigator.serviceWorker.getRegistration().then(registration => {
+                console.log('[Love Coupons] Service worker registration:', registration);
+                
+                if (!registration) {
+                    console.warn('[Love Coupons] No service worker registered');
+                    $statusValue.text('Not available');
+                    $message.text('Service worker not registered. Push notifications are not available.').css('color', '#dc3232').show();
+                    return;
+                }
 
-            Promise.race([swReadyPromise, timeoutPromise]).then(registration => {
-                console.log('[Love Coupons] Service worker ready, checking permission...');
+                // Service worker exists, check permission immediately
                 const permission = Notification.permission;
                 console.log('[Love Coupons] Permission status:', permission);
 
@@ -68,6 +72,10 @@
                             $enableBtn.text('Subscribe to Notifications').show();
                             this.bindEnableNotificationsButton(registration);
                         }
+                    }).catch(e => {
+                        console.error('[Love Coupons] Failed to get subscription:', e);
+                        $statusValue.text('Error');
+                        $message.text('Could not check subscription status.').css('color', '#dc3232').show();
                     });
                 } else if (permission === 'denied') {
                     $statusValue.text('\u2717 Blocked').css('color', '#dc3232');
@@ -78,7 +86,7 @@
                     this.bindEnableNotificationsButton(registration);
                 }
             }).catch(e => {
-                console.error('[Love Coupons] Service worker ready failed:', e);
+                console.error('[Love Coupons] Failed to get service worker registration:', e);
                 $statusValue.text('Error');
                 $message.text('Could not check notification status. Error: ' + e.message).css('color', '#dc3232').show();
             });
