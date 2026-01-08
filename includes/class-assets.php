@@ -55,7 +55,7 @@ class Love_Coupons_Assets {
     private function should_enqueue_assets() {
         global $post;
         if ( is_admin() ) { return false; }
-        if ( $post && ( has_shortcode( $post->post_content, 'love_coupons' ) || has_shortcode( $post->post_content, 'love_coupons_submit' ) ) ) {
+        if ( $post && ( has_shortcode( $post->post_content, 'love_coupons' ) || has_shortcode( $post->post_content, 'love_coupons_submit' ) || has_shortcode( $post->post_content, 'love_coupons_created' ) ) ) {
             return true;
         }
         return false;

@@ -121,7 +121,7 @@ class Love_Coupons_Plugin {
         }
 
         global $post;
-        if ( is_page() && $post && ( has_shortcode( $post->post_content, 'love_coupons' ) || has_shortcode( $post->post_content, 'love_coupons_submit' ) ) ) {
+        if ( is_page() && $post && ( has_shortcode( $post->post_content, 'love_coupons' ) || has_shortcode( $post->post_content, 'love_coupons_submit' ) || has_shortcode( $post->post_content, 'love_coupons_created' ) ) ) {
             auth_redirect();
         }
     }

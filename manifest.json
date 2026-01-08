@@ -2,12 +2,12 @@
   "name": "Love Coupons",
   "short_name": "Love Coupons",
   "description": "Manage and redeem digital coupons for sharing love and appreciation!",
-  "start_url": "/love-coupons/",
-  "scope": "/love-coupons/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#ffffff",
-  "theme_color": "#2c6e49",
+  "theme_color": "#197bbd",
   "categories": ["lifestyle", "business"],
   "lang": "en-US",
   "dir": "ltr",
@@ -25,36 +25,7 @@
       "purpose": "any maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "/wp-content/plugins/love-coupons/assets/images/screenshot-wide.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Coupon grid view on desktop"
-    },
-    {
-      "src": "/wp-content/plugins/love-coupons/assets/images/screenshot-portrait.png",
-      "sizes": "720x1280",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Coupon list on mobile"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "View Coupons",
-      "short_name": "Coupons",
-      "description": "View all available coupons",
-      "url": "/wp-content/plugins/love-coupons/?action=view",
-      "icons": [
-        {
-          "src": "/wp-content/plugins/love-coupons/assets/images/icon192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    }
-  ],
+  "screenshots": [],
+  "shortcuts": [],
   "prefer_related_applications": false
 }
