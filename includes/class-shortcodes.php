@@ -124,7 +124,7 @@ class Love_Coupons_Shortcodes {
             echo '<div class="love-coupons-section">';
             echo '<h3 class="love-coupons-section-title">' . __( 'Upcoming', 'love-coupons' ) . '</h3>';
             echo '<div class="love-coupons-grid">';
-            foreach ( $upcoming as $id ) { $this->render_coupon_item( $id ); }
+            foreach ( $upcoming as $id ) { $this->render_coupon_item( $id, true ); }
             echo '</div></div><hr class="love-coupons-separator">';
         }
 
@@ -132,7 +132,7 @@ class Love_Coupons_Shortcodes {
             echo '<div class="love-coupons-section">';
             echo '<h3 class="love-coupons-section-title">' . __( 'Available', 'love-coupons' ) . '</h3>';
             echo '<div class="love-coupons-grid">';
-            foreach ( $available as $id ) { $this->render_coupon_item( $id ); }
+            foreach ( $available as $id ) { $this->render_coupon_item( $id, true ); }
             echo '</div></div>';
         }
 
@@ -141,7 +141,7 @@ class Love_Coupons_Shortcodes {
             echo '<div class="love-coupons-section">';
             echo '<h3 class="love-coupons-section-title">' . __( 'Redeemed', 'love-coupons' ) . '</h3>';
             echo '<div class="love-coupons-grid">';
-            foreach ( $redeemed as $id ) { $this->render_coupon_item( $id ); }
+            foreach ( $redeemed as $id ) { $this->render_coupon_item( $id, true ); }
             echo '</div></div>';
         }
 
@@ -150,7 +150,7 @@ class Love_Coupons_Shortcodes {
             echo '<div class="love-coupons-section">';
             echo '<h3 class="love-coupons-section-title">' . __( 'Expired', 'love-coupons' ) . '</h3>';
             echo '<div class="love-coupons-grid">';
-            foreach ( $expired as $id ) { $this->render_coupon_item( $id ); }
+            foreach ( $expired as $id ) { $this->render_coupon_item( $id, true ); }
             echo '</div></div>';
         }
 
@@ -201,7 +201,7 @@ class Love_Coupons_Shortcodes {
         <?php
     }
 
-    private function render_coupon_item( $coupon_id ) {
+    private function render_coupon_item( $coupon_id, $show_delete = false ) {
         $redeemed = get_post_meta( $coupon_id, '_love_coupon_redeemed', true );
         $terms = get_post_meta( $coupon_id, '_love_coupon_terms', true );
         $expiry_date = get_post_meta( $coupon_id, '_love_coupon_expiry_date', true );
@@ -227,6 +227,9 @@ class Love_Coupons_Shortcodes {
                         <?php else : ?>
                             <button class="button button-primary redeem-button" data-coupon-id="<?php echo esc_attr( $coupon_id ); ?>"><span class="dashicons dashicons-tickets-alt"></span><?php _e( 'Redeem', 'love-coupons' ); ?></button>
                         <?php endif; ?>
+                    <?php endif; ?>
+                    <?php if ( $show_delete ) : ?>
+                        <button class="button button-secondary delete-coupon" data-coupon-id="<?php echo esc_attr( $coupon_id ); ?>"><?php _e( 'Remove', 'love-coupons' ); ?></button>
                     <?php endif; ?>
                 </div>
             </div>

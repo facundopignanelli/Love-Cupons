@@ -134,4 +134,34 @@ class Love_Coupons_Ajax {
 
         wp_send_json_success( array( 'message' => __( 'Coupon created successfully!', 'love-coupons' ), 'coupon_id' => $coupon_id ) );
     }
+
+    public function ajax_delete_coupon() {
+        if ( ! check_ajax_referer( 'love_coupons_nonce', 'security', false ) ) {
+            wp_send_json_error( __( 'Security check failed.', 'love-coupons' ) );
+        }
+        if ( ! is_user_logged_in() ) {
+            wp_send_json_error( __( 'You must be logged in to delete coupons.', 'love-coupons' ) );
+        }
+        $coupon_id = isset( $_POST['coupon_id'] ) ? absint( $_POST['coupon_id'] ) : 0;
+        if ( ! $coupon_id || 'love_coupon' !== get_post_type( $coupon_id ) ) {
+            wp_send_json_error( __( 'Invalid coupon.', 'love-coupons' ) );
+        }
+        $coupon = get_post( $coupon_id );
+        if ( ! $coupon ) {
+            wp_send_json_error( __( 'Coupon not found.', 'love-coupons' ) );
+        }
+
+        $current_user_id = get_current_user_id();
+        $created_by = get_post_meta( $coupon_id, '_love_coupon_created_by', true );
+        if ( intval( $created_by ) !== $current_user_id && ! current_user_can( 'delete_others_posts' ) ) {
+            wp_send_json_error( __( 'You do not have permission to delete this coupon.', 'love-coupons' ) );
+        }
+
+        $deleted = wp_trash_post( $coupon_id );
+        if ( ! $deleted ) {
+            wp_send_json_error( __( 'Failed to delete coupon.', 'love-coupons' ) );
+        }
+
+        wp_send_json_success( __( 'Coupon removed.', 'love-coupons' ) );
+    }
 }

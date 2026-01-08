@@ -27,6 +27,7 @@
          */
         bindEvents() {
             $(document).on('click', '.redeem-button', this.handleRedemption.bind(this));
+            $(document).on('click', '.delete-coupon', this.handleDeleteCoupon.bind(this));
             
             // Handle keyboard navigation for terms
             $(document).on('keydown', '.coupon-terms summary', this.handleTermsKeyboard.bind(this));
@@ -54,6 +55,13 @@
                 const $button = $(this);
                 const couponTitle = $button.closest('.love-coupon').find('.coupon-title').text();
                 $button.attr('aria-label', loveCouponsAjax.strings.redeem + ' ' + couponTitle);
+            });
+
+            // Add ARIA labels to delete buttons
+            $('.delete-coupon').each(function() {
+                const $button = $(this);
+                const couponTitle = $button.closest('.love-coupon').find('.coupon-title').text();
+                $button.attr('aria-label', loveCouponsAjax.strings.delete + ' ' + couponTitle);
             });
 
             // Add ARIA expanded to terms summaries
@@ -129,6 +137,37 @@
             this.processRedemption($button, couponId);
         }
 
+        handleDeleteCoupon(event) {
+            event.preventDefault();
+            const $button = $(event.currentTarget);
+            const couponId = $button.data('coupon-id');
+            if (!couponId) {
+                this.showError(loveCouponsAjax.strings.error + ' Invalid coupon.');
+                return;
+            }
+            if (!confirm(loveCouponsAjax.strings.delete_confirm)) {
+                return;
+            }
+            this.setButtonLoading($button, true, loveCouponsAjax.strings.deleting);
+            $.post(loveCouponsAjax.ajax_url, {
+                action: 'love_coupons_delete',
+                security: loveCouponsAjax.nonce,
+                coupon_id: couponId
+            }).done((response) => {
+                if (response && response.success) {
+                    this.showSuccess(response.data || loveCouponsAjax.strings.deleted);
+                    const $card = $button.closest('.love-coupon');
+                    $card.fadeOut(200, () => { $card.remove(); });
+                } else {
+                    this.showError((response && response.data) || loveCouponsAjax.strings.delete_failed);
+                    this.setButtonLoading($button, false);
+                }
+            }).fail(() => {
+                this.showError(loveCouponsAjax.strings.delete_failed);
+                this.setButtonLoading($button, false);
+            });
+        }
+
         /**
          * Validate coupon ID
          */
@@ -184,16 +223,18 @@
         /**
          * Set button loading state
          */
-        setButtonLoading($button, isLoading) {
+        setButtonLoading($button, isLoading, labelOverride = null) {
             if (isLoading) {
+                const label = labelOverride || loveCouponsAjax.strings.redeeming;
                 $button
                     .prop('disabled', true)
                     .addClass('loading disabled')
-                    .text(loveCouponsAjax.strings.redeeming)
+                    .text(label)
                     .attr('aria-busy', 'true');
             } else {
                 $button
-                    .removeClass('loading')
+                    .prop('disabled', false)
+                    .removeClass('loading disabled')
                     .attr('aria-busy', 'false');
             }
         }

@@ -68,6 +68,7 @@ class Love_Coupons_Plugin {
         add_action( 'wp_ajax_love_coupons_redeem', array( $this->ajax, 'ajax_redeem_coupon' ) );
         add_action( 'wp_ajax_nopriv_love_coupons_redeem', array( $this->ajax, 'ajax_redeem_coupon' ) );
         add_action( 'wp_ajax_love_coupons_create', array( $this->ajax, 'ajax_create_coupon' ) );
+        add_action( 'wp_ajax_love_coupons_delete', array( $this->ajax, 'ajax_delete_coupon' ) );
 
         $this->shortcodes->register();
 

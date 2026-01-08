@@ -26,6 +26,11 @@ class Love_Coupons_Assets {
                 'created'      => __( 'Coupon created successfully!', 'love-coupons' ),
                 'create_failed'=> __( 'Failed to create coupon.', 'love-coupons' ),
                 'image_ratio_warn' => __( 'Image is not 16:9. It will be center-cropped automatically.', 'love-coupons' ),
+                'delete'       => __( 'Remove', 'love-coupons' ),
+                'deleting'     => __( 'Removing...', 'love-coupons' ),
+                'deleted'      => __( 'Coupon removed.', 'love-coupons' ),
+                'delete_confirm' => __( 'Are you sure you want to remove this coupon?', 'love-coupons' ),
+                'delete_failed'  => __( 'Failed to remove coupon.', 'love-coupons' ),
             )
         ) );
 
