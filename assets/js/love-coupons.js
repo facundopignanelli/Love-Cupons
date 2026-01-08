@@ -21,6 +21,7 @@
             this.bindEvents();
             this.setupAccessibility();
             this.syncPreferencesUI();
+        }
 
         /**
          * Bind event listeners
