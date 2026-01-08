@@ -28,7 +28,7 @@
         /**
          * Initialize notification settings UI on preferences page
          */
-        async initNotificationSettings() {
+        initNotificationSettings() {
             const $statusValue = $('#love-notification-status-value');
             const $enableBtn = $('#love-enable-notifications-btn');
             const $message = $('#love-notification-message');
@@ -38,26 +38,40 @@
                 return;
             }
 
+            console.log('[Love Coupons] Initializing notification settings...');
+
             if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+                console.log('[Love Coupons] Push notifications not supported');
                 $statusValue.text('Not supported');
                 $message.text('Push notifications are not supported in this browser.').show();
                 return;
             }
 
-            try {
-                const registration = await navigator.serviceWorker.ready;
+            // Check service worker state
+            if (!navigator.serviceWorker.controller) {
+                console.warn('[Love Coupons] No service worker controller - may need page refresh');
+                $statusValue.text('Please refresh page');
+                $message.text('Refresh the page to activate notifications.').show();
+                return;
+            }
+
+            // Get service worker and check status
+            navigator.serviceWorker.ready.then(registration => {
+                console.log('[Love Coupons] Service worker ready, checking permission...');
                 const permission = Notification.permission;
+                console.log('[Love Coupons] Permission status:', permission);
 
                 if (permission === 'granted') {
-                    const subscription = await registration.pushManager.getSubscription();
-                    if (subscription) {
-                        $statusValue.text('\u2713 Enabled').css('color', '#46b450');
-                        $message.text('You will receive push notifications for coupon activity.').css('color', '#46b450').show();
-                    } else {
-                        $statusValue.text('Granted, but not subscribed');
-                        $enableBtn.text('Subscribe to Notifications').show();
-                        this.bindEnableNotificationsButton(registration);
-                    }
+                    registration.pushManager.getSubscription().then(subscription => {
+                        if (subscription) {
+                            $statusValue.text('\u2713 Enabled').css('color', '#46b450');
+                            $message.text('You will receive push notifications for coupon activity.').css('color', '#46b450').show();
+                        } else {
+                            $statusValue.text('Granted, but not subscribed');
+                            $enableBtn.text('Subscribe to Notifications').show();
+                            this.bindEnableNotificationsButton(registration);
+                        }
+                    });
                 } else if (permission === 'denied') {
                     $statusValue.text('\u2717 Blocked').css('color', '#dc3232');
                     $message.html('Notifications are blocked. To enable them, please update your browser/app settings.').css('color', '#dc3232').show();
@@ -66,11 +80,11 @@
                     $enableBtn.show();
                     this.bindEnableNotificationsButton(registration);
                 }
-            } catch (e) {
-                console.error('[Love Coupons] Notification settings init failed:', e);
+            }).catch(e => {
+                console.error('[Love Coupons] Service worker ready failed:', e);
                 $statusValue.text('Error');
-                $message.text('Could not check notification status.').css('color', '#dc3232').show();
-            }
+                $message.text('Could not check notification status. Error: ' + e.message).css('color', '#dc3232').show();
+            });
         }
 
         /**
