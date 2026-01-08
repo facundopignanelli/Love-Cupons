@@ -230,9 +230,17 @@ class Love_Coupons_Shortcodes {
 
         $current_user_id = get_current_user_id();
         $wrapper_attrs   = Love_Coupons_Core::get_accent_attributes_for_user( $current_user_id );
+        $all_coupons_url = $this->find_page_with_shortcode( 'love_coupons_all' );
         ob_start();
         ?>
         <div class="love-coupons-wrapper" <?php echo $wrapper_attrs; ?>>
+            <?php if ( $all_coupons_url ) : ?>
+            <div class="love-back-button-wrapper">
+                <a href="<?php echo esc_url( $all_coupons_url ); ?>" class="love-back-button">
+                    <i class="fas fa-arrow-left"></i> <?php _e( 'Back to Coupons', 'love-coupons' ); ?>
+                </a>
+            </div>
+            <?php endif; ?>
             <h2 class="love-coupons-section-title"><?php _e( 'Create a Coupon', 'love-coupons' ); ?></h2>
             <?php $this->render_create_coupon_form( $current_user_id ); ?>
         </div>
