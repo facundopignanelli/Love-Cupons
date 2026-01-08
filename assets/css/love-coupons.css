@@ -719,7 +719,7 @@
     border: none;
         border-radius: 15px;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
@@ -734,10 +734,12 @@
     background: var(--love-accent);
     color: var(--love-accent-contrast);
     border-radius: 15px;
+    font-weight: 700;
 }
 
 .button-primary:hover:not(:disabled) {
     background: var(--love-accent-strong);
+    color: var(--love-accent-contrast);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px color-mix(in srgb, var(--love-accent) 35%, transparent);
 }
@@ -746,10 +748,12 @@
     background: #dc3545;
     color: white;
     border-radius: 15px;
+    font-weight: 700;
 }
 
 .button-danger:hover:not(:disabled) {
     background: #b02a37;
+    color: #ffffff;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
@@ -759,6 +763,7 @@
     color: white;
     cursor: not-allowed;
     border-radius: 15px;
+    font-weight: 700;
 }
 
 .button-expired {
@@ -766,6 +771,7 @@
     color: white;
     cursor: not-allowed;
     border-radius: 15px;
+    font-weight: 700;
 }
 
 .button:disabled {
@@ -874,7 +880,7 @@
     margin: 5vh auto;
     max-width: 900px;
     background: #fff;
-    border-radius: 8px;
+    border-radius: 15px;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     display: flex;
@@ -882,13 +888,30 @@
     max-height: 90vh;
 }
 .love-modal-header, .love-modal-footer { padding: 0.75rem 1rem; background: #f8f9fa; }
+.love-modal-header h4 {
+    margin: 0;
+    color: var(--love-accent);
+    font-weight: 700;
+}
 .love-modal-footer { display: flex; gap: 0.75rem; justify-content: flex-end; flex-shrink: 0; }
 .love-modal-body { padding: 1rem; overflow: auto; flex: 1; }
-.love-modal-close { background: none; border: none; font-size: 1.25rem; cursor: pointer; float: right; }
+.love-modal-close { background: var(--love-accent); color: var(--love-accent-contrast); border: none; font-size: 1.25rem; cursor: pointer; float: right; padding: 0.35rem 0.65rem; border-radius: 15px; }
 .love-cropper-container { width: 100%; max-height: 65vh; }
 .love-cropper-container img { max-width: 100%; display: block; }
 .love-crop-preview { margin-top: 0.5rem; border: 1px dashed #ced4da; padding: 0.5rem; border-radius: 6px; max-width: 480px; }
 .love-crop-preview img { width: 100%; height: auto; display: block; border-radius: 4px; }
+
+.love-modal-footer .button,
+.love-modal-footer .wp-element-button,
+.love-modal-footer button {
+    border-radius: 15px;
+    font-weight: 700;
+}
+
+.love-modal-close:hover {
+    background: var(--love-accent-strong);
+    color: var(--love-accent-contrast);
+}
 
 @media (max-width: 768px) {
     .love-modal-content {
