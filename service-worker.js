@@ -3,9 +3,9 @@
  * Enhanced with better error handling, logging, and performance optimization
  */
 
-const CACHE_NAME = 'love-coupons-plugin-v1.1';
-const STATIC_CACHE_NAME = 'love-coupons-static-v1.1';
-const DYNAMIC_CACHE_NAME = 'love-coupons-dynamic-v1.1';
+const CACHE_NAME = 'love-coupons-plugin-v1.2';
+const STATIC_CACHE_NAME = 'love-coupons-static-v1.2';
+const DYNAMIC_CACHE_NAME = 'love-coupons-dynamic-v1.2';
 const PLUGIN_SCOPE = '/wp-content/plugins/love-coupons/';
 
 // Static assets to cache immediately

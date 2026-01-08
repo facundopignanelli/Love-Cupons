@@ -228,6 +228,15 @@ class Love_Coupons_Admin {
             'love_coupons_push_settings',
             array( $this, 'render_push_settings_page' )
         );
+
+        add_submenu_page(
+            'edit.php?post_type=love_coupon',
+            __( 'Push Notification Test', 'love-coupons' ),
+            __( 'Push Test', 'love-coupons' ),
+            'manage_options',
+            'love_coupons_push_test',
+            array( $this, 'render_push_test_page' )
+        );
     }
 
     public function render_admin_settings_page() {
@@ -413,6 +422,83 @@ class Love_Coupons_Admin {
                     <?php _e( 'Without this library, the system will fall back to sending email notifications.', 'love-coupons' ); ?>
                 </p>
             </div>
+        </div>
+        <?php
+    }
+
+    public function render_push_test_page() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( __( 'You do not have permission to access this page.', 'love-coupons' ) );
+        }
+
+        $notice = '';
+        if ( isset( $_POST['love_coupons_send_test_push'] ) && check_admin_referer( 'love_coupons_push_test_nonce' ) ) {
+            $target_user = isset( $_POST['test_user'] ) ? absint( $_POST['test_user'] ) : 0;
+            $title = isset( $_POST['test_title'] ) ? sanitize_text_field( $_POST['test_title'] ) : '';
+            $body  = isset( $_POST['test_body'] ) ? sanitize_text_field( $_POST['test_body'] ) : '';
+            $url   = isset( $_POST['test_url'] ) ? esc_url_raw( $_POST['test_url'] ) : '';
+
+            if ( $target_user > 0 ) {
+                $payload = array(
+                    'title' => $title ?: __( 'Love Coupons', 'love-coupons' ),
+                    'body'  => $body ?: __( 'This is a test notification.', 'love-coupons' ),
+                    'url'   => $url ?: home_url(),
+                    'icon'  => LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon192.png',
+                    'badge' => LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon192.png',
+                    'tag'   => 'love-coupons-test',
+                );
+                $ok = Love_Coupons_Core::send_push_notification_to_user( $target_user, $payload );
+                if ( $ok ) {
+                    $notice = '<div class="notice notice-success"><p>' . __( 'Test push sent successfully.', 'love-coupons' ) . '</p></div>';
+                } else {
+                    $notice = '<div class="notice notice-error"><p>' . __( 'Failed to send test push. Ensure subscription exists and VAPID keys are configured.', 'love-coupons' ) . '</p></div>';
+                }
+            } else {
+                $notice = '<div class="notice notice-error"><p>' . __( 'Please select a user.', 'love-coupons' ) . '</p></div>';
+            }
+        }
+
+        // Get users who likely have subscriptions (we can list all and mark those with sub)
+        $all_users = get_users( array( 'orderby' => 'display_name', 'order' => 'ASC' ) );
+        ?>
+        <div class="wrap">
+            <h1><?php _e( 'Send Test Push Notification', 'love-coupons' ); ?></h1>
+            <?php echo $notice; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            <form method="post" style="max-width: 800px;">
+                <?php wp_nonce_field( 'love_coupons_push_test_nonce' ); ?>
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><label for="test_user"><?php _e( 'User', 'love-coupons' ); ?></label></th>
+                        <td>
+                            <select id="test_user" name="test_user" class="regular-text" required>
+                                <option value="">— <?php _e( 'Select a user', 'love-coupons' ); ?> —</option>
+                                <?php foreach ( $all_users as $user ) :
+                                    $has_sub = get_user_meta( $user->ID, '_love_coupons_push_subscription', true );
+                                    $label = $user->display_name . ( $has_sub ? ' — ' . __( 'has subscription', 'love-coupons' ) : ' — ' . __( 'no subscription', 'love-coupons' ) );
+                                    ?>
+                                    <option value="<?php echo esc_attr( $user->ID ); ?>" <?php disabled( empty( $has_sub ) ); ?>>
+                                        <?php echo esc_html( $label ); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <p class="description"><?php _e( 'Only users who have visited the site and allowed notifications will have a subscription.', 'love-coupons' ); ?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="test_title"><?php _e( 'Title', 'love-coupons' ); ?></label></th>
+                        <td><input type="text" id="test_title" name="test_title" class="regular-text" placeholder="<?php esc_attr_e( 'Love Coupons', 'love-coupons' ); ?>" /></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="test_body"><?php _e( 'Message', 'love-coupons' ); ?></label></th>
+                        <td><input type="text" id="test_body" name="test_body" class="regular-text" placeholder="<?php esc_attr_e( 'This is a test notification.', 'love-coupons' ); ?>" /></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="test_url"><?php _e( 'Click URL', 'love-coupons' ); ?></label></th>
+                        <td><input type="url" id="test_url" name="test_url" class="regular-text" placeholder="<?php echo esc_attr( home_url() ); ?>" /></td>
+                    </tr>
+                </table>
+                <?php submit_button( __( 'Send Test Notification', 'love-coupons' ), 'primary', 'love_coupons_send_test_push' ); ?>
+            </form>
         </div>
         <?php
     }
