@@ -56,6 +56,14 @@ class Love_Coupons_Assets {
             )
         ) );
 
+        // FontAwesome for icons
+        wp_enqueue_style(
+            'fontawesome',
+            'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+            array(),
+            '6.4.0'
+        );
+
         // Cropper.js for client cropping UI
         wp_enqueue_style(
             'cropper-css',

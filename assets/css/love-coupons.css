@@ -1007,273 +1007,221 @@
 }
 
 /* ==========================================================================
-   Dashboard Styles
+   Header Menu Styles
    ========================================================================== */
 
-.love-coupons-dashboard {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 0;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.love-dashboard-header {
-    background: linear-gradient(135deg, var(--love-accent) 0%, var(--love-accent-strong) 100%);
-    padding: 2rem;
-    color: var(--love-accent-contrast);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-}
-
-.love-dashboard-profile {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-}
-
-.love-dashboard-avatar-wrapper {
-    flex-shrink: 0;
-}
-
-.love-dashboard-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    border: 4px solid var(--love-accent-contrast);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.love-dashboard-user-info {
-    color: var(--love-accent-contrast);
-}
-
-.love-dashboard-username {
+.love-coupons-menu {
+    --love-accent: #2c6e49;
+    background: var(--love-accent);
+    color: #ffffff;
+    padding: 1rem 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin: 0;
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--love-accent-contrast);
-    line-height: 1.2;
 }
 
-.love-dashboard-user-email {
-    margin: 0.5rem 0 0;
-    font-size: 0.95rem;
-    opacity: 0.9;
-}
-
-.love-dashboard-actions {
+.love-menu-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
     display: flex;
-    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
     flex-wrap: wrap;
 }
 
-.love-dashboard-actions .button {
-    background: var(--love-accent-contrast);
-    color: var(--love-accent);
-    border: none;
-    border-radius: 15px;
-    padding: 0.625rem 1.25rem;
-    font-weight: 700;
-    display: inline-flex;
+.love-menu-logo {
+    display: flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s ease;
+    gap: 0.75rem;
+    flex-shrink: 0;
+    color: #ffffff;
     text-decoration: none;
 }
 
-.love-dashboard-actions .button:hover {
-    background: var(--love-accent-soft);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.love-menu-logo svg {
+    width: 40px;
+    height: 40px;
+    color: #ffffff;
 }
 
-.love-dashboard-actions .dashicons {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
+.love-menu-logo svg path {
+    fill: currentColor;
 }
 
-.love-dashboard-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    padding: 2rem;
-    background: #f8f9fa;
+.love-menu-brand {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
 }
 
-.love-stat-card {
-    background: var(--love-accent-contrast);
-    padding: 1.5rem;
-    border-radius: 12px;
+.love-menu-center {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-    transition: all 0.2s ease;
-}
-
-.love-stat-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transform: translateY(-2px);
-    border-left: 4px solid var(--love-accent);
-}
-
-.love-stat-icon {
-    font-size: 2.5rem;
-    width: 2.5rem;
-    height: 2.5rem;
-    color: var(--love-accent);
-    flex-shrink: 0;
-}
-
-.love-stat-info {
+    gap: 2rem;
     flex: 1;
 }
 
-.love-stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--love-accent);
-    line-height: 1;
-}
-
-.love-stat-label {
-    font-size: 0.875rem;
-    color: #6c757d;
-    margin-top: 0.25rem;
+.love-menu-greeting {
+    font-size: 1rem;
     font-weight: 600;
-    transition: color 0.2s ease;
+    color: #ffffff;
+    white-space: nowrap;
 }
 
-.love-stat-card:hover .love-stat-label {
-    color: var(--love-accent-strong);
-}
-
-.love-dashboard-nav {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 0;
-    padding: 0;
-    border-top: 1px solid #dee2e6;
-}
-
-.love-nav-item {
+.love-menu-nav {
     display: flex;
-    flex-direction: column;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.love-menu-nav-item {
+    display: inline-block;
+    padding: 0.6rem 1.25rem;
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border-radius: 15px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.love-menu-nav-item:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: #ffffff;
+}
+
+.love-menu-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+.love-menu-avatar-wrapper {
+    flex-shrink: 0;
+}
+
+.love-menu-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    display: block;
+}
+
+.love-menu-icon-btn {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 1.5rem 1rem;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border-radius: 8px;
     text-decoration: none;
-    color: #495057;
     transition: all 0.2s ease;
-    border-right: 1px solid #dee2e6;
-    background: var(--love-accent-contrast);
-    position: relative;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
 }
 
-.love-nav-item:last-child {
-    border-right: none;
+.love-menu-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
 }
 
-.love-nav-item:hover {
-    background: var(--love-accent-soft);
-    color: var(--love-accent-strong);
+.love-menu-icon-btn i {
+    width: auto;
 }
 
-.love-nav-item:hover::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: var(--love-accent);
-}
+@media (max-width: 1024px) {
+    .love-menu-container {
+        gap: 1rem;
+        padding: 0 0.75rem;
+    }
 
-.love-nav-item .dashicons {
-    font-size: 2rem;
-    width: 2rem;
-    height: 2rem;
-    margin-bottom: 0.5rem;
-    transition: color 0.2s ease;
-}
+    .love-menu-center {
+        gap: 1.5rem;
+        order: 3;
+        width: 100%;
+        margin-top: 1rem;
+    }
 
-.love-nav-item:hover .dashicons {
-    color: var(--love-accent);
-}
+    .love-menu-nav {
+        gap: 0.25rem;
+    }
 
-.love-nav-label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-align: center;
+    .love-menu-nav-item {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
 }
 
 @media (max-width: 768px) {
-    .love-dashboard-header {
-        flex-direction: column;
-        text-align: center;
-        padding: 1.5rem;
+    .love-coupons-menu {
+        padding: 0.75rem 0;
     }
 
-    .love-dashboard-profile {
+    .love-menu-container {
         flex-direction: column;
-        text-align: center;
+        gap: 1rem;
+    }
+
+    .love-menu-greeting {
+        font-size: 0.9rem;
+    }
+
+    .love-menu-center {
+        flex-direction: column;
         width: 100%;
+        margin-top: 0;
+        order: 2;
     }
 
-    .love-dashboard-username {
-        font-size: 1.5rem;
-    }
-
-    .love-dashboard-actions {
+    .love-menu-nav {
         width: 100%;
         justify-content: center;
     }
 
-    .love-dashboard-stats {
-        grid-template-columns: 1fr;
-        padding: 1.5rem;
-        gap: 1rem;
-    }
-
-    .love-dashboard-nav {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .love-nav-item {
-        border-right: none;
-        border-bottom: 1px solid #dee2e6;
-    }
-
-    .love-nav-item:nth-child(odd) {
-        border-right: 1px solid #dee2e6;
+    .love-menu-nav-item {
+        padding: 0.5rem 0.875rem;
+        font-size: 0.85rem;
     }
 }
 
 @media (max-width: 480px) {
-    .love-dashboard-nav {
-        grid-template-columns: 1fr;
+    .love-menu-logo {
+        gap: 0.5rem;
     }
 
-    .love-nav-item:nth-child(odd) {
-        border-right: none;
+    .love-menu-brand {
+        font-size: 1.1rem;
     }
 
-    .love-stat-card {
-        padding: 1.25rem;
+    .love-menu-greeting {
+        font-size: 0.85rem;
     }
 
-    .love-stat-icon {
-        font-size: 2rem;
-        width: 2rem;
-        height: 2rem;
+    .love-menu-nav {
+        gap: 0.25rem;
     }
 
-    .love-stat-value {
-        font-size: 1.75rem;
+    .love-menu-nav-item {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .love-menu-icon-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .love-menu-avatar {
+        width: 40px;
+        height: 40px;
     }
 }
