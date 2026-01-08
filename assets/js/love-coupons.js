@@ -47,16 +47,13 @@
                 return;
             }
 
-            // Check service worker state
-            if (!navigator.serviceWorker.controller) {
-                console.warn('[Love Coupons] No service worker controller - may need page refresh');
-                $statusValue.text('Please refresh page');
-                $message.text('Refresh the page to activate notifications.').show();
-                return;
-            }
+            // Wait for service worker with timeout
+            const swReadyPromise = navigator.serviceWorker.ready;
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Service worker timeout')), 5000)
+            );
 
-            // Get service worker and check status
-            navigator.serviceWorker.ready.then(registration => {
+            Promise.race([swReadyPromise, timeoutPromise]).then(registration => {
                 console.log('[Love Coupons] Service worker ready, checking permission...');
                 const permission = Notification.permission;
                 console.log('[Love Coupons] Permission status:', permission);
