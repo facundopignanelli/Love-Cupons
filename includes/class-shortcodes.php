@@ -74,6 +74,20 @@ class Love_Coupons_Shortcodes {
                 <button type="submit" class="wp-element-button button button-primary" id="love-save-preferences"><?php _e( 'Save Preferences', 'love-coupons' ); ?></button>
                 <div class="form-message" style="display:none;"></div>
             </form>
+
+            <hr class="love-coupons-separator" style="margin: 2rem 0;">
+
+            <h2 class="love-coupons-section-title"><?php _e( 'Notifications', 'love-coupons' ); ?></h2>
+            <p class="description"><?php _e( 'Enable push notifications to receive instant updates when coupons are posted or redeemed.', 'love-coupons' ); ?></p>
+            <div id="love-notification-settings">
+                <div id="love-notification-status" style="margin-bottom: 1rem;">
+                    <p class="love-notification-status-text"><strong><?php _e( 'Status:', 'love-coupons' ); ?></strong> <span id="love-notification-status-value"><?php _e( 'Checking...', 'love-coupons' ); ?></span></p>
+                </div>
+                <button type="button" class="wp-element-button button button-primary" id="love-enable-notifications-btn" style="display:none;">
+                    <?php _e( 'Enable Notifications', 'love-coupons' ); ?>
+                </button>
+                <p class="love-notification-message" id="love-notification-message" style="display:none;"></p>
+            </div>
         </div>
         <?php
         return ob_get_clean();

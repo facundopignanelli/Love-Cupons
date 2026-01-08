@@ -22,31 +22,89 @@
             this.setupAccessibility();
             this.syncPreferencesUI();
             this.enhanceDatePlaceholders();
-            this.initPushNotifications();
+            this.initNotificationSettings();
         }
 
         /**
-         * Initialize push notifications
+         * Initialize notification settings UI on preferences page
          */
-        async initPushNotifications() {
-            if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
-                console.log('[Love Coupons] Push notifications not supported');
+        async initNotificationSettings() {
+            const $statusValue = $('#love-notification-status-value');
+            const $enableBtn = $('#love-enable-notifications-btn');
+            const $message = $('#love-notification-message');
+
+            // Only run on preferences page
+            if ($statusValue.length === 0) {
                 return;
             }
+
+            if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+                $statusValue.text('Not supported');
+                $message.text('Push notifications are not supported in this browser.').show();
+                return;
+            }
+
             try {
                 const registration = await navigator.serviceWorker.ready;
-                if (Notification.permission === 'granted') {
-                    await this.subscribeToPushNotifications(registration);
-                    this.removePushPromptBanner();
-                } else if (Notification.permission === 'default') {
-                    this.showPushPromptBanner(registration);
+                const permission = Notification.permission;
+
+                if (permission === 'granted') {
+                    const subscription = await registration.pushManager.getSubscription();
+                    if (subscription) {
+                        $statusValue.text('\u2713 Enabled').css('color', '#46b450');
+                        $message.text('You will receive push notifications for coupon activity.').css('color', '#46b450').show();
+                    } else {
+                        $statusValue.text('Granted, but not subscribed');
+                        $enableBtn.text('Subscribe to Notifications').show();
+                        this.bindEnableNotificationsButton(registration);
+                    }
+                } else if (permission === 'denied') {
+                    $statusValue.text('\u2717 Blocked').css('color', '#dc3232');
+                    $message.html('Notifications are blocked. To enable them, please update your browser/app settings.').css('color', '#dc3232').show();
                 } else {
-                    // denied
-                    this.showPushDeniedBanner();
+                    $statusValue.text('Disabled');
+                    $enableBtn.show();
+                    this.bindEnableNotificationsButton(registration);
                 }
-            } catch (error) {
-                console.error('[Love Coupons] Error initializing push notifications:', error);
+            } catch (e) {
+                console.error('[Love Coupons] Notification settings init failed:', e);
+                $statusValue.text('Error');
+                $message.text('Could not check notification status.').css('color', '#dc3232').show();
             }
+        }
+
+        /**
+         * Bind enable notifications button
+         */
+        bindEnableNotificationsButton(registration) {
+            $('#love-enable-notifications-btn').off('click').on('click', async () => {
+                const $btn = $('#love-enable-notifications-btn');
+                const $message = $('#love-notification-message');
+                const $statusValue = $('#love-notification-status-value');
+
+                $btn.prop('disabled', true).text('Requesting permission...');
+                $message.hide();
+
+                try {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        await this.subscribeToPushNotifications(registration);
+                        $statusValue.text('\u2713 Enabled').css('color', '#46b450');
+                        $message.text('Notifications enabled successfully!').css('color', '#46b450').show();
+                        $btn.hide();
+                    } else if (permission === 'denied') {
+                        $statusValue.text('\u2717 Blocked').css('color', '#dc3232');
+                        $message.text('You have blocked notifications. Please update your browser settings to enable them.').css('color', '#dc3232').show();
+                        $btn.hide();
+                    } else {
+                        $btn.prop('disabled', false).text('Enable Notifications');
+                    }
+                } catch (e) {
+                    console.error('[Love Coupons] Permission request failed:', e);
+                    $message.text('Failed to enable notifications. Please try again.').css('color', '#dc3232').show();
+                    $btn.prop('disabled', false).text('Enable Notifications');
+                }
+            });
         }
 
         /** Show prompt banner to enable notifications */
