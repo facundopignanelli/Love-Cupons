@@ -65,6 +65,9 @@
             $(document).on('click', '#love-feedback-btn', this.openFeedbackModal.bind(this));
             $(document).on('click', '#love-feedback-modal [data-dismiss]', this.closeFeedbackModal.bind(this));
             $(document).on('click', '#love-feedback-submit', this.submitFeedback.bind(this));
+
+            // Tabs in combined coupons view
+            $(document).on('click', '.love-tab-button', this.handleTabClick.bind(this));
         }
 
         /**
@@ -93,6 +96,44 @@
                 const $summary = $(this).find('summary');
                 $summary.attr('aria-expanded', this.open.toString());
             });
+
+            // Initialize tab aria state
+            $('.love-coupons-tabs-wrapper').each(function() {
+                const $wrapper = $(this);
+                const $buttons = $wrapper.find('.love-tab-button');
+                const $panes = $wrapper.find('.love-tab-pane');
+                $buttons.attr('aria-selected', 'false');
+                $panes.attr('aria-hidden', 'true');
+                const $activeBtn = $buttons.filter('.active').first();
+                const $initialBtn = $activeBtn.length ? $activeBtn : $buttons.first();
+                $buttons.removeClass('active');
+                $initialBtn.addClass('active').attr('aria-selected', 'true');
+                $panes.removeClass('active').attr('aria-hidden', 'true');
+                const paneId = $initialBtn.data('target');
+                if (paneId) {
+                    $wrapper.find('#' + paneId).addClass('active').attr('aria-hidden', 'false');
+                }
+            });
+        }
+
+        handleTabClick(event) {
+            event.preventDefault();
+            const $btn = $(event.currentTarget);
+            const targetId = $btn.data('target');
+            const $wrapper = $btn.closest('.love-coupons-tabs-wrapper');
+            if (!targetId || !$wrapper.length) return;
+
+            const $buttons = $wrapper.find('.love-tab-button');
+            const $panes = $wrapper.find('.love-tab-pane');
+
+            $buttons.removeClass('active').attr('aria-selected', 'false');
+            $btn.addClass('active').attr('aria-selected', 'true');
+
+            $panes.removeClass('active').attr('aria-hidden', 'true');
+            const $targetPane = $wrapper.find('#' + targetId);
+            if ($targetPane.length) {
+                $targetPane.addClass('active').attr('aria-hidden', 'false');
+            }
         }
 
         /**

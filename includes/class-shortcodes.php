@@ -9,6 +9,7 @@ class Love_Coupons_Shortcodes {
         add_shortcode( 'love_coupons_created', array( $this, 'display_coupons_created_shortcode' ) );
         add_shortcode( 'love_coupons_preferences', array( $this, 'display_preferences_shortcode' ) );
         add_shortcode( 'love_coupons_dashboard', array( $this, 'display_dashboard_shortcode' ) );
+        add_shortcode( 'love_coupons_all', array( $this, 'display_all_coupons_shortcode' ) );
     }
 
     public function display_dashboard_shortcode( $atts ) {
@@ -32,16 +33,38 @@ class Love_Coupons_Shortcodes {
             $accent_contrast = ( $yiq >= 140 ) ? '#000000' : '#ffffff';
         }
 
-        // Get navigation URLs
-        $nav_items = $this->get_navigation_items();
+        // Target accent: first allowed recipient (if any) for differentiated CTA
+        $target_accent       = $accent_color;
+        $target_accent_contr = $accent_contrast;
+        $allowed_recipients  = Love_Coupons_Core::get_allowed_recipients_for_user( $current_user_id );
+        if ( ! empty( $allowed_recipients ) && is_array( $allowed_recipients ) ) {
+            $first_target = reset( $allowed_recipients );
+            if ( $first_target ) {
+                $target_palette = Love_Coupons_Core::get_user_accent_color( $first_target );
+                if ( $target_palette && ! empty( $target_palette['color'] ) ) {
+                    $target_accent = $target_palette['color'];
+                    if ( preg_match( '/^#?([a-fA-F0-9]{6})$/', $target_accent, $tm ) ) {
+                        $h2  = $tm[1];
+                        $rt  = hexdec( substr( $h2, 0, 2 ) );
+                        $gt  = hexdec( substr( $h2, 2, 2 ) );
+                        $bt  = hexdec( substr( $h2, 4, 2 ) );
+                        $yiq2 = ( ( $rt * 299 ) + ( $gt * 587 ) + ( $bt * 114 ) ) / 1000;
+                        $target_accent_contr = ( $yiq2 >= 140 ) ? '#000000' : '#ffffff';
+                    }
+                }
+            }
+        }
+
+        // Get key URLs
+        $submit_url = $this->find_page_with_shortcode( 'love_coupons_submit' );
+        $prefs_url  = $this->find_page_with_shortcode( 'love_coupons_preferences' );
 
         // Get avatar
         $avatar = get_avatar( $current_user_id, 48, '', $current_user->display_name, array( 'class' => 'love-menu-avatar' ) );
-        $prefs_url = !empty($nav_items) ? $this->find_page_with_shortcode( 'love_coupons_preferences' ) : '';
 
         ob_start();
         ?>
-        <header class="love-coupons-menu" style="--love-accent: <?php echo esc_attr( $accent_color ); ?>; --love-accent-contrast: <?php echo esc_attr( $accent_contrast ); ?>;">
+        <header class="love-coupons-menu" style="--love-accent: <?php echo esc_attr( $accent_color ); ?>; --love-accent-contrast: <?php echo esc_attr( $accent_contrast ); ?>; --love-target-accent: <?php echo esc_attr( $target_accent ); ?>; --love-target-contrast: <?php echo esc_attr( $target_accent_contr ); ?>;">
             <div class="love-menu-container">
                 <!-- Top Row: Logo on Left, Greeting & Avatar on Right -->
                 <div class="love-menu-top">
@@ -57,6 +80,11 @@ class Love_Coupons_Shortcodes {
                             <?php echo $avatar; ?>
                         </div>
                         <div class="love-menu-actions">
+                            <?php if ( $submit_url ) : ?>
+                            <a href="<?php echo esc_url( $submit_url ); ?>" class="love-menu-icon-btn love-menu-icon-btn-new love-menu-nav-item-new" aria-label="<?php esc_attr_e( 'New Coupon', 'love-coupons' ); ?>" title="<?php esc_attr_e( 'New Coupon', 'love-coupons' ); ?>">
+                                <i class="fas fa-plus"></i>
+                            </a>
+                            <?php endif; ?>
                             <?php if ( $prefs_url ) : ?>
                             <a href="<?php echo esc_url( $prefs_url ); ?>" class="love-menu-icon-btn love-menu-preferences" aria-label="<?php esc_attr_e( 'Preferences', 'love-coupons' ); ?>" title="<?php esc_attr_e( 'Preferences', 'love-coupons' ); ?>">
                                 <i class="fas fa-cog"></i>
@@ -68,20 +96,40 @@ class Love_Coupons_Shortcodes {
                         </div>
                     </div>
                 </div>
-
-                <!-- Bottom Row: Navigation centered -->
-                <?php if ( ! empty( $nav_items ) ) : ?>
-                <nav class="love-menu-nav" role="navigation" aria-label="<?php esc_attr_e( 'Main Navigation', 'love-coupons' ); ?>">
-                    <?php foreach ( $nav_items as $item ) : ?>
-                        <?php if ( ! empty( $item['shortcode'] ) && $item['shortcode'] === 'love_coupons_preferences' ) { continue; } ?>
-                        <a href="<?php echo esc_url( $item['url'] ); ?>" class="love-menu-nav-item">
-                            <?php echo esc_html( $item['label'] ); ?>
-                        </a>
-                    <?php endforeach; ?>
-                </nav>
-                <?php endif; ?>
             </div>
         </header>
+        <?php
+        return ob_get_clean();
+    }
+
+    public function display_all_coupons_shortcode( $atts ) {
+        if ( ! is_user_logged_in() ) {
+            return '<div class="love-coupons-login-message"><p>' . __( 'Please log in to view your coupons.', 'love-coupons' ) . '</p></div>';
+        }
+
+        $current_user_id = get_current_user_id();
+        $wrapper_attrs   = Love_Coupons_Core::get_accent_attributes_for_user( $current_user_id );
+
+        ob_start();
+        ?>
+        <div class="love-coupons-wrapper love-coupons-tabs-wrapper" <?php echo $wrapper_attrs; ?>>
+            <div class="love-coupons-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Coupons', 'love-coupons' ); ?>">
+                <button type="button" class="love-tab-button active" role="tab" aria-selected="true" aria-controls="love-tab-available" data-target="love-tab-available">
+                    <?php esc_html_e( 'Available to me', 'love-coupons' ); ?>
+                </button>
+                <button type="button" class="love-tab-button" role="tab" aria-selected="false" aria-controls="love-tab-created" data-target="love-tab-created">
+                    <?php esc_html_e( 'My created coupons', 'love-coupons' ); ?>
+                </button>
+            </div>
+            <div class="love-tabs-content">
+                <div id="love-tab-available" class="love-tab-pane active" role="tabpanel">
+                    <?php echo $this->render_my_coupons( $current_user_id, array( 'limit' => -1, 'category' => '', 'show_expired' => 'yes' ) ); ?>
+                </div>
+                <div id="love-tab-created" class="love-tab-pane" role="tabpanel" aria-hidden="true">
+                    <?php echo $this->render_posted_coupons( $current_user_id, array( 'limit' => -1 ) ); ?>
+                </div>
+            </div>
+        </div>
         <?php
         return ob_get_clean();
     }
@@ -102,15 +150,15 @@ class Love_Coupons_Shortcodes {
                 'icon'      => 'tickets-alt',
                 'shortcode' => 'love_coupons',
             ),
-            'love_coupons_submit' => array(
-                'label'     => __( 'Create Coupon', 'love-coupons' ),
-                'icon'      => 'plus-alt',
-                'shortcode' => 'love_coupons_submit',
-            ),
             'love_coupons_created' => array(
                 'label'     => __( 'Created Coupons', 'love-coupons' ),
                 'icon'      => 'admin-post',
                 'shortcode' => 'love_coupons_created',
+            ),
+            'love_coupons_submit' => array(
+                'label'     => __( 'New Coupon', 'love-coupons' ),
+                'icon'      => 'plus-alt',
+                'shortcode' => 'love_coupons_submit',
             ),
             'love_coupons_preferences' => array(
                 'label'     => __( 'Preferences', 'love-coupons' ),

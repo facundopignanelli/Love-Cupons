@@ -23,7 +23,7 @@ class Love_Coupons_Assets {
         wp_localize_script( 'love-coupons-js', 'loveCouponsAjax', array(
             'ajax_url' => admin_url( 'admin-ajax.php' ),
             'nonce'    => wp_create_nonce( 'love_coupons_nonce' ),
-            'created_page_url' => $this->get_created_coupons_page_url(),
+            'created_page_url' => $this->get_all_coupons_page_url(),
             'vapid_public_key' => get_option( 'love_coupons_vapid_public_key', '' ),
             'strings'  => array(
                 'redeeming'    => __( 'Redeeming...', 'love-coupons' ),
@@ -90,7 +90,7 @@ class Love_Coupons_Assets {
     private function should_enqueue_assets() {
         global $post;
         if ( is_admin() ) { return false; }
-        if ( $post && ( has_shortcode( $post->post_content, 'love_coupons' ) || has_shortcode( $post->post_content, 'love_coupons_submit' ) || has_shortcode( $post->post_content, 'love_coupons_created' ) || has_shortcode( $post->post_content, 'love_coupons_preferences' ) || has_shortcode( $post->post_content, 'love_coupons_dashboard' ) ) ) {
+        if ( $post && ( has_shortcode( $post->post_content, 'love_coupons' ) || has_shortcode( $post->post_content, 'love_coupons_submit' ) || has_shortcode( $post->post_content, 'love_coupons_created' ) || has_shortcode( $post->post_content, 'love_coupons_preferences' ) || has_shortcode( $post->post_content, 'love_coupons_dashboard' ) || has_shortcode( $post->post_content, 'love_coupons_all' ) ) ) {
             return true;
         }
         return false;
@@ -132,12 +132,12 @@ class Love_Coupons_Assets {
         return is_user_logged_in() && $this->should_enqueue_assets();
     }
 
-    private function get_created_coupons_page_url() {
+    private function get_all_coupons_page_url() {
         $pages = get_posts( array(
             'post_type'   => 'page',
             'post_status' => 'publish',
             'numberposts' => 1,
-            's'           => '[love_coupons_created]',
+            's'           => '[love_coupons_all]',
         ) );
 
         if ( ! empty( $pages ) ) {
@@ -150,7 +150,7 @@ class Love_Coupons_Assets {
             "SELECT ID FROM {$wpdb->posts} 
             WHERE post_type = 'page' 
             AND post_status = 'publish' 
-            AND post_content LIKE '%[love_coupons_created]%' 
+            AND post_content LIKE '%[love_coupons_all]%' 
             LIMIT 1"
         );
 
