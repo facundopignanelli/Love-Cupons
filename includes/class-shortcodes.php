@@ -226,11 +226,11 @@ class Love_Coupons_Shortcodes {
                         <label><input type="radio" name="coupon_schedule_option" value="schedule" /> <?php _e( 'Schedule for later', 'love-coupons' ); ?></label>
                     </div>
                     <div class="schedule-date" id="schedule_date_group" style="display:none;">
-                        <input type="date" name="coupon_start_date" id="coupon_start_date" />
+                        <input type="date" name="coupon_start_date" id="coupon_start_date" placeholder="<?php esc_attr_e( 'Select start date', 'love-coupons' ); ?>" />
                     </div>
                 </div>
                 <div class="form-row form-row-spaced">
-                    <div class="form-group"><label for="coupon_expiry_date"><?php _e( 'Valid until', 'love-coupons' ); ?> <span class="required">*</span></label><input type="date" name="coupon_expiry_date" id="coupon_expiry_date" required /></div>
+                    <div class="form-group"><label for="coupon_expiry_date"><?php _e( 'Valid until', 'love-coupons' ); ?> <span class="required">*</span></label><input type="date" name="coupon_expiry_date" id="coupon_expiry_date" placeholder="<?php esc_attr_e( 'Select expiry date', 'love-coupons' ); ?>" required /></div>
                     <div class="form-group"><label for="coupon_usage_limit"><?php _e( 'Usage Limit', 'love-coupons' ); ?></label><input type="number" name="coupon_usage_limit" id="coupon_usage_limit" value="1" min="1" /></div>
                 </div>
                 <button type="submit" class="wp-element-button button button-primary"><?php _e( 'Create Coupon', 'love-coupons' ); ?></button>
