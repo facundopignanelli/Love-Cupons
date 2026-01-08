@@ -1048,19 +1048,14 @@
     color: var(--love-accent);
     text-decoration: none;
 }
-
-.love-menu-logo svg {
+.love-menu-logo img {
     width: 40px;
     height: 40px;
-    color: var(--love-accent);
-}
-
-.love-menu-logo svg path {
-    fill: currentColor;
+    display: block;
 }
 
 .love-menu-brand {
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     font-weight: 700;
     color: var(--love-accent);
 }
@@ -1073,7 +1068,7 @@
 }
 
 .love-menu-greeting {
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     font-weight: 600;
     color: #333333;
     white-space: nowrap;
@@ -1102,8 +1097,8 @@
     justify-content: center;
     width: 40px;
     height: 40px;
-    background: transparent;
-    color: var(--love-accent);
+    background: var(--love-accent);
+    color: var(--love-accent-contrast, #ffffff);
     border-radius: 8px;
     text-decoration: none;
     transition: all 0.2s ease;
@@ -1114,8 +1109,9 @@
 
 .love-menu-icon-btn:hover {
     background: var(--love-accent);
-    color: #ffffff;
+    color: var(--love-accent-contrast, #ffffff);
     transform: scale(1.05);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
 }
 
 .love-menu-icon-btn i {
@@ -1131,21 +1127,23 @@
 
 .love-menu-nav-item {
     display: inline-block;
-    padding: 0.6rem 1.5rem;
-    background: #e8f5e9;
-    color: var(--love-accent);
+    padding: 0.7rem 1.7rem;
+    background: var(--love-accent);
+    color: var(--love-accent-contrast, #ffffff);
     border-radius: 20px;
     text-decoration: none;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     transition: all 0.2s ease;
-    border: 2px solid transparent;
+    border: 2px solid var(--love-accent);
 }
 
 .love-menu-nav-item:hover {
     background: var(--love-accent);
-    color: #ffffff;
+    color: var(--love-accent-contrast, #ffffff);
     border-color: var(--love-accent);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
 }
 
 @media (max-width: 1024px) {
