@@ -177,6 +177,14 @@ class Love_Coupons_Admin {
     public function add_admin_settings_page() {
         add_submenu_page(
             'edit.php?post_type=love_coupon',
+            __( 'Coupons Overview', 'love-coupons' ),
+            __( 'Overview', 'love-coupons' ),
+            'manage_options',
+            'love_coupons_overview',
+            array( $this, 'render_coupons_overview_page' )
+        );
+        add_submenu_page(
+            'edit.php?post_type=love_coupon',
             __( 'Coupon Posting Permissions', 'love-coupons' ),
             __( 'Posting Permissions', 'love-coupons' ),
             'manage_options',
@@ -194,14 +202,10 @@ class Love_Coupons_Admin {
                 $user_id = absint( $user_id );
                 if ( $user_id > 0 ) {
                     $sanitized[ $user_id ] = array();
-                    if ( isset( $allowed['all'] ) && $allowed['all'] === 'on' ) {
-                        $sanitized[ $user_id ][] = 'all';
-                    } else {
-                        if ( isset( $allowed['users'] ) && is_array( $allowed['users'] ) ) {
-                            foreach ( $allowed['users'] as $recipient_id ) {
-                                $recipient_id = absint( $recipient_id );
-                                if ( $recipient_id > 0 && get_user_by( 'id', $recipient_id ) ) { $sanitized[ $user_id ][] = $recipient_id; }
-                            }
+                    if ( isset( $allowed['users'] ) && is_array( $allowed['users'] ) ) {
+                        foreach ( $allowed['users'] as $recipient_id ) {
+                            $recipient_id = absint( $recipient_id );
+                            if ( $recipient_id > 0 && get_user_by( 'id', $recipient_id ) ) { $sanitized[ $user_id ][] = $recipient_id; }
                         }
                     }
                 }
@@ -228,14 +232,10 @@ class Love_Coupons_Admin {
                                     <small><?php echo esc_html( $user->user_email ); ?></small>
                                 </td>
                                 <td>
-                                    <label>
-                                        <input type="checkbox" name="love_coupons_restrictions[<?php echo esc_attr( $user->ID ); ?>][all]" <?php checked( ! empty( $restrictions[ $user->ID ] ) && in_array( 'all', $restrictions[ $user->ID ] ) ); ?> />
-                                        <?php _e( 'Can post to all users', 'love-coupons' ); ?>
-                                    </label>
-                                    <fieldset style="margin-top: 10px; margin-left: 20px; border-left: 2px solid #ddd; padding-left: 10px;">
-                                        <legend><?php _e( 'Or select specific users:', 'love-coupons' ); ?></legend>
+                                    <fieldset>
+                                        <legend><?php _e( 'Select users to post coupons to:', 'love-coupons' ); ?></legend>
                                         <div style="max-height: 200px; overflow-y: auto;">
-                                            <?php foreach ( $all_users as $recipient ) : if ( $recipient->ID === $user->ID ) continue; $is_checked = ! empty( $restrictions[ $user->ID ] ) && ! in_array( 'all', $restrictions[ $user->ID ] ) && in_array( $recipient->ID, $restrictions[ $user->ID ] ); ?>
+                                            <?php foreach ( $all_users as $recipient ) : if ( $recipient->ID === $user->ID ) continue; $is_checked = ! empty( $restrictions[ $user->ID ] ) && in_array( $recipient->ID, $restrictions[ $user->ID ] ); ?>
                                                 <label style="display: block; margin-bottom: 5px;">
                                                     <input type="checkbox" name="love_coupons_restrictions[<?php echo esc_attr( $user->ID ); ?>][users][]" value="<?php echo esc_attr( $recipient->ID ); ?>" <?php checked( $is_checked ); ?> />
                                                     <?php echo esc_html( $recipient->display_name ); ?>
@@ -251,6 +251,114 @@ class Love_Coupons_Admin {
                 <br>
                 <?php submit_button( __( 'Save Permissions', 'love-coupons' ), 'primary', 'love_coupons_save_permissions' ); ?>
             </form>
+        </div>
+        <?php
+    }
+
+    public function render_coupons_overview_page() {
+        if ( ! current_user_can( 'manage_options' ) ) { wp_die( __( 'You do not have permission to access this page.', 'love-coupons' ) ); }
+        
+        $coupons = get_posts( array(
+            'post_type'      => 'love_coupon',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'orderby'        => 'date',
+            'order'          => 'DESC'
+        ) );
+
+        ?>
+        <div class="wrap">
+            <h1><?php _e( 'Coupons Overview', 'love-coupons' ); ?></h1>
+            <table class="wp-list-table widefat fixed striped">
+                <thead>
+                    <tr>
+                        <th><?php _e( 'Title', 'love-coupons' ); ?></th>
+                        <th><?php _e( 'Created By', 'love-coupons' ); ?></th>
+                        <th><?php _e( 'Assigned To', 'love-coupons' ); ?></th>
+                        <th><?php _e( 'Terms', 'love-coupons' ); ?></th>
+                        <th><?php _e( 'Expiry Date', 'love-coupons' ); ?></th>
+                        <th><?php _e( 'Start Date', 'love-coupons' ); ?></th>
+                        <th><?php _e( 'Usage Limit', 'love-coupons' ); ?></th>
+                        <th><?php _e( 'Status', 'love-coupons' ); ?></th>
+                        <th><?php _e( 'Created', 'love-coupons' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if ( empty( $coupons ) ) : ?>
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 2rem;">
+                                <?php _e( 'No coupons found.', 'love-coupons' ); ?>
+                            </td>
+                        </tr>
+                    <?php else : ?>
+                        <?php foreach ( $coupons as $coupon ) : ?>
+                            <?php
+                            $created_by = get_post_meta( $coupon->ID, '_love_coupon_created_by', true );
+                            $creator = $created_by ? get_user_by( 'id', $created_by ) : null;
+                            $assigned_to = get_post_meta( $coupon->ID, '_love_coupon_assigned_to', true );
+                            $terms = get_post_meta( $coupon->ID, '_love_coupon_terms', true );
+                            $expiry_date = get_post_meta( $coupon->ID, '_love_coupon_expiry_date', true );
+                            $start_date = get_post_meta( $coupon->ID, '_love_coupon_start_date', true );
+                            $usage_limit = get_post_meta( $coupon->ID, '_love_coupon_usage_limit', true );
+                            $is_redeemed = get_post_meta( $coupon->ID, '_love_coupon_redeemed', true );
+                            $is_expired = $expiry_date && strtotime( $expiry_date ) < time();
+                            $is_upcoming = $start_date && strtotime( $start_date ) > time();
+                            ?>
+                            <tr>
+                                <td>
+                                    <strong>
+                                        <a href="<?php echo esc_url( get_edit_post_link( $coupon->ID ) ); ?>">
+                                            <?php echo esc_html( get_the_title( $coupon->ID ) ); ?>
+                                        </a>
+                                    </strong>
+                                </td>
+                                <td><?php echo $creator ? esc_html( $creator->display_name ) : '—'; ?></td>
+                                <td>
+                                    <?php
+                                    if ( empty( $assigned_to ) || ! is_array( $assigned_to ) ) {
+                                        echo '<span style="color: #666;">' . __( 'All Users', 'love-coupons' ) . '</span>';
+                                    } else {
+                                        $names = array();
+                                        foreach ( $assigned_to as $uid ) {
+                                            $u = get_user_by( 'id', $uid );
+                                            if ( $u ) { $names[] = esc_html( $u->display_name ); }
+                                        }
+                                        echo implode( ', ', $names );
+                                    }
+                                    ?>
+                                </td>
+                                <td>
+                                    <?php if ( $terms ) : ?>
+                                        <details>
+                                            <summary style="cursor: pointer;"><?php _e( 'View', 'love-coupons' ); ?></summary>
+                                            <div style="margin-top: 0.5rem; padding: 0.5rem; background: #f9f9f9; border-left: 3px solid #2c6e49;">
+                                                <?php echo wp_kses_post( nl2br( $terms ) ); ?>
+                                            </div>
+                                        </details>
+                                    <?php else : ?>
+                                        —
+                                    <?php endif; ?>
+                                </td>
+                                <td><?php echo $expiry_date ? date_i18n( get_option( 'date_format' ), strtotime( $expiry_date ) ) : '—'; ?></td>
+                                <td><?php echo $start_date ? date_i18n( get_option( 'date_format' ), strtotime( $start_date ) ) : '—'; ?></td>
+                                <td><?php echo $usage_limit ? esc_html( $usage_limit ) : '—'; ?></td>
+                                <td>
+                                    <?php if ( $is_redeemed ) : ?>
+                                        <span style="color: #d63638; font-weight: 600;">✓ <?php _e( 'Redeemed', 'love-coupons' ); ?></span>
+                                    <?php elseif ( $is_expired ) : ?>
+                                        <span style="color: #ff9900; font-weight: 600;">⏰ <?php _e( 'Expired', 'love-coupons' ); ?></span>
+                                    <?php elseif ( $is_upcoming ) : ?>
+                                        <span style="color: #0d6efd; font-weight: 600;">📅 <?php _e( 'Upcoming', 'love-coupons' ); ?></span>
+                                    <?php else : ?>
+                                        <span style="color: #00a32a; font-weight: 600;">✓ <?php _e( 'Available', 'love-coupons' ); ?></span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?php echo get_the_date( get_option( 'date_format' ), $coupon->ID ); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
         <?php
     }

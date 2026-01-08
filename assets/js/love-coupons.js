@@ -41,7 +41,6 @@
 
             // Preferences form
             $(document).on('submit', '#love-coupons-preferences-form', this.handlePreferencesSubmit.bind(this));
-            $(document).on('change', '#love-allow-all', this.handleAllowAllToggle.bind(this));
 
             // Image ratio warning
             $(document).on('change', '#coupon_hero_image', this.warnImageRatio.bind(this));
@@ -556,34 +555,26 @@
         }
 
         syncPreferencesUI() {
-            const $toggle = $('#love-allow-all');
-            if ($toggle.length) {
-                const checked = $toggle.is(':checked');
-                $('.love-preferences-list input[type="checkbox"]').prop('disabled', checked);
-            }
-        }
-
-        handleAllowAllToggle(event) {
-            const checked = $(event.currentTarget).is(':checked');
-            $('.love-preferences-list input[type="checkbox"]').prop('disabled', checked);
+            // No longer needed - removed allow-all toggle
         }
 
         handlePreferencesSubmit(event) {
             event.preventDefault();
             const $form = $(event.currentTarget);
-            const allowAll = $('#love-allow-all').is(':checked');
             const recipients = [];
 
-            if (!allowAll) {
-                $('.love-preferences-list input[type="checkbox"]:checked').each(function() {
-                    recipients.push($(this).val());
-                });
+            $('.love-preferences-list input[type="checkbox"]:checked').each(function() {
+                recipients.push($(this).val());
+            });
+
+            if (recipients.length === 0) {
+                this.showError(loveCouponsAjax.strings.error + ' Please select at least one user.');
+                return;
             }
 
             const payload = {
                 action: 'love_coupons_save_preferences',
                 security: loveCouponsAjax.nonce,
-                allow_all: allowAll ? 'true' : 'false',
                 recipients
             };
 

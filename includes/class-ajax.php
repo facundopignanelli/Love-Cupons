@@ -83,15 +83,15 @@ class Love_Coupons_Ajax {
         if ( is_wp_error( $coupon_id ) ) {
             wp_send_json_error( __( 'Failed to create coupon.', 'love-coupons' ) );
         }
+        update_post_meta( $coupon_id, '_love_coupon_created_by', $current_user_id );
         $restrictions = get_option( 'love_coupons_posting_restrictions', array() );
         $assigned_to  = array();
-        if ( ! empty( $restrictions[ $current_user_id ] ) && ! in_array( 'all', $restrictions[ $current_user_id ], true ) ) {
-            $assigned_to = array_filter( array_map( 'absint', (array) $restrictions[ $current_user_id ] ), function( $uid ) use ( $current_user_id ) {
+        if ( ! empty( $restrictions[ $current_user_id ] ) && is_array( $restrictions[ $current_user_id ] ) ) {
+            $assigned_to = array_filter( array_map( 'absint', $restrictions[ $current_user_id ] ), function( $uid ) use ( $current_user_id ) {
                 return $uid > 0 && $uid !== $current_user_id && get_user_by( 'id', $uid );
             } );
         }
 
-        update_post_meta( $coupon_id, '_love_coupon_created_by', $current_user_id );
         if ( ! empty( $assigned_to ) ) {
             update_post_meta( $coupon_id, '_love_coupon_assigned_to', array_values( array_unique( $assigned_to ) ) );
         } else {
@@ -154,24 +154,20 @@ class Love_Coupons_Ajax {
         $allow_all       = isset( $_POST['allow_all'] ) && 'true' === $_POST['allow_all'];
         $recipients      = isset( $_POST['recipients'] ) ? (array) $_POST['recipients'] : array();
 
-        if ( ! $allow_all && empty( $recipients ) ) {
-            wp_send_json_error( __( 'Please choose at least one user or allow all.', 'love-coupons' ) );
+        if ( empty( $recipients ) ) {
+            wp_send_json_error( __( 'Please select at least one user.', 'love-coupons' ) );
         }
 
         $restrictions = get_option( 'love_coupons_posting_restrictions', array() );
         $restrictions[ $current_user_id ] = array();
 
-        if ( $allow_all ) {
-            $restrictions[ $current_user_id ][] = 'all';
-        } else {
-            foreach ( $recipients as $recipient_id ) {
-                $recipient_id = absint( $recipient_id );
-                if ( $recipient_id > 0 && $recipient_id !== $current_user_id && get_user_by( 'id', $recipient_id ) ) {
-                    $restrictions[ $current_user_id ][] = $recipient_id;
-                }
+        foreach ( $recipients as $recipient_id ) {
+            $recipient_id = absint( $recipient_id );
+            if ( $recipient_id > 0 && $recipient_id !== $current_user_id && get_user_by( 'id', $recipient_id ) ) {
+                $restrictions[ $current_user_id ][] = $recipient_id;
             }
-            $restrictions[ $current_user_id ] = array_values( array_unique( $restrictions[ $current_user_id ] ) );
         }
+        $restrictions[ $current_user_id ] = array_values( array_unique( $restrictions[ $current_user_id ] ) );
 
         update_option( 'love_coupons_posting_restrictions', $restrictions );
         wp_send_json_success( __( 'Preferences saved.', 'love-coupons' ) );

@@ -49,9 +49,8 @@ class Love_Coupons_Shortcodes {
 
         $current_user_id = get_current_user_id();
         $restrictions    = get_option( 'love_coupons_posting_restrictions', array() );
-        $current_setting = isset( $restrictions[ $current_user_id ] ) ? (array) $restrictions[ $current_user_id ] : array( 'all' );
-        $allow_all       = in_array( 'all', $current_setting, true ) || empty( $current_setting );
-        $selected_users  = $allow_all ? array() : array_map( 'absint', $current_setting );
+        $current_setting = isset( $restrictions[ $current_user_id ] ) ? (array) $restrictions[ $current_user_id ] : array();
+        $selected_users  = array_map( 'absint', $current_setting );
 
         $all_users = get_users( array( 'orderby' => 'display_name', 'order' => 'ASC' ) );
 
@@ -59,15 +58,10 @@ class Love_Coupons_Shortcodes {
         ?>
         <div class="love-coupons-wrapper love-coupons-preferences">
             <h2 class="love-coupons-section-title"><?php _e( 'Posting Preferences', 'love-coupons' ); ?></h2>
-            <p class="description"><?php _e( 'Control who your new coupons are assigned to.', 'love-coupons' ); ?></p>
+            <p class="description"><?php _e( 'Select which users you can create coupons for:', 'love-coupons' ); ?></p>
             <form id="love-coupons-preferences-form">
                 <?php wp_nonce_field( 'love_coupons_nonce', 'love_coupons_preferences_nonce' ); ?>
-                <label class="allow-all">
-                    <input type="checkbox" id="love-allow-all" name="love_allow_all" <?php checked( $allow_all ); ?> />
-                    <span><?php _e( 'Allow posting to all users', 'love-coupons' ); ?></span>
-                </label>
                 <div class="love-preferences-users" aria-live="polite">
-                    <p class="description"><?php _e( 'Or pick specific users:', 'love-coupons' ); ?></p>
                     <div class="love-preferences-list">
                         <?php foreach ( $all_users as $user ) : if ( $user->ID === $current_user_id ) { continue; } $checked = in_array( $user->ID, $selected_users, true ); ?>
                             <label class="love-preference-user">
