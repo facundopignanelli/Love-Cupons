@@ -39,6 +39,8 @@ class Love_Coupons_Plugin {
         add_action( 'template_redirect', array( $this, 'maybe_serve_service_worker' ) );
         $this->init_hooks();
 
+    }
+
     /**
      * Serve service worker JS with Service-Worker-Allowed header for root scope.
      */
@@ -56,7 +58,6 @@ class Love_Coupons_Plugin {
             }
             exit;
         }
-    }
     }
 
     private function get_menu_icon() {
