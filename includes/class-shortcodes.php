@@ -16,9 +16,10 @@ class Love_Coupons_Shortcodes {
         }
 
         $current_user_id = get_current_user_id();
+        $wrapper_attrs   = Love_Coupons_Core::get_accent_attributes_for_user( $current_user_id );
         ob_start();
         ?>
-        <div class="love-coupons-wrapper">
+        <div class="love-coupons-wrapper" <?php echo $wrapper_attrs; ?>>
             <h2 class="love-coupons-section-title"><?php _e( 'Create a Coupon', 'love-coupons' ); ?></h2>
             <?php $this->render_create_coupon_form( $current_user_id ); ?>
         </div>
@@ -33,9 +34,10 @@ class Love_Coupons_Shortcodes {
         }
 
         $current_user_id = get_current_user_id();
+        $wrapper_attrs   = Love_Coupons_Core::get_accent_attributes_for_user( $current_user_id );
         ob_start();
         ?>
-        <div class="love-coupons-wrapper">
+        <div class="love-coupons-wrapper" <?php echo $wrapper_attrs; ?>>
             <?php echo $this->render_posted_coupons( $current_user_id, $atts ); ?>
         </div>
         <?php
@@ -51,12 +53,15 @@ class Love_Coupons_Shortcodes {
         $restrictions    = get_option( 'love_coupons_posting_restrictions', array() );
         $current_setting = isset( $restrictions[ $current_user_id ] ) ? (array) $restrictions[ $current_user_id ] : array();
         $selected_users  = array_map( 'absint', $current_setting );
+        $palette         = Love_Coupons_Core::get_theme_accent_palette();
+        $current_accent  = Love_Coupons_Core::get_user_accent_color( $current_user_id );
+        $wrapper_attrs   = Love_Coupons_Core::get_accent_attributes_for_user( $current_user_id );
 
         $all_users = get_users( array( 'orderby' => 'display_name', 'order' => 'ASC' ) );
 
         ob_start();
         ?>
-        <div class="love-coupons-wrapper love-coupons-preferences">
+        <div class="love-coupons-wrapper love-coupons-preferences" <?php echo $wrapper_attrs; ?>>
             <h2 class="love-coupons-section-title"><?php _e( 'Posting Preferences', 'love-coupons' ); ?></h2>
             <p class="description"><?php _e( 'Select which users you can create coupons for:', 'love-coupons' ); ?></p>
             <form id="love-coupons-preferences-form">
@@ -69,6 +74,25 @@ class Love_Coupons_Shortcodes {
                                 <span><?php echo esc_html( $user->display_name ); ?></span>
                             </label>
                         <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <div class="love-preferences-colors" role="radiogroup" aria-label="<?php esc_attr_e( 'Choose your accent colour', 'love-coupons' ); ?>">
+                    <h3 class="love-coupons-section-subtitle"><?php _e( 'Accent colour', 'love-coupons' ); ?></h3>
+                    <p class="description"><?php _e( 'Pick a theme accent colour for the coupons you create. Others will keep their own colours so it is easy to tell who posted what.', 'love-coupons' ); ?></p>
+                    <div class="love-preferences-color-grid">
+                        <?php if ( ! empty( $palette ) ) : foreach ( $palette as $entry ) :
+                            $checked = ( isset( $current_accent['slug'] ) && $entry['slug'] === $current_accent['slug'] );
+                            $label   = ! empty( $entry['name'] ) ? $entry['name'] : $entry['slug'];
+                        ?>
+                        <label class="love-preference-color" style="--love-accent: <?php echo esc_attr( $entry['color'] ); ?>;" aria-label="<?php echo esc_attr( $label ); ?>">
+                            <input type="radio" name="love_accent_color" value="<?php echo esc_attr( $entry['slug'] ); ?>" <?php checked( $checked ); ?> />
+                            <span class="love-color-swatch" aria-hidden="true"></span>
+                            <span class="love-color-label"><?php echo esc_html( $label ); ?></span>
+                        </label>
+                        <?php endforeach; else : ?>
+                            <p class="description"><?php _e( 'Theme colours are unavailable. A default palette will be used.', 'love-coupons' ); ?></p>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <button type="submit" class="wp-element-button button button-primary" id="love-save-preferences"><?php _e( 'Save Preferences', 'love-coupons' ); ?></button>
@@ -99,9 +123,10 @@ class Love_Coupons_Shortcodes {
             return '<div class="love-coupons-login-message"><p>' . __( 'Please log in to see the coupons!', 'love-coupons' ) . '</p></div>';
         }
         $current_user_id = get_current_user_id();
+        $wrapper_attrs   = Love_Coupons_Core::get_accent_attributes_for_user( $current_user_id );
         ob_start();
         ?>
-        <div class="love-coupons-wrapper">
+        <div class="love-coupons-wrapper" <?php echo $wrapper_attrs; ?>>
             <?php echo $this->render_my_coupons( $current_user_id, $atts ); ?>
         </div>
         <?php
@@ -283,8 +308,13 @@ class Love_Coupons_Shortcodes {
         $start_date = get_post_meta( $coupon_id, '_love_coupon_start_date', true );
         $now = time(); $is_upcoming = $start_date && strtotime( $start_date ) > $now; $is_expired = $expiry_date && strtotime( $expiry_date ) < $now;
         $classes = array( 'love-coupon' ); if ( $redeemed ) $classes[] = 'redeemed'; if ( $is_expired ) $classes[] = 'expired'; if ( $is_upcoming ) $classes[] = 'upcoming';
+        $creator_id = get_post_meta( $coupon_id, '_love_coupon_created_by', true );
+        if ( ! $creator_id ) {
+            $creator_id = get_post_field( 'post_author', $coupon_id );
+        }
+        $accent_attrs = Love_Coupons_Core::get_accent_attributes_for_user( $creator_id );
         ?>
-        <div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" data-coupon-id="<?php echo esc_attr( $coupon_id ); ?>">
+        <div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" data-coupon-id="<?php echo esc_attr( $coupon_id ); ?>" <?php echo $accent_attrs; ?>>
             <?php if ( has_post_thumbnail( $coupon_id ) ) : ?><div class="coupon-image"><?php echo get_the_post_thumbnail( $coupon_id, 'large' ); ?></div><?php endif; ?>
             <div class="coupon-content">
                 <h3 class="coupon-title"><?php echo esc_html( get_the_title( $coupon_id ) ); ?></h3>

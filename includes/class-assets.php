@@ -90,8 +90,10 @@ class Love_Coupons_Assets {
 
     public function add_pwa_manifest() {
         if ( ! $this->should_load_pwa() ) { return; }
+        $accent = Love_Coupons_Core::get_user_accent_color( get_current_user_id() );
+        $theme_color = ( $accent && ! empty( $accent['color'] ) ) ? $accent['color'] : '#2c6e49';
         echo '<link rel="manifest" href="' . esc_url( LOVE_COUPONS_PLUGIN_URL . 'manifest.json' ) . '">' . "\n";
-        echo '<meta name="theme-color" content="#2c6e49">' . "\n";
+        echo '<meta name="theme-color" content="' . esc_attr( $theme_color ) . '">' . "\n";
         echo '<meta name="apple-mobile-web-app-capable" content="yes">' . "\n";
         echo '<meta name="mobile-web-app-capable" content="yes">' . "\n";
         echo '<meta name="apple-mobile-web-app-status-bar-style" content="default">' . "\n";

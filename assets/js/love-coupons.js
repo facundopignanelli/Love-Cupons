@@ -562,6 +562,7 @@
             event.preventDefault();
             const $form = $(event.currentTarget);
             const recipients = [];
+            const accentChoice = $form.find('input[name="love_accent_color"]:checked').val() || '';
 
             $('.love-preferences-list input[type="checkbox"]:checked').each(function() {
                 recipients.push($(this).val());
@@ -575,7 +576,8 @@
             const payload = {
                 action: 'love_coupons_save_preferences',
                 security: loveCouponsAjax.nonce,
-                recipients
+                recipients,
+                accent_color: accentChoice
             };
 
             this.processPreferences($form, payload);
@@ -592,6 +594,9 @@
                 .done((response) => {
                     if (response && response.success) {
                         $message.addClass('success').text(loveCouponsAjax.strings.preferences_saved).show();
+                        if (response.data && response.data.accent) {
+                            this.applyAccentToWrappers(response.data.accent);
+                        }
                     } else {
                         const msg = (response && response.data) ? response.data : loveCouponsAjax.strings.preferences_failed;
                         $message.addClass('error').text(msg).show();
@@ -609,6 +614,49 @@
             } else {
                 $button.prop('disabled', false).removeClass('loading disabled').text(loveCouponsAjax.strings.save_preferences || 'Save Preferences');
             }
+        }
+
+        applyAccentToWrappers(accent) {
+            if (!accent || !accent.color) return;
+            const wrappers = document.querySelectorAll('.love-coupons-wrapper');
+            const base = accent.color;
+            const strong = this.shiftColor(base, -18);
+            const soft = this.shiftColor(base, 26);
+            const contrast = this.getContrastColor(base);
+
+            wrappers.forEach(wrapper => {
+                wrapper.style.setProperty('--love-accent', base);
+                if (strong) wrapper.style.setProperty('--love-accent-strong', strong);
+                if (soft) wrapper.style.setProperty('--love-accent-soft', soft);
+                if (contrast) wrapper.style.setProperty('--love-accent-contrast', contrast);
+            });
+        }
+
+        shiftColor(hex, percent) {
+            if (!hex || typeof hex !== 'string') return '';
+            let value = hex.trim();
+            if (!value.startsWith('#')) value = `#${value}`;
+            if (!/^#([a-fA-F0-9]{6})$/.test(value)) return '';
+
+            const factor = (100 + percent) / 100;
+            const r = Math.max(0, Math.min(255, Math.round(parseInt(value.substr(1, 2), 16) * factor)));
+            const g = Math.max(0, Math.min(255, Math.round(parseInt(value.substr(3, 2), 16) * factor)));
+            const b = Math.max(0, Math.min(255, Math.round(parseInt(value.substr(5, 2), 16) * factor)));
+
+            return `#${[r, g, b].map(x => x.toString(16).padStart(2, '0')).join('')}`;
+        }
+
+        getContrastColor(hex) {
+            if (!hex || typeof hex !== 'string') return '#ffffff';
+            let value = hex.trim();
+            if (!value.startsWith('#')) value = `#${value}`;
+            if (!/^#([a-fA-F0-9]{6})$/.test(value)) return '#ffffff';
+
+            const r = parseInt(value.substr(1, 2), 16);
+            const g = parseInt(value.substr(3, 2), 16);
+            const b = parseInt(value.substr(5, 2), 16);
+            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            return luminance > 0.55 ? '#111111' : '#ffffff';
         }
 
         /**

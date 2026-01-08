@@ -237,6 +237,15 @@ class Love_Coupons_Admin {
             'love_coupons_push_test',
             array( $this, 'render_push_test_page' )
         );
+
+        add_submenu_page(
+            'edit.php?post_type=love_coupon',
+            __( 'User Accent Colours', 'love-coupons' ),
+            __( 'User Colours', 'love-coupons' ),
+            'manage_options',
+            'love_coupons_user_colours',
+            array( $this, 'render_user_colours_page' )
+        );
     }
 
     public function render_admin_settings_page() {
@@ -498,6 +507,78 @@ class Love_Coupons_Admin {
                     </tr>
                 </table>
                 <?php submit_button( __( 'Send Test Notification', 'love-coupons' ), 'primary', 'love_coupons_send_test_push' ); ?>
+            </form>
+        </div>
+        <?php
+    }
+
+    public function render_user_colours_page() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( __( 'You do not have permission to access this page.', 'love-coupons' ) );
+        }
+
+        $palette = Love_Coupons_Core::get_theme_accent_palette();
+        $all_users = get_users( array( 'orderby' => 'display_name', 'order' => 'ASC' ) );
+
+        if ( isset( $_POST['love_coupons_save_user_colours'] ) && check_admin_referer( 'love_coupons_user_colours_nonce' ) ) {
+            $submitted = isset( $_POST['love_coupons_user_colour'] ) ? (array) $_POST['love_coupons_user_colour'] : array();
+            foreach ( $submitted as $user_id => $accent_slug ) {
+                $user_id = absint( $user_id );
+                if ( $user_id <= 0 ) {
+                    continue;
+                }
+                $sanitized = Love_Coupons_Core::sanitize_accent_choice( $accent_slug );
+                if ( $sanitized ) {
+                    update_user_meta( $user_id, '_love_coupons_accent_color', $sanitized );
+                }
+            }
+            echo '<div class="notice notice-success"><p>' . esc_html__( 'User colours updated.', 'love-coupons' ) . '</p></div>';
+        }
+
+        ?>
+        <div class="wrap">
+            <h1><?php _e( 'User Accent Colours', 'love-coupons' ); ?></h1>
+            <p><?php _e( 'Override the accent colour used for each user. This controls how their coupons and wrappers are tinted.', 'love-coupons' ); ?></p>
+            <form method="post">
+                <?php wp_nonce_field( 'love_coupons_user_colours_nonce' ); ?>
+                <table class="widefat striped">
+                    <thead>
+                        <tr>
+                            <th><?php _e( 'User', 'love-coupons' ); ?></th>
+                            <th><?php _e( 'Accent Colour', 'love-coupons' ); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ( $all_users as $user ) :
+                            $current = Love_Coupons_Core::get_user_accent_color( $user->ID );
+                        ?>
+                        <tr>
+                            <td>
+                                <strong><?php echo esc_html( $user->display_name ); ?></strong><br>
+                                <small><?php echo esc_html( $user->user_email ); ?></small>
+                            </td>
+                            <td>
+                                <?php if ( empty( $palette ) ) : ?>
+                                    <em><?php _e( 'No theme palette available.', 'love-coupons' ); ?></em>
+                                <?php else : ?>
+                                    <select name="love_coupons_user_colour[<?php echo esc_attr( $user->ID ); ?>]">
+                                        <?php foreach ( $palette as $entry ) :
+                                            $label = ! empty( $entry['name'] ) ? $entry['name'] : $entry['slug'];
+                                            $selected = ( isset( $current['slug'] ) && $current['slug'] === $entry['slug'] );
+                                        ?>
+                                            <option value="<?php echo esc_attr( $entry['slug'] ); ?>" <?php selected( $selected ); ?>>
+                                                <?php echo esc_html( $label ); ?> (<?php echo esc_html( strtoupper( ltrim( $entry['color'], '#' ) ) ); ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+                <br>
+                <?php submit_button( __( 'Save User Colours', 'love-coupons' ), 'primary', 'love_coupons_save_user_colours' ); ?>
             </form>
         </div>
         <?php

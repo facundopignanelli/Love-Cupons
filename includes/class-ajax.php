@@ -156,8 +156,8 @@ class Love_Coupons_Ajax {
         }
 
         $current_user_id = get_current_user_id();
-        $allow_all       = isset( $_POST['allow_all'] ) && 'true' === $_POST['allow_all'];
         $recipients      = isset( $_POST['recipients'] ) ? (array) $_POST['recipients'] : array();
+        $accent_choice   = isset( $_POST['accent_color'] ) ? sanitize_text_field( wp_unslash( $_POST['accent_color'] ) ) : '';
 
         if ( empty( $recipients ) ) {
             wp_send_json_error( __( 'Please select at least one user.', 'love-coupons' ) );
@@ -175,7 +175,16 @@ class Love_Coupons_Ajax {
         $restrictions[ $current_user_id ] = array_values( array_unique( $restrictions[ $current_user_id ] ) );
 
         update_option( 'love_coupons_posting_restrictions', $restrictions );
-        wp_send_json_success( __( 'Preferences saved.', 'love-coupons' ) );
+
+        $accent_slug = Love_Coupons_Core::sanitize_accent_choice( $accent_choice );
+        if ( $accent_slug ) {
+            update_user_meta( $current_user_id, '_love_coupons_accent_color', $accent_slug );
+        }
+
+        wp_send_json_success( array(
+            'message' => __( 'Preferences saved.', 'love-coupons' ),
+            'accent'  => Love_Coupons_Core::get_user_accent_color( $current_user_id ),
+        ) );
     }
 
     public function ajax_delete_coupon() {

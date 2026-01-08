@@ -8,6 +8,10 @@
    ========================================================================== */
 
 .love-coupons-wrapper {
+    --love-accent: #2c6e49;
+    --love-accent-strong: #1e4d32;
+    --love-accent-soft: #e6f9ef;
+    --love-accent-contrast: #ffffff;
     margin: 2rem 0;
 }
 
@@ -34,12 +38,12 @@
 }
 
 .love-tab-button:hover {
-    color: #2c6e49;
+    color: var(--love-accent);
 }
 
 .love-tab-button.active {
-    color: #2c6e49;
-    border-bottom-color: #2c6e49;
+    color: var(--love-accent);
+    border-bottom-color: var(--love-accent);
 }
 
 .love-tab-pane {
@@ -79,7 +83,7 @@
 
 .love-create-coupon-form-wrapper h3 {
     margin-top: 0;
-    color: #2c6e49;
+    color: var(--love-accent);
 }
 
 .love-create-coupon-form {
@@ -167,9 +171,9 @@
 }
 
 .love-image-dropzone.is-dragover {
-    border-color: #198754;
-    background: #e6f9ef;
-    box-shadow: inset 0 0 0 2px rgba(25, 135, 84, 0.35);
+    border-color: var(--love-accent);
+    background: var(--love-accent-soft);
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--love-accent) 40%, transparent);
 }
 
 .love-image-preview {
@@ -229,8 +233,8 @@
 
 .schedule-date input[type="date"]:focus {
     outline: none;
-    border-color: #2c6e49;
-    box-shadow: 0 0 0 3px rgba(44, 110, 73, 0.1);
+    border-color: var(--love-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--love-accent) 20%, transparent);
 }
 
 .form-group input[type="text"]:focus,
@@ -239,8 +243,8 @@
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #2c6e49;
-    box-shadow: 0 0 0 3px rgba(44, 110, 73, 0.1);
+    border-color: var(--love-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--love-accent) 20%, transparent);
 }
 
 /* Date input placeholder hack for mobile/webkit */
@@ -283,6 +287,64 @@
     border: 1px solid #f5c6cb;
 }
 
+.love-coupons-section-subtitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--love-accent);
+    margin: 1.5rem 0 0.5rem;
+}
+
+.love-preferences-colors {
+    margin: 1.5rem 0;
+}
+
+.love-preferences-color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.love-preference-color {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem 0.9rem;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.love-preference-color:hover {
+    border-color: var(--love-accent);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.love-preference-color input[type="radio"] {
+    margin: 0;
+    accent-color: var(--love-accent);
+}
+
+.love-color-swatch {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--love-accent);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+    flex-shrink: 0;
+}
+
+.love-preference-color input[type="radio"]:checked + .love-color-swatch {
+    box-shadow: 0 0 0 4px var(--love-accent-soft), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.love-color-label {
+    font-weight: 600;
+    color: #1f2933;
+}
+
 .love-posted-coupons-wrapper {
     display: flex;
     flex-direction: column;
@@ -294,7 +356,7 @@
 }
 
 .love-posted-coupons-list h3 {
-    color: #2c6e49;
+    color: var(--love-accent);
     margin-top: 0;
 }
 
@@ -313,7 +375,7 @@
 
 .love-coupon-posted-item h4 {
     margin: 0 0 1rem 0;
-    color: #2c6e49;
+    color: var(--love-accent);
 }
 
 .love-coupon-posted-item p {
@@ -377,8 +439,8 @@
     }
 
     .schedule-options label:has(input:checked) {
-        background: #e6f9ef;
-        border-color: #2c6e49;
+        background: var(--love-accent-soft);
+        border-color: var(--love-accent);
     }
 
     .schedule-options input[type="radio"] {
@@ -407,10 +469,10 @@
 .love-coupons-section-title {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #2c6e49;
+    color: var(--love-accent);
     margin: 0 0 1.5rem 0;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid #2c6e49;
+    border-bottom: 2px solid var(--love-accent);
 }
 
 .love-coupons-separator {
@@ -476,8 +538,8 @@
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background: #2c6e49;
-    color: white;
+    background: var(--love-accent);
+    color: var(--love-accent-contrast);
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
     font-size: 0.75rem;
@@ -557,7 +619,7 @@
     margin: 0 0 1rem 0;
     font-size: 1.25rem;
     font-weight: 600;
-    color: #2c6e49;
+    color: var(--love-accent);
     line-height: 1.3;
 }
 
@@ -656,14 +718,14 @@
 }
 
 .button-primary {
-    background: #2c6e49;
-    color: white;
+    background: var(--love-accent);
+    color: var(--love-accent-contrast);
 }
 
 .button-primary:hover:not(:disabled) {
-    background: #1e4d32;
+    background: var(--love-accent-strong);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(44, 110, 73, 0.3);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--love-accent) 35%, transparent);
 }
 
 .button-danger {
@@ -838,12 +900,12 @@
    ========================================================================== */
 
 .coupon-terms summary:focus {
-    outline: 2px solid #2c6e49;
+    outline: 2px solid var(--love-accent);
     outline-offset: 2px;
 }
 
 .button:focus {
-    outline: 2px solid #2c6e49;
+    outline: 2px solid var(--love-accent);
     outline-offset: 2px;
 }
 
