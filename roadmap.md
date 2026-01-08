@@ -5,5 +5,3 @@
 6. settings section where a user can select their colour, change to whom they post coupons, and maybe change profile picture if that's used anywhere in the ui?
 7. dashboard section that shows quick stats, such as the latest cupon posted redeem, how many cupons they have posted and are avaliable, how many they have avaliable to them, etc. 
 8. add shorcuts to PWA
-9. make coupon images have higher resolution, they look blurry currently
-10. make it so my coupons only shows the coupons i can redeem, i think it's just showing all of them atm

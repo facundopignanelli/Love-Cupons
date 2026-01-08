@@ -100,10 +100,15 @@ class Love_Coupons_Shortcodes {
             'post_status' => 'publish',
             'posts_per_page' => intval( $atts['limit'] ),
             'meta_query' => array(
+                'relation' => 'OR',
                 array(
                     'key' => '_love_coupon_assigned_to',
-                    'value' => sprintf(':"%d";', $user_id),
+                    'value' => sprintf('i:%d;', $user_id),
                     'compare' => 'LIKE'
+                ),
+                array(
+                    'key' => '_love_coupon_assigned_to',
+                    'compare' => 'NOT EXISTS'
                 )
             )
         ) );
