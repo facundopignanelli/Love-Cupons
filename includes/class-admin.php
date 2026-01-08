@@ -561,16 +561,19 @@ class Love_Coupons_Admin {
                                 <?php if ( empty( $palette ) ) : ?>
                                     <em><?php _e( 'No theme palette available.', 'love-coupons' ); ?></em>
                                 <?php else : ?>
-                                    <select name="love_coupons_user_colour[<?php echo esc_attr( $user->ID ); ?>]">
-                                        <?php foreach ( $palette as $entry ) :
-                                            $label = ! empty( $entry['name'] ) ? $entry['name'] : $entry['slug'];
-                                            $selected = ( isset( $current['slug'] ) && $current['slug'] === $entry['slug'] );
-                                        ?>
-                                            <option value="<?php echo esc_attr( $entry['slug'] ); ?>" <?php selected( $selected ); ?>>
-                                                <?php echo esc_html( $label ); ?> (<?php echo esc_html( strtoupper( ltrim( $entry['color'], '#' ) ) ); ?>)
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
+                                    <div style="display:flex; align-items:center; gap:10px;">
+                                        <span class="love-admin-colour-swatch" style="width:28px; height:28px; border-radius:50%; border:1px solid #d0d0d0; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); background: <?php echo esc_attr( $current['color'] ?? '#2c6e49' ); ?>;"></span>
+                                        <select class="love-admin-colour-select" data-swatch-target=".love-admin-colour-swatch" name="love_coupons_user_colour[<?php echo esc_attr( $user->ID ); ?>]">
+                                            <?php foreach ( $palette as $entry ) :
+                                                $label = ! empty( $entry['name'] ) ? $entry['name'] : $entry['slug'];
+                                                $selected = ( isset( $current['slug'] ) && $current['slug'] === $entry['slug'] );
+                                            ?>
+                                                <option value="<?php echo esc_attr( $entry['slug'] ); ?>" data-colour="<?php echo esc_attr( $entry['color'] ); ?>" <?php selected( $selected ); ?>>
+                                                    <?php echo esc_html( $label ); ?> (<?php echo esc_html( strtoupper( ltrim( $entry['color'], '#' ) ) ); ?>)
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -581,6 +584,20 @@ class Love_Coupons_Admin {
                 <?php submit_button( __( 'Save User Colours', 'love-coupons' ), 'primary', 'love_coupons_save_user_colours' ); ?>
             </form>
         </div>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selects = document.querySelectorAll('.love-admin-colour-select');
+            selects.forEach(function(select){
+                const swatch = select.closest('td').querySelector(select.dataset.swatchTarget);
+                const update = () => {
+                    const colour = select.options[select.selectedIndex].dataset.colour || '#2c6e49';
+                    if (swatch) { swatch.style.backgroundColor = colour; }
+                };
+                select.addEventListener('change', update);
+                update();
+            });
+        });
+        </script>
         <?php
     }
 }

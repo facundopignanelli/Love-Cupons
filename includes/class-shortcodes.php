@@ -51,7 +51,10 @@ class Love_Coupons_Shortcodes {
 
         $current_user_id = get_current_user_id();
         $restrictions    = get_option( 'love_coupons_posting_restrictions', array() );
-        $current_setting = isset( $restrictions[ $current_user_id ] ) ? (array) $restrictions[ $current_user_id ] : array();
+        $user_pref_meta  = get_user_meta( $current_user_id, '_love_coupons_allowed_recipients', true );
+        $current_setting = ! empty( $user_pref_meta ) && is_array( $user_pref_meta )
+            ? $user_pref_meta
+            : ( isset( $restrictions[ $current_user_id ] ) ? (array) $restrictions[ $current_user_id ] : array() );
         $selected_users  = array_map( 'absint', $current_setting );
         $palette         = Love_Coupons_Core::get_theme_accent_palette();
         $current_accent  = Love_Coupons_Core::get_user_accent_color( $current_user_id );

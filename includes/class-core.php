@@ -18,13 +18,23 @@ class Love_Coupons_Core {
     public static function get_allowed_recipients_for_user( $user_id ) {
         $all_users = get_users( array( 'fields' => 'ID' ) );
         $user_restrictions = get_option( 'love_coupons_posting_restrictions', array() );
-        if ( empty( $user_restrictions[ $user_id ] ) ) {
+        $user_meta_restrictions = get_user_meta( $user_id, '_love_coupons_allowed_recipients', true );
+
+        $allowed = array();
+        if ( ! empty( $user_meta_restrictions ) && is_array( $user_meta_restrictions ) ) {
+            $allowed = $user_meta_restrictions;
+        } elseif ( isset( $user_restrictions[ $user_id ] ) ) {
+            $allowed = $user_restrictions[ $user_id ];
+        }
+
+        if ( empty( $allowed ) ) {
             return array_filter( $all_users, function( $uid ) use ( $user_id ) { return $uid !== $user_id; });
         }
-        $allowed = $user_restrictions[ $user_id ];
-        if ( in_array( 'all', $allowed ) ) {
+
+        if ( in_array( 'all', $allowed, true ) ) {
             return array_filter( $all_users, function( $uid ) use ( $user_id ) { return $uid !== $user_id; });
         }
+
         return array_filter( $allowed, function( $uid ) use ( $user_id, $all_users ) {
             return $uid !== $user_id && in_array( $uid, $all_users );
         });

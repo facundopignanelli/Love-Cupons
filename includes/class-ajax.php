@@ -175,6 +175,7 @@ class Love_Coupons_Ajax {
         $restrictions[ $current_user_id ] = array_values( array_unique( $restrictions[ $current_user_id ] ) );
 
         update_option( 'love_coupons_posting_restrictions', $restrictions );
+        update_user_meta( $current_user_id, '_love_coupons_allowed_recipients', $restrictions[ $current_user_id ] );
 
         $accent_slug = Love_Coupons_Core::sanitize_accent_choice( $accent_choice );
         if ( $accent_slug ) {
@@ -182,8 +183,9 @@ class Love_Coupons_Ajax {
         }
 
         wp_send_json_success( array(
-            'message' => __( 'Preferences saved.', 'love-coupons' ),
-            'accent'  => Love_Coupons_Core::get_user_accent_color( $current_user_id ),
+            'message'    => __( 'Preferences saved.', 'love-coupons' ),
+            'accent'     => Love_Coupons_Core::get_user_accent_color( $current_user_id ),
+            'recipients' => $restrictions[ $current_user_id ],
         ) );
     }
 

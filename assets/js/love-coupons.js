@@ -597,6 +597,9 @@
                         if (response.data && response.data.accent) {
                             this.applyAccentToWrappers(response.data.accent);
                         }
+                        if (response.data && Array.isArray(response.data.recipients)) {
+                            this.recheckRecipients(response.data.recipients);
+                        }
                     } else {
                         const msg = (response && response.data) ? response.data : loveCouponsAjax.strings.preferences_failed;
                         $message.addClass('error').text(msg).show();
@@ -657,6 +660,15 @@
             const b = parseInt(value.substr(5, 2), 16);
             const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
             return luminance > 0.55 ? '#111111' : '#ffffff';
+        }
+
+        recheckRecipients(recipientIds) {
+            if (!Array.isArray(recipientIds)) return;
+            const ids = recipientIds.map(String);
+            $('.love-preferences-list input[type="checkbox"]').each(function(){
+                const checked = ids.includes($(this).val());
+                $(this).prop('checked', checked);
+            });
         }
 
         /**
