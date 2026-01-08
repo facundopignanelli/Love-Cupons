@@ -52,32 +52,42 @@
         /** Show prompt banner to enable notifications */
         showPushPromptBanner(registration) {
             // Avoid duplicating
-            if ($('#love-push-banner').length) return;
-            const $container = $('.love-coupons-wrapper').first().length ? $('.love-coupons-wrapper').first() : $('body');
+            if ($('#love-push-banner').length) {
+                console.log('[Love Coupons] Banner already exists');
+                return;
+            }
+            
+            console.log('[Love Coupons] Showing notification permission banner');
+            
+            const title = loveCouponsAjax?.strings?.enable_notifications_title || 'Enable Notifications';
+            const desc = loveCouponsAjax?.strings?.enable_notifications_desc || 'Stay updated: allow notifications for coupon activity.';
+            const ctaText = loveCouponsAjax?.strings?.enable_notifications_cta || 'Enable notifications';
+            const dismissText = loveCouponsAjax?.strings?.not_now || 'Not now';
+            
             const $banner = $('<div>', { id: 'love-push-banner', class: 'love-push-banner', 'aria-live': 'polite' })
                 .append($('<div>', { class: 'love-push-banner-content' })
-                    .append($('<strong>', { text: loveCouponsAjax.strings?.enable_notifications_title || 'Enable Notifications' }))
-                    .append($('<p>', { text: loveCouponsAjax.strings?.enable_notifications_desc || 'Stay updated: allow notifications for coupon activity.' }))
-                    .append($('<div>', { class: 'love-push-actions' })
-                        .append($('<button>', { id: 'love-enable-notifications', class: 'button button-primary', text: loveCouponsAjax.strings?.enable_notifications_cta || 'Enable notifications' }))
-                        .append($('<button>', { id: 'love-dismiss-notifications', class: 'button', text: loveCouponsAjax.strings?.not_now || 'Not now' }))
-                    )
+                    .append($('<strong>').text(title))
+                    .append($('<p>').text(desc))
+                )
+                .append($('<div>', { class: 'love-push-actions' })
+                    .append($('<button>', { id: 'love-enable-notifications', class: 'button button-primary' }).text(ctaText))
+                    .append($('<button>', { id: 'love-dismiss-notifications', class: 'button' }).text(dismissText))
                 );
-            // Insert at top
-            if ($container.is('body')) {
-                $('body').prepend($banner);
-            } else {
-                $container.prepend($banner);
-            }
+            
+            // Insert at top of body
+            $('body').prepend($banner);
+            
             // Bind actions
             $('#love-enable-notifications').on('click', async () => {
                 try {
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted') {
                         await this.subscribeToPushNotifications(registration);
-                        this.showNotification(loveCouponsAjax.strings?.notifications_enabled || 'Notifications enabled', 'success');
+                        const msg = loveCouponsAjax?.strings?.notifications_enabled || 'Notifications enabled!';
+                        this.showNotification(msg, 'success');
                         this.removePushPromptBanner();
                     } else if (permission === 'denied') {
+                        this.removePushPromptBanner();
                         this.showPushDeniedBanner();
                     }
                 } catch (e) {
@@ -102,18 +112,22 @@
 
         /** Show denied banner with guidance */
         showPushDeniedBanner() {
-            if ($('#love-push-banner').length) return;
-            const $container = $('.love-coupons-wrapper').first().length ? $('.love-coupons-wrapper').first() : $('body');
+            if ($('#love-push-banner').length) {
+                this.removePushPromptBanner();
+            }
+            
+            console.log('[Love Coupons] Showing denied banner');
+            
+            const title = loveCouponsAjax?.strings?.notifications_blocked_title || 'Notifications blocked';
+            const desc = loveCouponsAjax?.strings?.notifications_blocked_desc || 'Please enable notifications in your browser/app settings to receive updates.';
+            
             const $banner = $('<div>', { id: 'love-push-banner', class: 'love-push-banner love-push-banner-denied' })
                 .append($('<div>', { class: 'love-push-banner-content' })
-                    .append($('<strong>', { text: loveCouponsAjax.strings?.notifications_blocked_title || 'Notifications blocked' }))
-                    .append($('<p>', { text: loveCouponsAjax.strings?.notifications_blocked_desc || 'Please enable notifications in your browser/app settings to receive updates.' }))
+                    .append($('<strong>').text(title))
+                    .append($('<p>').text(desc))
                 );
-            if ($container.is('body')) {
-                $('body').prepend($banner);
-            } else {
-                $container.prepend($banner);
-            }
+            
+            $('body').prepend($banner);
         }
 
         /**

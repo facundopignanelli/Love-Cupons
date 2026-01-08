@@ -38,6 +38,13 @@ class Love_Coupons_Assets {
                 'preferences_saved'  => __( 'Preferences saved.', 'love-coupons' ),
                 'preferences_failed' => __( 'Failed to save preferences.', 'love-coupons' ),
                 'save_preferences'   => __( 'Save Preferences', 'love-coupons' ),
+                'enable_notifications_title' => __( 'Enable Notifications', 'love-coupons' ),
+                'enable_notifications_desc'  => __( 'Stay updated: allow notifications for coupon activity.', 'love-coupons' ),
+                'enable_notifications_cta'   => __( 'Enable notifications', 'love-coupons' ),
+                'not_now'                    => __( 'Not now', 'love-coupons' ),
+                'notifications_enabled'      => __( 'Notifications enabled!', 'love-coupons' ),
+                'notifications_blocked_title' => __( 'Notifications blocked', 'love-coupons' ),
+                'notifications_blocked_desc'  => __( 'Please enable notifications in your browser/app settings to receive updates.', 'love-coupons' ),
             )
         ) );
 
