@@ -56,6 +56,7 @@ class Love_Coupons_Shortcodes {
         }
 
         // Get key URLs
+        $all_coupons_url = $this->find_page_with_shortcode( 'love_coupons_all' );
         $submit_url = $this->find_page_with_shortcode( 'love_coupons_submit' );
         $prefs_url  = $this->find_page_with_shortcode( 'love_coupons_preferences' );
 
@@ -86,6 +87,11 @@ class Love_Coupons_Shortcodes {
                         <?php if ( $submit_url ) : ?>
                         <a href="<?php echo esc_url( $submit_url ); ?>" class="love-menu-icon-btn love-menu-icon-btn-new love-menu-nav-item-new" aria-label="<?php esc_attr_e( 'New Coupon', 'love-coupons' ); ?>" title="<?php esc_attr_e( 'New Coupon', 'love-coupons' ); ?>">
                             <i class="fas fa-plus"></i>
+                        </a>
+                        <?php endif; ?>
+                        <?php if ( $all_coupons_url ) : ?>
+                        <a href="<?php echo esc_url( $all_coupons_url ); ?>" class="love-menu-icon-btn love-menu-coupons" aria-label="<?php esc_attr_e( 'View Coupons', 'love-coupons' ); ?>" title="<?php esc_attr_e( 'View Coupons', 'love-coupons' ); ?>">
+                            <i class="fas fa-ticket-alt"></i>
                         </a>
                         <?php endif; ?>
                         <?php if ( $prefs_url ) : ?>
@@ -232,17 +238,9 @@ class Love_Coupons_Shortcodes {
 
         $current_user_id = get_current_user_id();
         $wrapper_attrs   = Love_Coupons_Core::get_accent_attributes_for_user( $current_user_id );
-        $all_coupons_url = $this->find_page_with_shortcode( 'love_coupons_all' );
         ob_start();
         ?>
         <div class="love-coupons-wrapper" <?php echo $wrapper_attrs; ?>>
-            <?php if ( $all_coupons_url ) : ?>
-            <div class="love-back-button-wrapper">
-                <a href="<?php echo esc_url( $all_coupons_url ); ?>" class="love-back-button">
-                    <i class="fas fa-arrow-left"></i> <?php _e( 'Back to Coupons', 'love-coupons' ); ?>
-                </a>
-            </div>
-            <?php endif; ?>
             <h2 class="love-coupons-section-title"><?php _e( 'Create a Coupon', 'love-coupons' ); ?></h2>
             <?php $this->render_create_coupon_form( $current_user_id ); ?>
         </div>
@@ -282,21 +280,12 @@ class Love_Coupons_Shortcodes {
         $palette         = Love_Coupons_Core::get_theme_accent_palette();
         $current_accent  = Love_Coupons_Core::get_user_accent_color( $current_user_id );
         $wrapper_attrs   = Love_Coupons_Core::get_accent_attributes_for_user( $current_user_id );
-        $all_coupons_url = $this->find_page_with_shortcode( 'love_coupons_all' );
 
         $all_users = get_users( array( 'orderby' => 'display_name', 'order' => 'ASC' ) );
 
         ob_start();
         ?>
         <div class="love-coupons-wrapper love-coupons-preferences love-coupons-tabs-wrapper" <?php echo $wrapper_attrs; ?>>
-            <?php if ( $all_coupons_url ) : ?>
-            <div class="love-back-button-wrapper">
-                <a href="<?php echo esc_url( $all_coupons_url ); ?>" class="love-back-button">
-                    <i class="fas fa-arrow-left"></i> <?php _e( 'Back to Coupons', 'love-coupons' ); ?>
-                </a>
-            </div>
-            <?php endif; ?>
-
             <h2 class="love-coupons-section-title"><?php _e( 'Preferences', 'love-coupons' ); ?></h2>
 
             <div class="love-coupons-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Preferences', 'love-coupons' ); ?>">
@@ -367,12 +356,14 @@ class Love_Coupons_Shortcodes {
                         <div id="love-notification-status" style="margin-bottom: 1rem;">
                             <p class="love-notification-status-text"><strong><?php _e( 'Status:', 'love-coupons' ); ?></strong> <span id="love-notification-status-value"><?php _e( 'Checking...', 'love-coupons' ); ?></span></p>
                         </div>
-                        <button type="button" class="wp-element-button button button-primary" id="love-enable-notifications-btn" style="display:none;">
-                            <?php _e( 'Enable Notifications', 'love-coupons' ); ?>
-                        </button>
-                        <button type="button" class="wp-element-button button button-secondary" id="love-refresh-notifications-btn" style="margin-left: 8px;">
-                            <?php _e( 'Refresh Status', 'love-coupons' ); ?>
-                        </button>
+                        <div class="love-notification-buttons">
+                            <button type="button" class="wp-element-button button button-primary" id="love-enable-notifications-btn" style="display:none;">
+                                <?php _e( 'Enable Notifications', 'love-coupons' ); ?>
+                            </button>
+                            <button type="button" class="wp-element-button button button-secondary" id="love-refresh-notifications-btn">
+                                <?php _e( 'Refresh Status', 'love-coupons' ); ?>
+                            </button>
+                        </div>
                         <p class="love-notification-message" id="love-notification-message" style="display:none; margin-top: 1rem;"></p>
                     </div>
                 </div>

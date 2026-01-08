@@ -21,6 +21,11 @@
             this.bindEvents();
             this.setupAccessibility();
             this.syncPreferencesUI();
+            
+            // Check validation on page load for create form
+            if ($('#love-create-coupon-form').length) {
+                this.checkFormValidation();
+            }
         }
 
         /**
@@ -69,6 +74,9 @@
 
             // Tabs in combined coupons view
             $(document).on('click', '.love-tab-button', this.handleTabClick.bind(this));
+
+            // Validation indicators for create coupon form
+            $(document).on('input change', '#love-create-coupon-form input, #love-create-coupon-form textarea', this.checkFormValidation.bind(this));
         }
 
         /**
@@ -135,6 +143,44 @@
             if ($targetPane.length) {
                 $targetPane.addClass('active').attr('aria-hidden', 'false');
             }
+
+            // Check validation after switching tabs
+            if ($wrapper.find('#love-create-coupon-form').length) {
+                this.checkFormValidation();
+            }
+        }
+
+        /**
+         * Check form validation and update tab error indicators
+         */
+        checkFormValidation() {
+            const $form = $('#love-create-coupon-form');
+            if (!$form.length) return;
+
+            // Check Basic Info tab
+            const titleValid = $form.find('#coupon_title').val().trim() !== '';
+            const termsValid = $form.find('#coupon_terms').val().trim() !== '';
+            const basicTabValid = titleValid && termsValid;
+
+            // Check Image tab
+            const fileInput = $form.find('#coupon_hero_image')[0];
+            const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+            const imageTabValid = hasFile || this.croppedBlob;
+
+            // Check Time tab
+            const expiryValid = $form.find('#coupon_expiry_date').val() !== '';
+            const scheduleChoice = $form.find('input[name="coupon_schedule_option"]:checked').val();
+            const startDateValid = scheduleChoice !== 'schedule' || $form.find('#coupon_start_date').val() !== '';
+            const timeTabValid = expiryValid && startDateValid;
+
+            // Update tab indicators
+            const $basicTab = $form.closest('.love-coupons-tabs-wrapper').find('[data-target="love-tab-basic"]');
+            const $imageTab = $form.closest('.love-coupons-tabs-wrapper').find('[data-target="love-tab-image"]');
+            const $timeTab = $form.closest('.love-coupons-tabs-wrapper').find('[data-target="love-tab-time"]');
+
+            $basicTab.toggleClass('has-error', !basicTabValid);
+            $imageTab.toggleClass('has-error', !imageTabValid);
+            $timeTab.toggleClass('has-error', !timeTabValid);
         }
 
         /**
@@ -911,6 +957,9 @@
                     $preview.find('img').attr('src', url);
                     $dropzone.hide();
                     $preview.show();
+                    
+                    // Check validation after image is added
+                    this.checkFormValidation();
                 }
                 this.dismissCropper();
             }, 'image/jpeg', 0.9);
@@ -929,6 +978,9 @@
             const $dropzone = $('#coupon_image_dropzone');
             $preview.hide().find('img').attr('src', '');
             $dropzone.show();
+            
+            // Check validation after image is removed
+            this.checkFormValidation();
         }
 
         openFeedbackModal(event) {

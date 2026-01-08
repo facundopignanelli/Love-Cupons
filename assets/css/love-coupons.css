@@ -42,6 +42,27 @@
     min-width: 150px;
 }
 
+.love-tab-button.has-error::after {
+    content: '';
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 8px;
+    height: 8px;
+    background: #d63638;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
 .love-tab-button:hover {
     background: #fff;
     color: var(--love-accent);
@@ -83,17 +104,24 @@
     }
 
     .love-tab-button {
-        padding: 0.75rem 1rem;
-        font-size: 0.9rem;
+        padding: 0.75rem 0.5rem;
+        font-size: 0.85rem;
         min-width: 0;
         flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }
 
 @media (max-width: 480px) {
     .love-tab-button {
-        padding: 0.65rem 0.75rem;
-        font-size: 0.85rem;
+        padding: 0.625rem 0.4rem;
+        font-size: 0.8rem;
+    }
+
+    .love-coupons-tabs {
+        gap: 0.25rem;
     }
 }
 
@@ -335,6 +363,32 @@
     margin-top: 0.75rem;
 }
 
+@media (max-width: 768px) {
+    .love-preferences-color-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .love-preference-color {
+        padding: 0.7rem 0.8rem;
+    }
+
+    .wp-element-button,
+    .button {
+        font-size: 0.9rem !important;
+        padding: 0.6rem 1rem !important;
+        white-space: normal !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .wp-element-button,
+    .button {
+        font-size: 0.85rem !important;
+        padding: 0.55rem 0.85rem !important;
+    }
+}
+
 .love-preference-color {
     display: flex;
     align-items: center;
@@ -379,6 +433,36 @@
 .love-color-label {
     font-weight: 600;
     color: #1f2933;
+}
+
+.love-preferences-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.love-preference-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.love-preference-user:hover {
+    border-color: var(--love-accent);
+    background: var(--love-accent-soft, #f5f5f5);
+}
+
+@media (max-width: 768px) {
+    .love-preference-user {
+        padding: 0.65rem;
+        font-size: 0.9rem;
+    }
 }
 
 .love-posted-coupons-wrapper {
@@ -931,6 +1015,42 @@
     display: flex;
     gap: 0.5rem;
     flex-shrink: 0;
+}
+
+.love-notification-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .love-notification-buttons {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .love-notification-buttons button {
+        width: 100%;
+        margin: 0 !important;
+    }
+}
+
+.love-notification-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .love-notification-buttons {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .love-notification-buttons button {
+        width: 100%;
+        margin: 0 !important;
+    }
 }
 
 /* ==========================================================================
