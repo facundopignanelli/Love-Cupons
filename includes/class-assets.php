@@ -12,6 +12,14 @@ class Love_Coupons_Assets {
             true
         );
 
+        wp_enqueue_script(
+            'love-coupons-pwa-js',
+            LOVE_COUPONS_PLUGIN_URL . 'assets/js/love-coupons-pwa.js',
+            array( 'jquery' ),
+            LOVE_COUPONS_VERSION,
+            true
+        );
+
         wp_localize_script( 'love-coupons-js', 'loveCouponsAjax', array(
             'ajax_url' => admin_url( 'admin-ajax.php' ),
             'nonce'    => wp_create_nonce( 'love_coupons_nonce' ),
@@ -92,15 +100,15 @@ class Love_Coupons_Assets {
 
     public function register_service_worker() {
         if ( ! $this->should_load_pwa() ) { return; }
-        ?>
         $sw_url = esc_url( add_query_arg( 'love_coupons_sw', '1', site_url( '/' ) ) );
+        ?>
         <script>
         if ( 'serviceWorker' in navigator ) {
             window.addEventListener( 'load', function() {
-                navigator.serviceWorker.register( '<?php echo esc_url( LOVE_COUPONS_PLUGIN_URL . 'service-worker.js' ); ?>', {
                 navigator.serviceWorker.register( '<?php echo $sw_url; ?>', {
                     scope: '/'
                 } ).then( function( registration ) {
+                    console.log( 'Love Coupons SW registered: ', registration.scope );
                 } ).catch( function( error ) {
                     console.warn( 'Love Coupons SW registration failed: ', error );
                 } );

@@ -6,16 +6,22 @@
 const CACHE_NAME = 'love-coupons-plugin-v1.2';
 const STATIC_CACHE_NAME = 'love-coupons-static-v1.2';
 const DYNAMIC_CACHE_NAME = 'love-coupons-dynamic-v1.2';
-const PLUGIN_SCOPE = '/wp-content/plugins/love-coupons/';
+
+// Base URL for plugin assets; keeps all paths consistent and avoids hard-coded scope case issues
+const PLUGIN_BASE = (typeof LOVE_COUPONS_PLUGIN_BASE !== 'undefined')
+    ? LOVE_COUPONS_PLUGIN_BASE
+    : `${self.location.origin}/wp-content/plugins/love-coupons/`;
+const PLUGIN_PATH = new URL(PLUGIN_BASE).pathname;
 
 // Static assets to cache immediately
 const STATIC_ASSETS = [
-    PLUGIN_SCOPE,
-    PLUGIN_SCOPE + 'assets/js/love-coupons.js',
-    PLUGIN_SCOPE + 'assets/css/love-coupons.css',
-    PLUGIN_SCOPE + 'manifest.json',
-    PLUGIN_SCOPE + 'assets/images/icon192.png',
-    PLUGIN_SCOPE + 'assets/images/icon512.png'
+    PLUGIN_BASE,
+    `${PLUGIN_BASE}assets/js/love-coupons.js`,
+    `${PLUGIN_BASE}assets/js/love-coupons-pwa.js`,
+    `${PLUGIN_BASE}assets/css/love-coupons.css`,
+    `${PLUGIN_BASE}manifest.json`,
+    `${PLUGIN_BASE}assets/images/icon192.png`,
+    `${PLUGIN_BASE}assets/images/icon512.png`
 ];
 
 // Cache configuration
@@ -126,7 +132,7 @@ self.addEventListener('message', event => {
  * Check if request is related to our plugin
  */
 function isPluginRequest(url) {
-    return url.pathname.startsWith(PLUGIN_SCOPE) ||
+    return url.pathname.startsWith(PLUGIN_PATH) ||
            url.pathname.includes('love-coupons') ||
            url.pathname.includes('love_coupon') ||
            url.searchParams.has('love-coupon');
@@ -439,8 +445,8 @@ self.addEventListener('push', event => {
     let notificationData = {
         title: 'Love Coupons',
         body: 'You have a new notification',
-        icon: PLUGIN_SCOPE + 'assets/images/icon192.png',
-        badge: PLUGIN_SCOPE + 'assets/images/icon192.png',
+        icon: `${PLUGIN_BASE}assets/images/icon192.png`,
+        badge: `${PLUGIN_BASE}assets/images/icon192.png`,
         tag: 'love-coupons-notification',
         requireInteraction: true
     };

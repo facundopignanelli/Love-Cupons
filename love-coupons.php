@@ -52,6 +52,9 @@ class Love_Coupons_Plugin {
             header( 'Cache-Control: no-store, no-cache, must-revalidate' );
             $sw_path = LOVE_COUPONS_PLUGIN_DIR . 'service-worker.js';
             if ( file_exists( $sw_path ) ) {
+                // Pass the resolved plugin base URL so the worker can cache the right paths regardless of folder casing
+                $plugin_base = trailingslashit( LOVE_COUPONS_PLUGIN_URL );
+                echo "const LOVE_COUPONS_PLUGIN_BASE = '" . esc_url_raw( $plugin_base ) . "';\n";
                 readfile( $sw_path );
             } else {
                 echo "// Service worker file not found";
