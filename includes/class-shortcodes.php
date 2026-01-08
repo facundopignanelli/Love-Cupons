@@ -95,7 +95,18 @@ class Love_Coupons_Shortcodes {
     }
 
     private function render_my_coupons( $user_id, $atts ) {
-        $query = new WP_Query( array( 'post_type' => 'love_coupon', 'post_status' => 'publish', 'posts_per_page' => intval( $atts['limit'] ) ) );
+        $query = new WP_Query( array(
+            'post_type' => 'love_coupon',
+            'post_status' => 'publish',
+            'posts_per_page' => intval( $atts['limit'] ),
+            'meta_query' => array(
+                array(
+                    'key' => '_love_coupon_assigned_to',
+                    'value' => sprintf(':"%d";', $user_id),
+                    'compare' => 'LIKE'
+                )
+            )
+        ) );
         $upcoming = array(); $available = array(); $redeemed = array(); $expired = array();
         while ( $query->have_posts() ) { $query->the_post(); $coupon_id = get_the_ID();
             if ( ! Love_Coupons_Core::user_can_access_coupon( $coupon_id, $user_id ) ) { continue; }
@@ -255,7 +266,7 @@ class Love_Coupons_Shortcodes {
         $classes = array( 'love-coupon' ); if ( $redeemed ) $classes[] = 'redeemed'; if ( $is_expired ) $classes[] = 'expired'; if ( $is_upcoming ) $classes[] = 'upcoming';
         ?>
         <div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" data-coupon-id="<?php echo esc_attr( $coupon_id ); ?>">
-            <?php if ( has_post_thumbnail( $coupon_id ) ) : ?><div class="coupon-image"><?php echo get_the_post_thumbnail( $coupon_id, 'medium' ); ?></div><?php endif; ?>
+            <?php if ( has_post_thumbnail( $coupon_id ) ) : ?><div class="coupon-image"><?php echo get_the_post_thumbnail( $coupon_id, 'large' ); ?></div><?php endif; ?>
             <div class="coupon-content">
                 <h3 class="coupon-title"><?php echo esc_html( get_the_title( $coupon_id ) ); ?></h3>
                 <?php if ( $expiry_date ) : ?><div class="coupon-expiry"><small><?php printf( __( 'Expires: %s', 'love-coupons' ), date_i18n( get_option( 'date_format' ), strtotime( $expiry_date ) ) ); ?></small></div><?php endif; ?>
