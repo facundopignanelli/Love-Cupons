@@ -63,11 +63,11 @@ class Love_Coupons_Assets {
 
     public function add_pwa_manifest() {
         if ( ! $this->should_load_pwa() ) { return; }
-        echo '<link rel="manifest" href="' . esc_url( LOVE_COUPONS_PLUGIN_URL . 'manifest.json' ) . '">\n';
-        echo '<meta name="theme-color" content="#2c6e49">\n';
-        echo '<meta name="apple-mobile-web-app-capable" content="yes">\n';
-        echo '<meta name="apple-mobile-web-app-status-bar-style" content="default">\n';
-        echo '<link rel="apple-touch-icon" href="' . esc_url( LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon192.png' ) . '">\n';
+        echo '<link rel="manifest" href="' . esc_url( LOVE_COUPONS_PLUGIN_URL . 'manifest.json' ) . '">' . "\n";
+        echo '<meta name="theme-color" content="#2c6e49">' . "\n";
+        echo '<meta name="apple-mobile-web-app-capable" content="yes">' . "\n";
+        echo '<meta name="apple-mobile-web-app-status-bar-style" content="default">' . "\n";
+        echo '<link rel="apple-touch-icon" href="' . esc_url( LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon192.png' ) . '">' . "\n";
     }
 
     public function register_service_worker() {

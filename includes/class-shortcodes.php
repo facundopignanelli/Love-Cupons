@@ -83,50 +83,78 @@ class Love_Coupons_Shortcodes {
     private function render_posted_coupons( $user_id, $atts ) {
         ob_start();
         $query = new WP_Query( array(
-            'post_type' => 'love_coupon', 'post_status' => 'publish', 'posts_per_page' => intval( $atts['limit'] ),
+            'post_type' => 'love_coupon',
+            'post_status' => 'publish',
+            'posts_per_page' => intval( $atts['limit'] ),
             'meta_query' => array( array( 'key' => '_love_coupon_created_by', 'value' => $user_id, 'compare' => '=' ) ),
         ) );
-        echo '<div class="love-posted-coupons-wrapper">';
-        echo '<div class="love-posted-coupons-list">';
-        echo '<h3>' . __( 'Created Coupons', 'love-coupons' ) . '</h3>';
-        if ( ! $query->have_posts() ) { echo '<p>' . __( 'You haven\'t created any coupons yet.', 'love-coupons' ) . '</p>'; }
-        else {
-            $upcoming = array(); $available = array(); $redeemed = array(); $expired = array();
-            while ( $query->have_posts() ) { $query->the_post(); $cid = get_the_ID();
-                $is_redeemed = get_post_meta( $cid, '_love_coupon_redeemed', true );
-                $expiry_date = get_post_meta( $cid, '_love_coupon_expiry_date', true );
-                $start_date  = get_post_meta( $cid, '_love_coupon_start_date', true );
-                $now = time(); $is_upcoming = $start_date && strtotime( $start_date ) > $now; $is_expired = $expiry_date && strtotime( $expiry_date ) < $now;
-                if ( $is_upcoming ) { $upcoming[] = $cid; }
-                elseif ( $is_redeemed ) { $redeemed[] = $cid; }
-                elseif ( $is_expired ) { $expired[] = $cid; }
-                else { $available[] = $cid; }
-            }
-            $render_item = function( $coupon_id ) {
-                $assigned_to = get_post_meta( $coupon_id, '_love_coupon_assigned_to', true );
-                $is_redeemed = get_post_meta( $coupon_id, '_love_coupon_redeemed', true );
-                $expiry_date = get_post_meta( $coupon_id, '_love_coupon_expiry_date', true );
-                $start_date  = get_post_meta( $coupon_id, '_love_coupon_start_date', true );
-                echo '<div class="love-coupon-posted-item" data-coupon-id="' . esc_attr( $coupon_id ) . '">';
-                echo '<h4>' . esc_html( get_the_title( $coupon_id ) ) . '</h4>';
-                if ( $start_date ) echo '<p><strong>' . __( 'Starts:', 'love-coupons' ) . '</strong> ' . esc_html( date_i18n( get_option( 'date_format' ), strtotime( $start_date ) ) ) . '</p>';
-                if ( $expiry_date ) echo '<p><strong>' . __( 'Expires:', 'love-coupons' ) . '</strong> ' . esc_html( date_i18n( get_option( 'date_format' ), strtotime( $expiry_date ) ) ) . '</p>';
-                if ( is_array( $assigned_to ) && ! empty( $assigned_to ) ) { $recipient = get_user_by( 'id', $assigned_to[0] ); if ( $recipient ) echo '<p><strong>' . __( 'Sent to:', 'love-coupons' ) . '</strong> ' . esc_html( $recipient->display_name ) . '</p>'; }
-                else { echo '<p><strong>' . __( 'Sent to:', 'love-coupons' ) . '</strong> ' . __( 'All Users', 'love-coupons' ) . '</p>'; }
-                echo '<p><strong>' . __( 'Status:', 'love-coupons' ) . '</strong> ';
-                if ( $start_date && strtotime( $start_date ) > time() ) echo '<span style="color:#0d6efd;">' . __( 'Upcoming', 'love-coupons' ) . '</span>';
-                elseif ( $is_redeemed ) echo '<span style="color:#d63638;">✓ ' . __( 'Redeemed', 'love-coupons' ) . '</span>';
-                elseif ( $expiry_date && strtotime( $expiry_date ) < time() ) echo '<span style="color:#ff9900;">⏰ ' . __( 'Expired', 'love-coupons' ) . '</span>';
-                else echo '<span style="color:#00a32a;">✓ ' . __( 'Available', 'love-coupons' ) . '</span>';
-                echo '</p></div>';
-            };
-            if ( ! empty( $upcoming ) ) { echo '<div class="love-coupons-section"><h3 class="love-coupons-section-title">' . __( 'Upcoming', 'love-coupons' ) . '</h3><div class="love-coupons-grid">'; foreach ( $upcoming as $id ) { $render_item( $id ); } echo '</div></div>'; }
-            if ( ! empty( $available ) ) { if ( ! empty( $upcoming ) ) echo '<hr class="love-coupons-separator">'; echo '<div class="love-coupons-section"><h3 class="love-coupons-section-title">' . __( 'Available', 'love-coupons' ) . '</h3><div class="love-coupons-grid">'; foreach ( $available as $id ) { $render_item( $id ); } echo '</div></div>'; }
-            if ( ! empty( $redeemed ) ) { if ( ! empty( $upcoming ) || ! empty( $available ) ) echo '<hr class="love-coupons-separator">'; echo '<div class="love-coupons-section"><h3 class="love-coupons-section-title">' . __( 'Redeemed', 'love-coupons' ) . '</h3><div class="love-coupons-grid">'; foreach ( $redeemed as $id ) { $render_item( $id ); } echo '</div></div>'; }
-            if ( ! empty( $expired ) ) { if ( ! empty( $upcoming ) || ! empty( $available ) || ! empty( $redeemed ) ) echo '<hr class="love-coupons-separator">'; echo '<div class="love-coupons-section"><h3 class="love-coupons-section-title">' . __( 'Expired', 'love-coupons' ) . '</h3><div class="love-coupons-grid">'; foreach ( $expired as $id ) { $render_item( $id ); } echo '</div></div>'; }
+
+        $upcoming = array();
+        $available = array();
+        $redeemed = array();
+        $expired = array();
+
+        while ( $query->have_posts() ) {
+            $query->the_post();
+            $cid = get_the_ID();
+            $is_redeemed = get_post_meta( $cid, '_love_coupon_redeemed', true );
+            $expiry_date = get_post_meta( $cid, '_love_coupon_expiry_date', true );
+            $start_date  = get_post_meta( $cid, '_love_coupon_start_date', true );
+            $now = time();
+            $is_upcoming = $start_date && strtotime( $start_date ) > $now;
+            $is_expired  = $expiry_date && strtotime( $expiry_date ) < $now;
+
+            if ( $is_upcoming ) { $upcoming[] = $cid; }
+            elseif ( $is_redeemed ) { $redeemed[] = $cid; }
+            elseif ( $is_expired ) { $expired[] = $cid; }
+            else { $available[] = $cid; }
         }
         wp_reset_postdata();
-        echo '</div></div>';
+
+        echo '<div class="love-coupons-container">';
+        echo '<h3 class="love-coupons-section-title">' . __( 'Created Coupons', 'love-coupons' ) . '</h3>';
+
+        if ( empty( $upcoming ) && empty( $available ) && empty( $redeemed ) && empty( $expired ) ) {
+            echo '<div class="love-coupons-empty"><p>' . __( 'You haven\'t created any coupons yet.', 'love-coupons' ) . '</p></div>';
+            echo '</div>';
+            return ob_get_clean();
+        }
+
+        if ( ! empty( $upcoming ) ) {
+            echo '<div class="love-coupons-section">';
+            echo '<h3 class="love-coupons-section-title">' . __( 'Upcoming', 'love-coupons' ) . '</h3>';
+            echo '<div class="love-coupons-grid">';
+            foreach ( $upcoming as $id ) { $this->render_coupon_item( $id ); }
+            echo '</div></div><hr class="love-coupons-separator">';
+        }
+
+        if ( ! empty( $available ) ) {
+            echo '<div class="love-coupons-section">';
+            echo '<h3 class="love-coupons-section-title">' . __( 'Available', 'love-coupons' ) . '</h3>';
+            echo '<div class="love-coupons-grid">';
+            foreach ( $available as $id ) { $this->render_coupon_item( $id ); }
+            echo '</div></div>';
+        }
+
+        if ( ! empty( $redeemed ) ) {
+            if ( ! empty( $available ) ) { echo '<hr class="love-coupons-separator">'; }
+            echo '<div class="love-coupons-section">';
+            echo '<h3 class="love-coupons-section-title">' . __( 'Redeemed', 'love-coupons' ) . '</h3>';
+            echo '<div class="love-coupons-grid">';
+            foreach ( $redeemed as $id ) { $this->render_coupon_item( $id ); }
+            echo '</div></div>';
+        }
+
+        if ( ! empty( $expired ) ) {
+            if ( ! empty( $available ) || ! empty( $redeemed ) ) { echo '<hr class="love-coupons-separator">'; }
+            echo '<div class="love-coupons-section">';
+            echo '<h3 class="love-coupons-section-title">' . __( 'Expired', 'love-coupons' ) . '</h3>';
+            echo '<div class="love-coupons-grid">';
+            foreach ( $expired as $id ) { $this->render_coupon_item( $id ); }
+            echo '</div></div>';
+        }
+
+        echo '</div>';
         return ob_get_clean();
     }
 
