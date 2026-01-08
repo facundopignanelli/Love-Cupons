@@ -41,6 +41,7 @@
 
             // Preferences form
             $(document).on('submit', '#love-coupons-preferences-form', this.handlePreferencesSubmit.bind(this));
+            $(document).on('submit', '#love-coupons-appearance-form', this.handleAppearanceSubmit.bind(this));
 
             // Image ratio warning
             $(document).on('change', '#coupon_hero_image', this.warnImageRatio.bind(this));
@@ -625,7 +626,6 @@
             event.preventDefault();
             const $form = $(event.currentTarget);
             const recipients = [];
-            const accentChoice = $form.find('input[name="love_accent_color"]:checked').val() || '';
 
             $('.love-preferences-list input[type="checkbox"]:checked').each(function() {
                 recipients.push($(this).val());
@@ -639,11 +639,29 @@
             const payload = {
                 action: 'love_coupons_save_preferences',
                 security: loveCouponsAjax.nonce,
-                recipients,
-                accent_color: accentChoice
+                recipients
             };
 
             this.processPreferences($form, payload);
+        }
+
+        handleAppearanceSubmit(event) {
+            event.preventDefault();
+            const $form = $(event.currentTarget);
+            const accentChoice = $form.find('input[name="love_accent_color"]:checked').val() || '';
+
+            if (!accentChoice) {
+                this.showError(loveCouponsAjax.strings.error + ' Please select a colour.');
+                return;
+            }
+
+            const payload = {
+                action: 'love_coupons_save_preferences',
+                security: loveCouponsAjax.nonce,
+                accent_color: accentChoice
+            };
+
+            this.processAppearance($form, payload);
         }
 
         processPreferences($form, payload) {
@@ -657,9 +675,6 @@
                 .done((response) => {
                     if (response && response.success) {
                         $message.addClass('success').text(loveCouponsAjax.strings.preferences_saved).show();
-                        if (response.data && response.data.accent) {
-                            this.applyAccentToWrappers(response.data.accent);
-                        }
                         if (response.data && Array.isArray(response.data.recipients)) {
                             this.recheckRecipients(response.data.recipients);
                         }
@@ -674,11 +689,44 @@
                 .always(() => this.setPreferencesLoading($button, false));
         }
 
+        processAppearance($form, payload) {
+            const $button = $form.find('#love-save-appearance');
+            const $message = $form.find('.form-message-appearance');
+
+            this.setAppearanceLoading($button, true);
+            $message.hide().removeClass('success error').text('');
+
+            $.post(loveCouponsAjax.ajax_url, payload)
+                .done((response) => {
+                    if (response && response.success) {
+                        $message.addClass('success').text('Appearance saved successfully!').show();
+                        if (response.data && response.data.accent) {
+                            this.applyAccentToWrappers(response.data.accent);
+                        }
+                    } else {
+                        const msg = (response && response.data) ? response.data : 'Failed to save appearance.';
+                        $message.addClass('error').text(msg).show();
+                    }
+                })
+                .fail(() => {
+                    $message.addClass('error').text('Failed to save appearance.').show();
+                })
+                .always(() => this.setAppearanceLoading($button, false));
+        }
+
         setPreferencesLoading($button, isLoading) {
             if (isLoading) {
                 $button.prop('disabled', true).addClass('loading disabled').text(loveCouponsAjax.strings.preferences_saving);
             } else {
-                $button.prop('disabled', false).removeClass('loading disabled').text(loveCouponsAjax.strings.save_preferences || 'Save Preferences');
+                $button.prop('disabled', false).removeClass('loading disabled').text('Save Recipients');
+            }
+        }
+
+        setAppearanceLoading($button, isLoading) {
+            if (isLoading) {
+                $button.prop('disabled', true).addClass('loading disabled').text('Saving...');
+            } else {
+                $button.prop('disabled', false).removeClass('loading disabled').text('Save Appearance');
             }
         }
 

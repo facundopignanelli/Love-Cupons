@@ -117,7 +117,7 @@ class Love_Coupons_Shortcodes {
         <div class="love-coupons-wrapper love-coupons-tabs-wrapper" <?php echo $wrapper_attrs; ?>>
             <div class="love-coupons-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Coupons', 'love-coupons' ); ?>">
                 <button type="button" class="love-tab-button active" role="tab" aria-selected="true" aria-controls="love-tab-available" data-target="love-tab-available">
-                    <?php esc_html_e( 'For me', 'love-coupons' ); ?>
+                    <?php esc_html_e( 'For Me', 'love-coupons' ); ?>
                 </button>
                 <button type="button" class="love-tab-button" role="tab" aria-selected="false" aria-controls="love-tab-created" data-target="love-tab-created">
                     <?php esc_html_e( 'By Me', 'love-coupons' ); ?>
@@ -282,64 +282,100 @@ class Love_Coupons_Shortcodes {
         $palette         = Love_Coupons_Core::get_theme_accent_palette();
         $current_accent  = Love_Coupons_Core::get_user_accent_color( $current_user_id );
         $wrapper_attrs   = Love_Coupons_Core::get_accent_attributes_for_user( $current_user_id );
+        $all_coupons_url = $this->find_page_with_shortcode( 'love_coupons_all' );
 
         $all_users = get_users( array( 'orderby' => 'display_name', 'order' => 'ASC' ) );
 
         ob_start();
         ?>
-        <div class="love-coupons-wrapper love-coupons-preferences" <?php echo $wrapper_attrs; ?>>
-            <h2 class="love-coupons-section-title"><?php _e( 'Posting Preferences', 'love-coupons' ); ?></h2>
-            <p class="description"><?php _e( 'Select which users you can create coupons for:', 'love-coupons' ); ?></p>
-            <form id="love-coupons-preferences-form">
-                <?php wp_nonce_field( 'love_coupons_nonce', 'love_coupons_preferences_nonce' ); ?>
-                <div class="love-preferences-users" aria-live="polite">
-                    <div class="love-preferences-list">
-                        <?php foreach ( $all_users as $user ) : if ( $user->ID === $current_user_id ) { continue; } $checked = in_array( $user->ID, $selected_users, true ); ?>
-                            <label class="love-preference-user">
-                                <input type="checkbox" name="love_preference_recipients[]" value="<?php echo esc_attr( $user->ID ); ?>" <?php checked( $checked ); ?> />
-                                <span><?php echo esc_html( $user->display_name ); ?></span>
-                            </label>
-                        <?php endforeach; ?>
+        <div class="love-coupons-wrapper love-coupons-preferences love-coupons-tabs-wrapper" <?php echo $wrapper_attrs; ?>>
+            <?php if ( $all_coupons_url ) : ?>
+            <div class="love-back-button-wrapper">
+                <a href="<?php echo esc_url( $all_coupons_url ); ?>" class="love-back-button">
+                    <i class="fas fa-arrow-left"></i> <?php _e( 'Back to Coupons', 'love-coupons' ); ?>
+                </a>
+            </div>
+            <?php endif; ?>
+
+            <h2 class="love-coupons-section-title"><?php _e( 'Preferences', 'love-coupons' ); ?></h2>
+
+            <div class="love-coupons-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Preferences', 'love-coupons' ); ?>">
+                <button type="button" class="love-tab-button active" role="tab" aria-selected="true" aria-controls="love-tab-recipients" data-target="love-tab-recipients">
+                    <?php esc_html_e( 'Recipients', 'love-coupons' ); ?>
+                </button>
+                <button type="button" class="love-tab-button" role="tab" aria-selected="false" aria-controls="love-tab-appearance" data-target="love-tab-appearance">
+                    <?php esc_html_e( 'Appearance', 'love-coupons' ); ?>
+                </button>
+                <button type="button" class="love-tab-button" role="tab" aria-selected="false" aria-controls="love-tab-notifications" data-target="love-tab-notifications">
+                    <?php esc_html_e( 'Notifications', 'love-coupons' ); ?>
+                </button>
+            </div>
+
+            <div class="love-tabs-content">
+                <!-- Recipients Tab -->
+                <div id="love-tab-recipients" class="love-tab-pane active" role="tabpanel">
+                    <form id="love-coupons-preferences-form">
+                        <?php wp_nonce_field( 'love_coupons_nonce', 'love_coupons_preferences_nonce' ); ?>
+                        <p class="description" style="margin-bottom: 1.5rem;"><?php _e( 'Select which users you can create coupons for:', 'love-coupons' ); ?></p>
+                        <div class="love-preferences-users" aria-live="polite">
+                            <div class="love-preferences-list">
+                                <?php foreach ( $all_users as $user ) : if ( $user->ID === $current_user_id ) { continue; } $checked = in_array( $user->ID, $selected_users, true ); ?>
+                                    <label class="love-preference-user">
+                                        <input type="checkbox" name="love_preference_recipients[]" value="<?php echo esc_attr( $user->ID ); ?>" <?php checked( $checked ); ?> />
+                                        <span><?php echo esc_html( $user->display_name ); ?></span>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <button type="submit" class="wp-element-button button button-primary" id="love-save-preferences" style="margin-top: 1.5rem;"><?php _e( 'Save Recipients', 'love-coupons' ); ?></button>
+                        <div class="form-message" style="display:none; margin-top: 1rem;"></div>
+                    </form>
+                </div>
+
+                <!-- Appearance Tab -->
+                <div id="love-tab-appearance" class="love-tab-pane" role="tabpanel" aria-hidden="true">
+                    <form id="love-coupons-appearance-form">
+                        <?php wp_nonce_field( 'love_coupons_nonce', 'love_coupons_appearance_nonce' ); ?>
+                        <div class="love-preferences-colors" role="radiogroup" aria-label="<?php esc_attr_e( 'Choose your accent colour', 'love-coupons' ); ?>">
+                            <h3 class="love-coupons-section-subtitle"><?php _e( 'Accent Colour', 'love-coupons' ); ?></h3>
+                            <p class="description" style="margin-bottom: 1.5rem;"><?php _e( 'Pick a theme accent colour for the coupons you create. Others will keep their own colours so it is easy to tell who posted what.', 'love-coupons' ); ?></p>
+                            <div class="love-preferences-color-grid">
+                                <?php if ( ! empty( $palette ) ) : foreach ( $palette as $entry ) :
+                                    $checked = ( isset( $current_accent['slug'] ) && $entry['slug'] === $current_accent['slug'] );
+                                    $label   = ! empty( $entry['name'] ) ? $entry['name'] : $entry['slug'];
+                                ?>
+                                <label class="love-preference-color" style="--love-accent: <?php echo esc_attr( $entry['color'] ); ?>;" aria-label="<?php echo esc_attr( $label ); ?>">
+                                    <input type="radio" name="love_accent_color" value="<?php echo esc_attr( $entry['slug'] ); ?>" <?php checked( $checked ); ?> />
+                                    <span class="love-color-swatch" aria-hidden="true"></span>
+                                    <span class="love-color-label"><?php echo esc_html( $label ); ?></span>
+                                </label>
+                                <?php endforeach; else : ?>
+                                    <p class="description"><?php _e( 'Theme colours are unavailable. A default palette will be used.', 'love-coupons' ); ?></p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <button type="submit" class="wp-element-button button button-primary" id="love-save-appearance" style="margin-top: 1.5rem;"><?php _e( 'Save Appearance', 'love-coupons' ); ?></button>
+                        <div class="form-message-appearance" style="display:none; margin-top: 1rem;"></div>
+                    </form>
+                </div>
+
+                <!-- Notifications Tab -->
+                <div id="love-tab-notifications" class="love-tab-pane" role="tabpanel" aria-hidden="true">
+                    <h3 class="love-coupons-section-subtitle"><?php _e( 'Push Notifications', 'love-coupons' ); ?></h3>
+                    <p class="description" style="margin-bottom: 1.5rem;"><?php _e( 'Enable push notifications to receive instant updates when coupons are posted or redeemed.', 'love-coupons' ); ?></p>
+                    <div id="love-notification-settings">
+                        <div id="love-notification-status" style="margin-bottom: 1rem;">
+                            <p class="love-notification-status-text"><strong><?php _e( 'Status:', 'love-coupons' ); ?></strong> <span id="love-notification-status-value"><?php _e( 'Checking...', 'love-coupons' ); ?></span></p>
+                        </div>
+                        <button type="button" class="wp-element-button button button-primary" id="love-enable-notifications-btn" style="display:none;">
+                            <?php _e( 'Enable Notifications', 'love-coupons' ); ?>
+                        </button>
+                        <button type="button" class="wp-element-button button button-secondary" id="love-refresh-notifications-btn" style="margin-left: 8px;">
+                            <?php _e( 'Refresh Status', 'love-coupons' ); ?>
+                        </button>
+                        <p class="love-notification-message" id="love-notification-message" style="display:none; margin-top: 1rem;"></p>
                     </div>
                 </div>
-
-                <div class="love-preferences-colors" role="radiogroup" aria-label="<?php esc_attr_e( 'Choose your accent colour', 'love-coupons' ); ?>">
-                    <h3 class="love-coupons-section-subtitle"><?php _e( 'Accent colour', 'love-coupons' ); ?></h3>
-                    <p class="description"><?php _e( 'Pick a theme accent colour for the coupons you create. Others will keep their own colours so it is easy to tell who posted what.', 'love-coupons' ); ?></p>
-                    <div class="love-preferences-color-grid">
-                        <?php if ( ! empty( $palette ) ) : foreach ( $palette as $entry ) :
-                            $checked = ( isset( $current_accent['slug'] ) && $entry['slug'] === $current_accent['slug'] );
-                            $label   = ! empty( $entry['name'] ) ? $entry['name'] : $entry['slug'];
-                        ?>
-                        <label class="love-preference-color" style="--love-accent: <?php echo esc_attr( $entry['color'] ); ?>;" aria-label="<?php echo esc_attr( $label ); ?>">
-                            <input type="radio" name="love_accent_color" value="<?php echo esc_attr( $entry['slug'] ); ?>" <?php checked( $checked ); ?> />
-                            <span class="love-color-swatch" aria-hidden="true"></span>
-                            <span class="love-color-label"><?php echo esc_html( $label ); ?></span>
-                        </label>
-                        <?php endforeach; else : ?>
-                            <p class="description"><?php _e( 'Theme colours are unavailable. A default palette will be used.', 'love-coupons' ); ?></p>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <button type="submit" class="wp-element-button button button-primary" id="love-save-preferences"><?php _e( 'Save Preferences', 'love-coupons' ); ?></button>
-                <div class="form-message" style="display:none;"></div>
-            </form>
-
-            <hr class="love-coupons-separator" style="margin: 2rem 0;">
-
-            <h2 class="love-coupons-section-title"><?php _e( 'Notifications', 'love-coupons' ); ?></h2>
-            <p class="description"><?php _e( 'Enable push notifications to receive instant updates when coupons are posted or redeemed.', 'love-coupons' ); ?></p>
-            <div id="love-notification-settings">
-                <div id="love-notification-status" style="margin-bottom: 1rem;">
-                    <p class="love-notification-status-text"><strong><?php _e( 'Status:', 'love-coupons' ); ?></strong> <span id="love-notification-status-value"><?php _e( 'Checking...', 'love-coupons' ); ?></span></p>
-                </div>
-                <button type="button" class="wp-element-button button button-primary" id="love-enable-notifications-btn" style="display:none;">
-                    <?php _e( 'Enable Notifications', 'love-coupons' ); ?>
-                </button>
-                <button type="button" class="wp-element-button button button-secondary" id="love-refresh-notifications-btn" style="margin-left: 8px;">
-                    <?php _e( 'Refresh Status', 'love-coupons' ); ?>
-                </button>
-                <p class="love-notification-message" id="love-notification-message" style="display:none;"></p>
             </div>
         </div>
         <?php
