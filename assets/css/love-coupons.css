@@ -74,6 +74,7 @@
     border-radius: 8px;
     margin-bottom: 2rem;
     border: 1px solid #dee2e6;
+    box-sizing: border-box;
 }
 
 .love-create-coupon-form-wrapper h3 {
@@ -122,6 +123,7 @@
     font-size: 1rem;
     font-family: inherit;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
 }
 
 .love-image-dropzone {
@@ -133,6 +135,8 @@
     text-align: center;
     cursor: pointer;
     transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .love-image-dropzone .dropzone-instructions {
@@ -734,15 +738,26 @@
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
 }
 .love-modal-header, .love-modal-footer { padding: 0.75rem 1rem; background: #f8f9fa; }
-.love-modal-footer { display: flex; gap: 0.75rem; justify-content: flex-end; }
-.love-modal-body { padding: 1rem; }
+.love-modal-footer { display: flex; gap: 0.75rem; justify-content: flex-end; flex-shrink: 0; }
+.love-modal-body { padding: 1rem; overflow: auto; flex: 1; }
 .love-modal-close { background: none; border: none; font-size: 1.25rem; cursor: pointer; float: right; }
 .love-cropper-container { width: 100%; max-height: 65vh; }
 .love-cropper-container img { max-width: 100%; display: block; }
 .love-crop-preview { margin-top: 0.5rem; border: 1px dashed #ced4da; padding: 0.5rem; border-radius: 6px; max-width: 480px; }
 .love-crop-preview img { width: 100%; height: auto; display: block; border-radius: 4px; }
+
+@media (max-width: 768px) {
+    .love-modal-content {
+        margin: 3vh auto;
+        max-width: 95vw;
+        width: calc(100vw - 2rem);
+    }
+}
 
 /* ==========================================================================
    Admin Styles
