@@ -16,6 +16,7 @@ class Love_Coupons_Assets {
             'ajax_url' => admin_url( 'admin-ajax.php' ),
             'nonce'    => wp_create_nonce( 'love_coupons_nonce' ),
             'created_page_url' => $this->get_created_coupons_page_url(),
+            'vapid_public_key' => get_option( 'love_coupons_vapid_public_key', '' ),
             'strings'  => array(
                 'redeeming'    => __( 'Redeeming...', 'love-coupons' ),
                 'redeem'       => __( 'Redeem', 'love-coupons' ),

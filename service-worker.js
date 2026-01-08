@@ -430,4 +430,69 @@ function logPerformance(startTime, url, source) {
     console.log(`[Love Coupons SW] ${url} served from ${source} in ${duration.toFixed(2)}ms`);
 }
 
+/**
+ * Push Notification Event Handler
+ */
+self.addEventListener('push', event => {
+    console.log('[Love Coupons SW] Push notification received');
+    
+    let notificationData = {
+        title: 'Love Coupons',
+        body: 'You have a new notification',
+        icon: PLUGIN_SCOPE + 'assets/images/icon192.png',
+        badge: PLUGIN_SCOPE + 'assets/images/icon192.png',
+        tag: 'love-coupons-notification',
+        requireInteraction: true
+    };
+    
+    if (event.data) {
+        try {
+            const data = event.data.json();
+            notificationData = {
+                title: data.title || notificationData.title,
+                body: data.body || notificationData.body,
+                icon: data.icon || notificationData.icon,
+                badge: data.badge || notificationData.badge,
+                tag: data.tag || notificationData.tag,
+                data: data.url ? { url: data.url } : {},
+                requireInteraction: data.requireInteraction !== undefined ? data.requireInteraction : true
+            };
+        } catch (error) {
+            console.error('[Love Coupons SW] Error parsing push data:', error);
+            notificationData.body = event.data.text();
+        }
+    }
+    
+    event.waitUntil(
+        self.registration.showNotification(notificationData.title, notificationData)
+    );
+});
+
+/**
+ * Notification Click Event Handler
+ */
+self.addEventListener('notificationclick', event => {
+    console.log('[Love Coupons SW] Notification clicked');
+    
+    event.notification.close();
+    
+    const urlToOpen = event.notification.data?.url || self.location.origin;
+    
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true })
+            .then(clientList => {
+                // Check if there's already a window/tab open
+                for (const client of clientList) {
+                    if (client.url === urlToOpen && 'focus' in client) {
+                        return client.focus();
+                    }
+                }
+                // If not, open a new window/tab
+                if (clients.openWindow) {
+                    return clients.openWindow(urlToOpen);
+                }
+            })
+    );
+});
+
 console.log('[Love Coupons SW] Service worker loaded successfully');

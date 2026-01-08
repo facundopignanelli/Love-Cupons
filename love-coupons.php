@@ -75,6 +75,7 @@ class Love_Coupons_Plugin {
         add_action( 'wp_ajax_love_coupons_create', array( $this->ajax, 'ajax_create_coupon' ) );
         add_action( 'wp_ajax_love_coupons_delete', array( $this->ajax, 'ajax_delete_coupon' ) );
         add_action( 'wp_ajax_love_coupons_save_preferences', array( $this->ajax, 'ajax_save_preferences' ) );
+        add_action( 'wp_ajax_love_coupons_save_push_subscription', array( $this->ajax, 'ajax_save_push_subscription' ) );
 
         $this->shortcodes->register();
 

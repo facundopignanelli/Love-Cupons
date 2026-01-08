@@ -207,4 +207,27 @@ class Love_Coupons_Ajax {
 
         wp_send_json_success( __( 'Coupon removed.', 'love-coupons' ) );
     }
+
+    public function ajax_save_push_subscription() {
+        if ( ! check_ajax_referer( 'love_coupons_nonce', 'security', false ) ) {
+            wp_send_json_error( __( 'Security check failed.', 'love-coupons' ) );
+        }
+        if ( ! is_user_logged_in() ) {
+            wp_send_json_error( __( 'You must be logged in.', 'love-coupons' ) );
+        }
+        
+        $subscription = isset( $_POST['subscription'] ) ? sanitize_text_field( $_POST['subscription'] ) : '';
+        if ( empty( $subscription ) ) {
+            wp_send_json_error( __( 'Invalid subscription data.', 'love-coupons' ) );
+        }
+        
+        $current_user_id = get_current_user_id();
+        $updated = update_user_meta( $current_user_id, '_love_coupons_push_subscription', $subscription );
+        
+        if ( false === $updated ) {
+            wp_send_json_error( __( 'Failed to save subscription.', 'love-coupons' ) );
+        }
+        
+        wp_send_json_success( __( 'Push notification subscription saved.', 'love-coupons' ) );
+    }
 }

@@ -55,7 +55,52 @@ class Love_Coupons_Core {
             current_time( 'mysql' ),
             self::get_user_ip()
         );
-        wp_mail( $admin_email, $subject, $message );
+        
+        // Try to send push notification first, fallback to email if it fails
+        $push_sent = self::send_push_notification( $coupon_id, $user );
+        
+        // Send email as backup or if push notifications are disabled
+        if ( ! $push_sent ) {
+            wp_mail( $admin_email, $subject, $message );
+        }
+    }
+
+    public static function send_push_notification( $coupon_id, $user ) {
+        // Get the coupon creator
+        $creator_id = get_post_meta( $coupon_id, '_love_coupon_created_by', true );
+        if ( ! $creator_id ) {
+            return false;
+        }
+        
+        // Get the creator's push subscription
+        $subscription_data = get_user_meta( $creator_id, '_love_coupons_push_subscription', true );
+        if ( empty( $subscription_data ) ) {
+            return false;
+        }
+        
+        $coupon = get_post( $coupon_id );
+        
+        // Prepare notification data
+        $notification_data = array(
+            'title' => __( 'Coupon Redeemed!', 'love-coupons' ),
+            'body' => sprintf(
+                __( '%s has redeemed your coupon "%s"', 'love-coupons' ),
+                $user->display_name,
+                $coupon->post_title
+            ),
+            'icon' => LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon192.png',
+            'badge' => LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon192.png',
+            'tag' => 'coupon-redeemed-' . $coupon_id,
+            'url' => home_url( '/coupons/' ),
+            'requireInteraction' => true
+        );
+        
+        // Use WordPress HTTP API to send push notification
+        // This is a placeholder - you would need a proper Web Push library
+        // or integrate with a push notification service like OneSignal, Firebase, etc.
+        do_action( 'love_coupons_send_push_notification', $subscription_data, $notification_data, $coupon_id, $user );
+        
+        return true;
     }
 
     public static function log_redemption( $coupon_id, $user ) {

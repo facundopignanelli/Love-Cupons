@@ -22,6 +22,99 @@
             this.setupAccessibility();
             this.syncPreferencesUI();
             this.enhanceDatePlaceholders();
+            this.initPushNotifications();
+        }
+
+        /**
+         * Initialize push notifications
+         */
+        async initPushNotifications() {
+            // Check if service worker and push notifications are supported
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                console.log('[Love Coupons] Push notifications not supported');
+                return;
+            }
+
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                
+                // Check current permission status
+                if (Notification.permission === 'granted') {
+                    await this.subscribeToPushNotifications(registration);
+                } else if (Notification.permission === 'default') {
+                    // Request permission on first interaction
+                    $(document).one('click', async () => {
+                        const permission = await Notification.requestPermission();
+                        if (permission === 'granted') {
+                            await this.subscribeToPushNotifications(registration);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('[Love Coupons] Error initializing push notifications:', error);
+            }
+        }
+
+        /**
+         * Subscribe to push notifications
+         */
+        async subscribeToPushNotifications(registration) {
+            try {
+                // Check if already subscribed
+                let subscription = await registration.pushManager.getSubscription();
+                
+                if (!subscription) {
+                    // Create new subscription
+                    subscription = await registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: this.urlBase64ToUint8Array(loveCouponsAjax.vapid_public_key || '')
+                    });
+                    
+                    // Send subscription to server
+                    await this.sendSubscriptionToServer(subscription);
+                }
+                
+                console.log('[Love Coupons] Push notification subscription successful');
+            } catch (error) {
+                console.error('[Love Coupons] Failed to subscribe to push notifications:', error);
+            }
+        }
+
+        /**
+         * Send subscription to server
+         */
+        async sendSubscriptionToServer(subscription) {
+            try {
+                const response = await $.post(loveCouponsAjax.ajax_url, {
+                    action: 'love_coupons_save_push_subscription',
+                    security: loveCouponsAjax.nonce,
+                    subscription: JSON.stringify(subscription)
+                });
+                
+                if (!response.success) {
+                    console.error('[Love Coupons] Failed to save subscription:', response.data);
+                }
+            } catch (error) {
+                console.error('[Love Coupons] Error sending subscription to server:', error);
+            }
+        }
+
+        /**
+         * Convert VAPID key
+         */
+        urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding)
+                .replace(/\-/g, '+')
+                .replace(/_/g, '/');
+            
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
         }
 
         /**

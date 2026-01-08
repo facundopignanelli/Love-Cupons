@@ -219,6 +219,15 @@ class Love_Coupons_Admin {
             'love_coupons_permissions',
             array( $this, 'render_admin_settings_page' )
         );
+        
+        add_submenu_page(
+            'edit.php?post_type=love_coupon',
+            __( 'Push Notification Settings', 'love-coupons' ),
+            __( 'Push Notifications', 'love-coupons' ),
+            'manage_options',
+            'love_coupons_push_settings',
+            array( $this, 'render_push_settings_page' )
+        );
     }
 
     public function render_admin_settings_page() {
@@ -287,6 +296,123 @@ class Love_Coupons_Admin {
                 <br>
                 <?php submit_button( __( 'Save Permissions', 'love-coupons' ), 'primary', 'love_coupons_save_permissions' ); ?>
             </form>
+        </div>
+        <?php
+    }
+
+    public function render_push_settings_page() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( __( 'You do not have permission to access this page.', 'love-coupons' ) );
+        }
+
+        // Handle form submission
+        if ( isset( $_POST['love_coupons_save_push_settings'] ) && check_admin_referer( 'love_coupons_push_settings_nonce' ) ) {
+            $vapid_public_key = isset( $_POST['vapid_public_key'] ) ? sanitize_text_field( $_POST['vapid_public_key'] ) : '';
+            $vapid_private_key = isset( $_POST['vapid_private_key'] ) ? sanitize_text_field( $_POST['vapid_private_key'] ) : '';
+            
+            update_option( 'love_coupons_vapid_public_key', $vapid_public_key );
+            update_option( 'love_coupons_vapid_private_key', $vapid_private_key );
+            
+            echo '<div class="notice notice-success"><p>' . __( 'Push notification settings saved successfully!', 'love-coupons' ) . '</p></div>';
+        }
+
+        $vapid_public_key = get_option( 'love_coupons_vapid_public_key', '' );
+        $vapid_private_key = get_option( 'love_coupons_vapid_private_key', '' );
+        ?>
+        <div class="wrap">
+            <h1><?php _e( 'Push Notification Settings', 'love-coupons' ); ?></h1>
+            
+            <div class="notice notice-info">
+                <p>
+                    <strong><?php _e( 'How to generate VAPID keys:', 'love-coupons' ); ?></strong>
+                </p>
+                <ol>
+                    <li><?php _e( 'Install Node.js if you haven\'t already', 'love-coupons' ); ?></li>
+                    <li><?php _e( 'Run this command in your terminal:', 'love-coupons' ); ?> <code>npx web-push generate-vapid-keys</code></li>
+                    <li><?php _e( 'Or use an online tool:', 'love-coupons' ); ?> <a href="https://web-push-codelab.glitch.me/" target="_blank">https://web-push-codelab.glitch.me/</a></li>
+                    <li><?php _e( 'Copy and paste the public and private keys below', 'love-coupons' ); ?></li>
+                </ol>
+            </div>
+
+            <form method="post" style="max-width: 800px;">
+                <?php wp_nonce_field( 'love_coupons_push_settings_nonce' ); ?>
+                
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <label for="vapid_public_key"><?php _e( 'VAPID Public Key', 'love-coupons' ); ?></label>
+                        </th>
+                        <td>
+                            <input 
+                                type="text" 
+                                id="vapid_public_key" 
+                                name="vapid_public_key" 
+                                value="<?php echo esc_attr( $vapid_public_key ); ?>" 
+                                class="large-text code"
+                                placeholder="BEl62iUYgUivxIkv69yViEuiBIa-Ib37gp2..."
+                            />
+                            <p class="description">
+                                <?php _e( 'Your VAPID public key. This will be shared with browsers to subscribe to push notifications.', 'love-coupons' ); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="vapid_private_key"><?php _e( 'VAPID Private Key', 'love-coupons' ); ?></label>
+                        </th>
+                        <td>
+                            <input 
+                                type="password" 
+                                id="vapid_private_key" 
+                                name="vapid_private_key" 
+                                value="<?php echo esc_attr( $vapid_private_key ); ?>" 
+                                class="large-text code"
+                                placeholder="dGhlIHNhbXBsZSBub25jZQ=="
+                            />
+                            <p class="description">
+                                <?php _e( 'Your VAPID private key. Keep this secret! It\'s used to sign push notification requests.', 'love-coupons' ); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <?php _e( 'Status', 'love-coupons' ); ?>
+                        </th>
+                        <td>
+                            <?php if ( empty( $vapid_public_key ) || empty( $vapid_private_key ) ) : ?>
+                                <span style="color: #d63638;">
+                                    <span class="dashicons dashicons-warning"></span>
+                                    <?php _e( 'Push notifications are not configured. Please add your VAPID keys above.', 'love-coupons' ); ?>
+                                </span>
+                            <?php else : ?>
+                                <span style="color: #00a32a;">
+                                    <span class="dashicons dashicons-yes-alt"></span>
+                                    <?php _e( 'Push notifications are configured and ready to use!', 'love-coupons' ); ?>
+                                </span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                </table>
+
+                <?php submit_button( __( 'Save Settings', 'love-coupons' ), 'primary', 'love_coupons_save_push_settings' ); ?>
+            </form>
+
+            <hr style="margin: 40px 0;">
+
+            <h2><?php _e( 'Additional Setup Required', 'love-coupons' ); ?></h2>
+            <div class="notice notice-warning">
+                <p>
+                    <strong><?php _e( 'To actually send push notifications, you need to install the web-push library:', 'love-coupons' ); ?></strong>
+                </p>
+                <ol>
+                    <li><?php _e( 'Navigate to your plugin directory in terminal', 'love-coupons' ); ?></li>
+                    <li><?php _e( 'Run:', 'love-coupons' ); ?> <code>composer require minishlink/web-push</code></li>
+                    <li><?php _e( 'The notification sending code will then work automatically', 'love-coupons' ); ?></li>
+                </ol>
+                <p>
+                    <?php _e( 'Without this library, the system will fall back to sending email notifications.', 'love-coupons' ); ?>
+                </p>
+            </div>
         </div>
         <?php
     }
