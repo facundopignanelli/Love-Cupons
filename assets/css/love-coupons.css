@@ -1012,10 +1012,10 @@
 
 .love-coupons-menu {
     --love-accent: #2c6e49;
-    background: var(--love-accent);
-    color: #ffffff;
-    padding: 1rem 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: transparent;
+    color: #333333;
+    padding: 1.5rem 0;
+    border-bottom: 2px solid #f0f0f0;
     margin: 0;
 }
 
@@ -1024,25 +1024,35 @@
     margin: 0 auto;
     padding: 0 1rem;
     display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.love-menu-top {
+    display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 2rem;
-    flex-wrap: wrap;
+}
+
+.love-menu-left {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
 }
 
 .love-menu-logo {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    flex-shrink: 0;
-    color: #ffffff;
+    color: var(--love-accent);
     text-decoration: none;
 }
 
 .love-menu-logo svg {
     width: 40px;
     height: 40px;
-    color: #ffffff;
+    color: var(--love-accent);
 }
 
 .love-menu-logo svg path {
@@ -1052,45 +1062,7 @@
 .love-menu-brand {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #ffffff;
-}
-
-.love-menu-center {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-    flex: 1;
-}
-
-.love-menu-greeting {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #ffffff;
-    white-space: nowrap;
-}
-
-.love-menu-nav {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.love-menu-nav-item {
-    display: inline-block;
-    padding: 0.6rem 1.25rem;
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-    border-radius: 15px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-    border: 2px solid transparent;
-}
-
-.love-menu-nav-item:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: #ffffff;
+    color: var(--love-accent);
 }
 
 .love-menu-right {
@@ -1098,6 +1070,13 @@
     align-items: center;
     gap: 1rem;
     flex-shrink: 0;
+}
+
+.love-menu-greeting {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #333333;
+    white-space: nowrap;
 }
 
 .love-menu-avatar-wrapper {
@@ -1108,8 +1087,13 @@
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    border: 2px solid #ffffff;
+    border: 2px solid var(--love-accent);
     display: block;
+}
+
+.love-menu-actions {
+    display: flex;
+    gap: 0.5rem;
 }
 
 .love-menu-icon-btn {
@@ -1118,18 +1102,19 @@
     justify-content: center;
     width: 40px;
     height: 40px;
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
+    background: transparent;
+    color: var(--love-accent);
     border-radius: 8px;
     text-decoration: none;
     transition: all 0.2s ease;
-    border: none;
+    border: 2px solid var(--love-accent);
     cursor: pointer;
     font-size: 1.1rem;
 }
 
 .love-menu-icon-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
+    background: var(--love-accent);
+    color: #ffffff;
     transform: scale(1.05);
 }
 
@@ -1137,80 +1122,76 @@
     width: auto;
 }
 
-@media (max-width: 1024px) {
-    .love-menu-container {
-        gap: 1rem;
-        padding: 0 0.75rem;
-    }
-
-    .love-menu-center {
-        gap: 1.5rem;
-        order: 3;
-        width: 100%;
-        margin-top: 1rem;
-    }
-
-    .love-menu-nav {
-        gap: 0.25rem;
-    }
-
-    .love-menu-nav-item {
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
-    }
+.love-menu-nav {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
-@media (max-width: 768px) {
-    .love-coupons-menu {
-        padding: 0.75rem 0;
-    }
+.love-menu-nav-item {
+    display: inline-block;
+    padding: 0.6rem 1.5rem;
+    background: #e8f5e9;
+    color: var(--love-accent);
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
 
-    .love-menu-container {
-        flex-direction: column;
-        gap: 1rem;
+.love-menu-nav-item:hover {
+    background: var(--love-accent);
+    color: #ffffff;
+    border-color: var(--love-accent);
+}
+
+@media (max-width: 1024px) {
+    .love-menu-top {
+        flex-wrap: wrap;
+        justify-content: space-between;
     }
 
     .love-menu-greeting {
         font-size: 0.9rem;
-    }
-
-    .love-menu-center {
-        flex-direction: column;
-        width: 100%;
-        margin-top: 0;
-        order: 2;
-    }
-
-    .love-menu-nav {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .love-menu-nav-item {
-        padding: 0.5rem 0.875rem;
-        font-size: 0.85rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .love-menu-logo {
-        gap: 0.5rem;
     }
 
     .love-menu-brand {
         font-size: 1.1rem;
     }
 
+    .love-menu-nav-item {
+        padding: 0.5rem 1.25rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .love-coupons-menu {
+        padding: 1rem 0;
+    }
+
+    .love-menu-container {
+        gap: 1rem;
+        padding: 0 0.75rem;
+    }
+
+    .love-menu-top {
+        gap: 1rem;
+    }
+
     .love-menu-greeting {
         font-size: 0.85rem;
     }
 
-    .love-menu-nav {
-        gap: 0.25rem;
+    .love-menu-brand {
+        font-size: 1rem;
     }
 
     .love-menu-nav-item {
-        padding: 0.4rem 0.75rem;
+        padding: 0.4rem 1rem;
         font-size: 0.8rem;
     }
 
@@ -1223,5 +1204,39 @@
     .love-menu-avatar {
         width: 40px;
         height: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .love-menu-logo {
+        gap: 0.5rem;
+    }
+
+    .love-menu-brand {
+        font-size: 0.95rem;
+    }
+
+    .love-menu-greeting {
+        font-size: 0.8rem;
+    }
+
+    .love-menu-nav {
+        gap: 0.5rem;
+    }
+
+    .love-menu-nav-item {
+        padding: 0.35rem 0.875rem;
+        font-size: 0.75rem;
+    }
+
+    .love-menu-icon-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+
+    .love-menu-avatar {
+        width: 36px;
+        height: 36px;
     }
 }
