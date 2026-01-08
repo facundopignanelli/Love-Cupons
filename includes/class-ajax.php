@@ -230,4 +230,17 @@ class Love_Coupons_Ajax {
         
         wp_send_json_success( __( 'Push notification subscription saved.', 'love-coupons' ) );
     }
+
+    /**
+     * Provide a fresh nonce for cached PWA contexts where the page nonce may be stale.
+     */
+    public function ajax_get_nonce() {
+        if ( ! is_user_logged_in() ) {
+            wp_send_json_error( __( 'You must be logged in.', 'love-coupons' ) );
+        }
+
+        wp_send_json_success( array(
+            'nonce' => wp_create_nonce( 'love_coupons_nonce' ),
+        ) );
+    }
 }

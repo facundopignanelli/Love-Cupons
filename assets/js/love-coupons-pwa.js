@@ -130,28 +130,72 @@
 
         async sendSubscriptionToServer(subscription) {
             return new Promise((resolve, reject) => {
-                console.log('[Love Coupons PWA] Sending AJAX request to:', loveCouponsAjax.ajax_url);
+                const attemptSave = (nonceOverride = null, hasRetried = false) => {
+                    const payload = {
+                        action: 'love_coupons_save_push_subscription',
+                        nonce: nonceOverride || loveCouponsAjax.nonce,
+                        subscription: JSON.stringify(subscription)
+                    };
+
+                    console.log('[Love Coupons PWA] Sending AJAX request to:', loveCouponsAjax.ajax_url, 'hasRetried:', hasRetried);
+
+                    $.ajax({
+                        url: loveCouponsAjax.ajax_url,
+                        method: 'POST',
+                        data: payload,
+                        success: async (response) => {
+                            console.log('[Love Coupons PWA] Server response:', response);
+                            if (response && response.success) {
+                                resolve(true);
+                            } else {
+                                const error = response && response.data ? response.data : 'Failed to save subscription';
+                                // If nonce failed once, fetch a fresh nonce and retry once
+                                if (!hasRetried && typeof error === 'string' && error.toLowerCase().includes('security check')) {
+                                    try {
+                                        console.warn('[Love Coupons PWA] Nonce failed, fetching fresh nonce...');
+                                        const freshNonce = await this.fetchNonce();
+                                        if (freshNonce) {
+                                            return attemptSave(freshNonce, true);
+                                        }
+                                    } catch (e) {
+                                        console.error('[Love Coupons PWA] Failed to fetch nonce:', e);
+                                    }
+                                }
+                                console.error('[Love Coupons PWA] Save failed:', error);
+                                reject(error);
+                            }
+                        },
+                        error: (xhr, status, error) => {
+                            console.error('[Love Coupons PWA] AJAX error:', status, error);
+                            console.error('[Love Coupons PWA] Response text:', xhr && xhr.responseText);
+                            reject(xhr && xhr.responseText ? xhr.responseText : 'Request failed');
+                        }
+                    });
+                };
+
+                attemptSave();
+            });
+        },
+
+        async fetchNonce() {
+            return new Promise((resolve, reject) => {
                 $.ajax({
                     url: loveCouponsAjax.ajax_url,
                     method: 'POST',
                     data: {
-                        action: 'love_coupons_save_push_subscription',
-                        nonce: loveCouponsAjax.nonce,
-                        subscription: JSON.stringify(subscription)
+                        action: 'love_coupons_get_nonce'
                     },
                     success: (response) => {
-                        console.log('[Love Coupons PWA] Server response:', response);
-                        if (response && response.success) {
-                            resolve(true);
+                        if (response && response.success && response.data && response.data.nonce) {
+                            // Update global nonce for future requests too
+                            loveCouponsAjax.nonce = response.data.nonce;
+                            resolve(response.data.nonce);
                         } else {
-                            const error = response && response.data ? response.data : 'Failed to save subscription';
-                            console.error('[Love Coupons PWA] Save failed:', error);
-                            reject(error);
+                            reject(response && response.data ? response.data : 'Failed to fetch nonce');
                         }
                     },
                     error: (xhr, status, error) => {
-                        console.error('[Love Coupons PWA] AJAX error:', status, error);
-                        console.error('[Love Coupons PWA] Response text:', xhr && xhr.responseText);
+                        console.error('[Love Coupons PWA] Nonce AJAX error:', status, error);
                         reject(xhr && xhr.responseText ? xhr.responseText : 'Request failed');
                     }
                 });
