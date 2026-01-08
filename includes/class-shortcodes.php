@@ -8,6 +8,242 @@ class Love_Coupons_Shortcodes {
         add_shortcode( 'love_coupons_submit', array( $this, 'display_coupons_submit_shortcode' ) );
         add_shortcode( 'love_coupons_created', array( $this, 'display_coupons_created_shortcode' ) );
         add_shortcode( 'love_coupons_preferences', array( $this, 'display_preferences_shortcode' ) );
+        add_shortcode( 'love_coupons_dashboard', array( $this, 'display_dashboard_shortcode' ) );
+    }
+
+    public function display_dashboard_shortcode( $atts ) {
+        if ( ! is_user_logged_in() ) {
+            return '<div class="love-coupons-login-message"><p>' . __( 'Please log in to view your dashboard.', 'love-coupons' ) . '</p></div>';
+        }
+
+        $current_user_id = get_current_user_id();
+        $current_user    = wp_get_current_user();
+        $wrapper_attrs   = Love_Coupons_Core::get_accent_attributes_for_user( $current_user_id );
+
+        // Calculate stats
+        $posted_query = new WP_Query( array(
+            'post_type' => 'love_coupon',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'meta_query' => array( array( 'key' => '_love_coupon_created_by', 'value' => $current_user_id, 'compare' => '=' ) ),
+            'fields' => 'ids',
+        ) );
+        $posted_count = $posted_query->found_posts;
+        
+        $posted_available = 0;
+        foreach ( $posted_query->posts as $pid ) {
+            $is_redeemed = get_post_meta( $pid, '_love_coupon_redeemed', true );
+            $expiry_date = get_post_meta( $pid, '_love_coupon_expiry_date', true );
+            $start_date  = get_post_meta( $pid, '_love_coupon_start_date', true );
+            $now = time();
+            $is_expired  = $expiry_date && strtotime( $expiry_date ) < $now;
+            $is_upcoming = $start_date && strtotime( $start_date ) > $now;
+            if ( ! $is_redeemed && ! $is_expired && ! $is_upcoming ) {
+                $posted_available++;
+            }
+        }
+        wp_reset_postdata();
+
+        $available_query = new WP_Query( array(
+            'post_type' => 'love_coupon',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'meta_query' => array(
+                'relation' => 'OR',
+                array( 'key' => '_love_coupon_assigned_to', 'value' => sprintf('i:%d;', $current_user_id), 'compare' => 'LIKE' ),
+                array( 'key' => '_love_coupon_assigned_to', 'compare' => 'NOT EXISTS' )
+            ),
+            'fields' => 'ids',
+        ) );
+
+        $available_count = 0;
+        foreach ( $available_query->posts as $aid ) {
+            if ( ! Love_Coupons_Core::user_can_access_coupon( $aid, $current_user_id ) ) { continue; }
+            $is_redeemed = get_post_meta( $aid, '_love_coupon_redeemed', true );
+            $expiry_date = get_post_meta( $aid, '_love_coupon_expiry_date', true );
+            $start_date  = get_post_meta( $aid, '_love_coupon_start_date', true );
+            $now = time();
+            $is_expired  = $expiry_date && strtotime( $expiry_date ) < $now;
+            $is_upcoming = $start_date && strtotime( $start_date ) > $now;
+            if ( ! $is_redeemed && ! $is_expired && ! $is_upcoming ) {
+                $available_count++;
+            }
+        }
+        wp_reset_postdata();
+
+        // Get navigation URLs
+        $nav_items = $this->get_navigation_items();
+
+        // Get avatar
+        $avatar = get_avatar( $current_user_id, 80, '', $current_user->display_name, array( 'class' => 'love-dashboard-avatar' ) );
+
+        ob_start();
+        ?>
+        <div class="love-coupons-wrapper love-coupons-dashboard" <?php echo $wrapper_attrs; ?>>
+            <div class="love-dashboard-header">
+                <div class="love-dashboard-profile">
+                    <div class="love-dashboard-avatar-wrapper">
+                        <?php echo $avatar; ?>
+                    </div>
+                    <div class="love-dashboard-user-info">
+                        <h2 class="love-dashboard-username"><?php echo esc_html( $current_user->display_name ); ?></h2>
+                        <p class="love-dashboard-user-email"><?php echo esc_html( $current_user->user_email ); ?></p>
+                    </div>
+                </div>
+                <div class="love-dashboard-actions">
+                    <a href="#" class="wp-element-button button button-secondary love-feedback-btn" id="love-feedback-btn">
+                        <span class="dashicons dashicons-email"></span><?php _e( 'Send Feedback', 'love-coupons' ); ?>
+                    </a>
+                    <a href="<?php echo esc_url( wp_logout_url( home_url() ) ); ?>" class="wp-element-button button button-secondary love-logout-btn">
+                        <span class="dashicons dashicons-exit"></span><?php _e( 'Logout', 'love-coupons' ); ?>
+                    </a>
+                </div>
+            </div>
+
+            <div class="love-dashboard-stats">
+                <div class="love-stat-card">
+                    <span class="love-stat-icon dashicons dashicons-tickets-alt"></span>
+                    <div class="love-stat-info">
+                        <div class="love-stat-value"><?php echo esc_html( $available_count ); ?></div>
+                        <div class="love-stat-label"><?php _e( 'Available to You', 'love-coupons' ); ?></div>
+                    </div>
+                </div>
+                <div class="love-stat-card">
+                    <span class="love-stat-icon dashicons dashicons-admin-post"></span>
+                    <div class="love-stat-info">
+                        <div class="love-stat-value"><?php echo esc_html( $posted_count ); ?></div>
+                        <div class="love-stat-label"><?php _e( 'You Posted', 'love-coupons' ); ?></div>
+                    </div>
+                </div>
+                <div class="love-stat-card">
+                    <span class="love-stat-icon dashicons dashicons-yes-alt"></span>
+                    <div class="love-stat-info">
+                        <div class="love-stat-value"><?php echo esc_html( $posted_available ); ?></div>
+                        <div class="love-stat-label"><?php _e( 'Still Available', 'love-coupons' ); ?></div>
+                    </div>
+                </div>
+            </div>
+
+            <?php if ( ! empty( $nav_items ) ) : ?>
+            <nav class="love-dashboard-nav" role="navigation" aria-label="<?php esc_attr_e( 'Dashboard Navigation', 'love-coupons' ); ?>">
+                <?php foreach ( $nav_items as $item ) : ?>
+                    <a href="<?php echo esc_url( $item['url'] ); ?>" class="love-nav-item">
+                        <span class="dashicons dashicons-<?php echo esc_attr( $item['icon'] ); ?>"></span>
+                        <span class="love-nav-label"><?php echo esc_html( $item['label'] ); ?></span>
+                    </a>
+                <?php endforeach; ?>
+            </nav>
+            <?php endif; ?>
+        </div>
+
+        <div class="love-modal" id="love-feedback-modal" aria-hidden="true" style="display:none;">
+            <div class="love-modal-overlay" data-dismiss></div>
+            <div class="love-modal-content" role="dialog" aria-modal="true" aria-labelledby="love-feedback-title">
+                <div class="love-modal-header">
+                    <h4 id="love-feedback-title"><?php _e( 'Send Feedback', 'love-coupons' ); ?></h4>
+                    <button type="button" class="wp-element-button button love-modal-close" data-dismiss aria-label="<?php esc_attr_e( 'Close', 'love-coupons' ); ?>"><?php _e( 'Close', 'love-coupons' ); ?></button>
+                </div>
+                <div class="love-modal-body">
+                    <p><?php _e( 'Have suggestions or found an issue? Let us know!', 'love-coupons' ); ?></p>
+                    <form id="love-feedback-form">
+                        <div class="form-group">
+                            <label for="feedback-message"><?php _e( 'Your Feedback', 'love-coupons' ); ?></label>
+                            <textarea id="feedback-message" name="feedback_message" rows="6" required placeholder="<?php esc_attr_e( 'Tell us what you think...', 'love-coupons' ); ?>"></textarea>
+                        </div>
+                        <div class="form-message" style="display:none;"></div>
+                    </form>
+                </div>
+                <div class="love-modal-footer">
+                    <button type="button" class="wp-element-button button" data-dismiss><?php _e( 'Cancel', 'love-coupons' ); ?></button>
+                    <button type="button" class="wp-element-button button button-primary" id="love-feedback-submit"><?php _e( 'Send Feedback', 'love-coupons' ); ?></button>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    private function get_navigation_items() {
+        static $cached_items = null;
+
+        if ( $cached_items !== null ) {
+            return $cached_items;
+        }
+
+        $option_key = 'love_coupons_nav_urls';
+        $stored_urls = get_option( $option_key, array() );
+
+        $shortcodes = array(
+            'love_coupons' => array(
+                'label' => __( 'My coupons', 'love-coupons' ),
+                'icon'  => 'tickets-alt',
+            ),
+            'love_coupons_submit' => array(
+                'label' => __( 'Create Coupon', 'love-coupons' ),
+                'icon'  => 'plus-alt',
+            ),
+            'love_coupons_created' => array(
+                'label' => __( 'Created Coupons', 'love-coupons' ),
+                'icon'  => 'admin-post',
+            ),
+            'love_coupons_preferences' => array(
+                'label' => __( 'Preferences', 'love-coupons' ),
+                'icon'  => 'admin-settings',
+            ),
+        );
+
+        $nav_items = array();
+        $needs_update = false;
+
+        foreach ( $shortcodes as $shortcode => $data ) {
+            if ( ! empty( $stored_urls[ $shortcode ] ) ) {
+                $page_id = url_to_postid( $stored_urls[ $shortcode ] );
+                if ( $page_id && get_post_status( $page_id ) === 'publish' ) {
+                    $nav_items[] = array(
+                        'label' => $data['label'],
+                        'icon'  => $data['icon'],
+                        'url'   => $stored_urls[ $shortcode ],
+                    );
+                    continue;
+                }
+            }
+
+            $url = $this->find_page_with_shortcode( $shortcode );
+            if ( $url ) {
+                $stored_urls[ $shortcode ] = $url;
+                $needs_update = true;
+                $nav_items[] = array(
+                    'label' => $data['label'],
+                    'icon'  => $data['icon'],
+                    'url'   => $url,
+                );
+            }
+        }
+
+        if ( $needs_update ) {
+            update_option( $option_key, $stored_urls, false );
+        }
+
+        $cached_items = $nav_items;
+        return $nav_items;
+    }
+
+    private function find_page_with_shortcode( $shortcode ) {
+        global $wpdb;
+        $page_id = $wpdb->get_var( $wpdb->prepare(
+            "SELECT ID FROM {$wpdb->posts}
+            WHERE post_type = 'page'
+            AND post_status = 'publish'
+            AND post_content LIKE %s
+            LIMIT 1",
+            '%[' . $wpdb->esc_like( $shortcode ) . '%'
+        ) );
+
+        if ( $page_id ) {
+            return get_permalink( $page_id );
+        }
+
+        return '';
     }
 
     public function display_coupons_submit_shortcode( $atts ) {

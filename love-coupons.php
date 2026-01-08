@@ -103,6 +103,7 @@ class Love_Coupons_Plugin {
         add_action( 'wp_ajax_love_coupons_save_preferences', array( $this->ajax, 'ajax_save_preferences' ) );
         add_action( 'wp_ajax_love_coupons_save_push_subscription', array( $this->ajax, 'ajax_save_push_subscription' ) );
         add_action( 'wp_ajax_love_coupons_get_nonce', array( $this->ajax, 'ajax_get_nonce' ) );
+        add_action( 'wp_ajax_love_coupons_send_feedback', array( $this->ajax, 'ajax_send_feedback' ) );
 
         $this->shortcodes->register();
 
@@ -160,7 +161,7 @@ class Love_Coupons_Plugin {
             return;
         }
 
-        $shortcodes = array( 'love_coupons', 'love_coupons_submit', 'love_coupons_created', 'love_coupons_preferences' );
+        $shortcodes = array( 'love_coupons', 'love_coupons_submit', 'love_coupons_created', 'love_coupons_preferences', 'love_coupons_dashboard' );
         foreach ( $shortcodes as $code ) {
             if ( has_shortcode( $post->post_content, $code ) ) {
                 auth_redirect();

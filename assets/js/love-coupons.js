@@ -60,6 +60,11 @@
 
             // Remove image button
             $(document).on('click', '#love-remove-image', this.removeImage.bind(this));
+
+            // Feedback modal
+            $(document).on('click', '#love-feedback-btn', this.openFeedbackModal.bind(this));
+            $(document).on('click', '#love-feedback-modal [data-dismiss]', this.closeFeedbackModal.bind(this));
+            $(document).on('click', '#love-feedback-submit', this.submitFeedback.bind(this));
         }
 
         /**
@@ -835,6 +840,69 @@
             const $dropzone = $('#coupon_image_dropzone');
             $preview.hide().find('img').attr('src', '');
             $dropzone.show();
+        }
+
+        openFeedbackModal(event) {
+            event.preventDefault();
+            const $modal = $('#love-feedback-modal');
+            $modal.show().attr('aria-hidden', 'false');
+            // Focus on textarea
+            setTimeout(() => {
+                $('#feedback-message').focus();
+            }, 100);
+        }
+
+        closeFeedbackModal(event) {
+            if (event) {
+                event.preventDefault();
+            }
+            const $modal = $('#love-feedback-modal');
+            $modal.hide().attr('aria-hidden', 'true');
+            // Clear form
+            $('#love-feedback-form')[0].reset();
+            $('#love-feedback-form .form-message').hide();
+        }
+
+        submitFeedback(event) {
+            event.preventDefault();
+            const $button = $(event.currentTarget);
+            const $form = $('#love-feedback-form');
+            const $message = $form.find('.form-message');
+            const feedbackText = $('#feedback-message').val().trim();
+
+            if (!feedbackText) {
+                $message.text('Please enter your feedback.').css('color', '#d63638').show();
+                return;
+            }
+
+            const originalText = $button.text();
+            $button.prop('disabled', true).text('Sending...');
+            $message.hide();
+
+            $.ajax({
+                url: loveCouponsAjax.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'love_coupons_send_feedback',
+                    security: loveCouponsAjax.nonce,
+                    feedback: feedbackText
+                },
+                success: (response) => {
+                    if (response.success) {
+                        $message.text(response.data || 'Thank you for your feedback!').css('color', '#00a32a').show();
+                        setTimeout(() => {
+                            this.closeFeedbackModal();
+                        }, 1500);
+                    } else {
+                        $message.text(response.data || 'Failed to send feedback. Please try again.').css('color', '#d63638').show();
+                        $button.prop('disabled', false).text(originalText);
+                    }
+                },
+                error: () => {
+                    $message.text('An error occurred. Please try again.').css('color', '#d63638').show();
+                    $button.prop('disabled', false).text(originalText);
+                }
+            });
         }
     }
 

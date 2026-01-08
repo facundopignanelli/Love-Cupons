@@ -82,7 +82,7 @@ class Love_Coupons_Assets {
     private function should_enqueue_assets() {
         global $post;
         if ( is_admin() ) { return false; }
-        if ( $post && ( has_shortcode( $post->post_content, 'love_coupons' ) || has_shortcode( $post->post_content, 'love_coupons_submit' ) || has_shortcode( $post->post_content, 'love_coupons_created' ) || has_shortcode( $post->post_content, 'love_coupons_preferences' ) ) ) {
+        if ( $post && ( has_shortcode( $post->post_content, 'love_coupons' ) || has_shortcode( $post->post_content, 'love_coupons_submit' ) || has_shortcode( $post->post_content, 'love_coupons_created' ) || has_shortcode( $post->post_content, 'love_coupons_preferences' ) || has_shortcode( $post->post_content, 'love_coupons_dashboard' ) ) ) {
             return true;
         }
         return false;

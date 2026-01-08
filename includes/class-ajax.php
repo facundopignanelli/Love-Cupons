@@ -283,4 +283,36 @@ class Love_Coupons_Ajax {
             'nonce' => wp_create_nonce( 'love_coupons_nonce' ),
         ) );
     }
+
+    public function ajax_send_feedback() {
+        if ( ! check_ajax_referer( 'love_coupons_nonce', 'security', false ) ) {
+            wp_send_json_error( __( 'Security check failed.', 'love-coupons' ) );
+        }
+        if ( ! is_user_logged_in() ) {
+            wp_send_json_error( __( 'You must be logged in to send feedback.', 'love-coupons' ) );
+        }
+
+        $feedback = isset( $_POST['feedback'] ) ? sanitize_textarea_field( wp_unslash( $_POST['feedback'] ) ) : '';
+        if ( empty( $feedback ) ) {
+            wp_send_json_error( __( 'Please enter your feedback.', 'love-coupons' ) );
+        }
+
+        $current_user = wp_get_current_user();
+        $admin_email  = get_option( 'admin_email' );
+        $subject      = sprintf( __( 'Love Coupons Feedback from %s', 'love-coupons' ), $current_user->display_name );
+        $message      = sprintf(
+            __( 'Feedback from: %1$s (%2$s)\n\nFeedback:\n%3$s', 'love-coupons' ),
+            $current_user->display_name,
+            $current_user->user_email,
+            $feedback
+        );
+
+        $sent = wp_mail( $admin_email, $subject, $message );
+
+        if ( $sent ) {
+            wp_send_json_success( __( 'Thank you for your feedback!', 'love-coupons' ) );
+        } else {
+            wp_send_json_error( __( 'Failed to send feedback. Please try again.', 'love-coupons' ) );
+        }
+    }
 }
