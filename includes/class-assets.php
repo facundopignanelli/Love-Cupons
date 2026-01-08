@@ -96,7 +96,7 @@ class Love_Coupons_Assets {
         if ( 'serviceWorker' in navigator ) {
             window.addEventListener( 'load', function() {
                 navigator.serviceWorker.register( '<?php echo esc_url( LOVE_COUPONS_PLUGIN_URL . 'service-worker.js' ); ?>', {
-                    scope: '<?php echo esc_url( LOVE_COUPONS_PLUGIN_URL ); ?>'
+                    scope: '/'
                 } ).then( function( registration ) {
                     console.log( 'Love Coupons SW registered: ', registration.scope );
                 } ).catch( function( error ) {

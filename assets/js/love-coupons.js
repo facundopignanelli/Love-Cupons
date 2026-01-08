@@ -47,49 +47,49 @@
                 return;
             }
 
-            // Check if service worker is registered
-            navigator.serviceWorker.getRegistration().then(registration => {
-                console.log('[Love Coupons] Service worker registration:', registration);
-                
-                if (!registration) {
-                    console.warn('[Love Coupons] No service worker registered');
-                    $statusValue.text('Not available');
-                    $message.text('Service worker not registered. Push notifications are not available.').css('color', '#dc3232').show();
-                    return;
-                }
-
-                // Service worker exists, check permission immediately
-                const permission = Notification.permission;
-                console.log('[Love Coupons] Permission status:', permission);
-
-                if (permission === 'granted') {
-                    registration.pushManager.getSubscription().then(subscription => {
-                        if (subscription) {
-                            $statusValue.text('\u2713 Enabled').css('color', '#46b450');
-                            $message.text('You will receive push notifications for coupon activity.').css('color', '#46b450').show();
-                        } else {
-                            $statusValue.text('Granted, but not subscribed');
-                            $enableBtn.text('Subscribe to Notifications').show();
-                            this.bindEnableNotificationsButton(registration);
-                        }
-                    }).catch(e => {
-                        console.error('[Love Coupons] Failed to get subscription:', e);
-                        $statusValue.text('Error');
-                        $message.text('Could not check subscription status.').css('color', '#dc3232').show();
-                    });
-                } else if (permission === 'denied') {
-                    $statusValue.text('\u2717 Blocked').css('color', '#dc3232');
-                    $message.html('Notifications are blocked. To enable them, please update your browser/app settings.').css('color', '#dc3232').show();
-                } else {
-                    $statusValue.text('Disabled');
-                    $enableBtn.show();
-                    this.bindEnableNotificationsButton(registration);
-                }
-            }).catch(e => {
-                console.error('[Love Coupons] Failed to get service worker registration:', e);
+            // Wait for service worker - use ready promise with proper handling
+            const self = this;
+            navigator.serviceWorker.ready.then(function(registration) {
+                console.log('[Love Coupons] Service worker is ready:', registration);
+                self.updateNotificationStatus(registration, $statusValue, $enableBtn, $message);
+            }).catch(function(e) {
+                console.error('[Love Coupons] Service worker ready failed:', e);
                 $statusValue.text('Error');
-                $message.text('Could not check notification status. Error: ' + e.message).css('color', '#dc3232').show();
+                $message.text('Could not initialize notifications.').css('color', '#dc3232').show();
             });
+        }
+
+        /**
+         * Update notification status UI
+         */
+        updateNotificationStatus(registration, $statusValue, $enableBtn, $message) {
+            const permission = Notification.permission;
+            const self = this;
+            console.log('[Love Coupons] Permission status:', permission);
+
+            if (permission === 'granted') {
+                registration.pushManager.getSubscription().then(function(subscription) {
+                    if (subscription) {
+                        $statusValue.text('\u2713 Enabled').css('color', '#46b450');
+                        $message.text('You will receive push notifications for coupon activity.').css('color', '#46b450').show();
+                    } else {
+                        $statusValue.text('Granted, but not subscribed');
+                        $enableBtn.text('Subscribe to Notifications').show();
+                        self.bindEnableNotificationsButton(registration);
+                    }
+                }).catch(function(e) {
+                    console.error('[Love Coupons] Failed to get subscription:', e);
+                    $statusValue.text('Error');
+                    $message.text('Could not check subscription status.').css('color', '#dc3232').show();
+                });
+            } else if (permission === 'denied') {
+                $statusValue.text('\u2717 Blocked').css('color', '#dc3232');
+                $message.html('Notifications are blocked. To enable them, please update your browser/app settings.').css('color', '#dc3232').show();
+            } else {
+                $statusValue.text('Disabled');
+                $enableBtn.show();
+                self.bindEnableNotificationsButton(registration);
+            }
         }
 
         /**
