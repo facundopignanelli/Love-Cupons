@@ -231,15 +231,6 @@ class Love_Coupons_Admin {
 
         add_submenu_page(
             'edit.php?post_type=love_coupon',
-            __( 'Push Notification Test', 'love-coupons' ),
-            __( 'Push Test', 'love-coupons' ),
-            'manage_options',
-            'love_coupons_push_test',
-            array( $this, 'render_push_test_page' )
-        );
-
-        add_submenu_page(
-            'edit.php?post_type=love_coupon',
             __( 'User Accent Colours', 'love-coupons' ),
             __( 'User Colours', 'love-coupons' ),
             'manage_options',
@@ -323,6 +314,9 @@ class Love_Coupons_Admin {
             wp_die( __( 'You do not have permission to access this page.', 'love-coupons' ) );
         }
 
+        $settings_notice = '';
+        $test_notice     = '';
+
         // Handle form submission
         if ( isset( $_POST['love_coupons_save_push_settings'] ) && check_admin_referer( 'love_coupons_push_settings_nonce' ) ) {
             $vapid_public_key = isset( $_POST['vapid_public_key'] ) ? sanitize_text_field( $_POST['vapid_public_key'] ) : '';
@@ -331,14 +325,45 @@ class Love_Coupons_Admin {
             update_option( 'love_coupons_vapid_public_key', $vapid_public_key );
             update_option( 'love_coupons_vapid_private_key', $vapid_private_key );
             
-            echo '<div class="notice notice-success"><p>' . __( 'Push notification settings saved successfully!', 'love-coupons' ) . '</p></div>';
+            $settings_notice = '<div class="notice notice-success"><p>' . __( 'Push notification settings saved successfully!', 'love-coupons' ) . '</p></div>';
+        }
+
+        if ( isset( $_POST['love_coupons_send_test_push'] ) && check_admin_referer( 'love_coupons_push_test_nonce' ) ) {
+            $target_user = isset( $_POST['test_user'] ) ? absint( $_POST['test_user'] ) : 0;
+            $title = isset( $_POST['test_title'] ) ? sanitize_text_field( $_POST['test_title'] ) : '';
+            $body  = isset( $_POST['test_body'] ) ? sanitize_text_field( $_POST['test_body'] ) : '';
+            $url   = isset( $_POST['test_url'] ) ? esc_url_raw( $_POST['test_url'] ) : '';
+
+            if ( $target_user > 0 ) {
+                $payload = array(
+                    'title' => $title ?: __( 'Love Coupons', 'love-coupons' ),
+                    'body'  => $body ?: __( 'This is a test notification.', 'love-coupons' ),
+                    'url'   => $url ?: home_url(),
+                    'icon'  => LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon192.png',
+                    'badge' => LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon192.png',
+                    'tag'   => 'love-coupons-test',
+                );
+                $ok = Love_Coupons_Core::send_push_notification_to_user( $target_user, $payload );
+                if ( $ok ) {
+                    $test_notice = '<div class="notice notice-success"><p>' . __( 'Test push sent successfully.', 'love-coupons' ) . '</p></div>';
+                } else {
+                    $test_notice = '<div class="notice notice-error"><p>' . __( 'Failed to send test push. Ensure subscription exists and VAPID keys are configured.', 'love-coupons' ) . '</p></div>';
+                }
+            } else {
+                $test_notice = '<div class="notice notice-error"><p>' . __( 'Please select a user.', 'love-coupons' ) . '</p></div>';
+            }
         }
 
         $vapid_public_key = get_option( 'love_coupons_vapid_public_key', '' );
         $vapid_private_key = get_option( 'love_coupons_vapid_private_key', '' );
+        $all_users = get_users( array( 'orderby' => 'display_name', 'order' => 'ASC' ) );
         ?>
         <div class="wrap">
             <h1><?php _e( 'Push Notification Settings', 'love-coupons' ); ?></h1>
+            <?php
+            echo $settings_notice; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            echo $test_notice; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            ?>
             
             <div class="notice notice-info">
                 <p>
@@ -431,48 +456,11 @@ class Love_Coupons_Admin {
                     <?php _e( 'Without this library, the system will fall back to sending email notifications.', 'love-coupons' ); ?>
                 </p>
             </div>
-        </div>
-        <?php
-    }
 
-    public function render_push_test_page() {
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( __( 'You do not have permission to access this page.', 'love-coupons' ) );
-        }
+            <hr style="margin: 40px 0;">
 
-        $notice = '';
-        if ( isset( $_POST['love_coupons_send_test_push'] ) && check_admin_referer( 'love_coupons_push_test_nonce' ) ) {
-            $target_user = isset( $_POST['test_user'] ) ? absint( $_POST['test_user'] ) : 0;
-            $title = isset( $_POST['test_title'] ) ? sanitize_text_field( $_POST['test_title'] ) : '';
-            $body  = isset( $_POST['test_body'] ) ? sanitize_text_field( $_POST['test_body'] ) : '';
-            $url   = isset( $_POST['test_url'] ) ? esc_url_raw( $_POST['test_url'] ) : '';
-
-            if ( $target_user > 0 ) {
-                $payload = array(
-                    'title' => $title ?: __( 'Love Coupons', 'love-coupons' ),
-                    'body'  => $body ?: __( 'This is a test notification.', 'love-coupons' ),
-                    'url'   => $url ?: home_url(),
-                    'icon'  => LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon192.png',
-                    'badge' => LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon192.png',
-                    'tag'   => 'love-coupons-test',
-                );
-                $ok = Love_Coupons_Core::send_push_notification_to_user( $target_user, $payload );
-                if ( $ok ) {
-                    $notice = '<div class="notice notice-success"><p>' . __( 'Test push sent successfully.', 'love-coupons' ) . '</p></div>';
-                } else {
-                    $notice = '<div class="notice notice-error"><p>' . __( 'Failed to send test push. Ensure subscription exists and VAPID keys are configured.', 'love-coupons' ) . '</p></div>';
-                }
-            } else {
-                $notice = '<div class="notice notice-error"><p>' . __( 'Please select a user.', 'love-coupons' ) . '</p></div>';
-            }
-        }
-
-        // Get users who likely have subscriptions (we can list all and mark those with sub)
-        $all_users = get_users( array( 'orderby' => 'display_name', 'order' => 'ASC' ) );
-        ?>
-        <div class="wrap">
-            <h1><?php _e( 'Send Test Push Notification', 'love-coupons' ); ?></h1>
-            <?php echo $notice; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+            <h2><?php _e( 'Send Test Push Notification', 'love-coupons' ); ?></h2>
+            <p><?php _e( 'Send a quick test notification to confirm subscriptions are working.', 'love-coupons' ); ?></p>
             <form method="post" style="max-width: 800px;">
                 <?php wp_nonce_field( 'love_coupons_push_test_nonce' ); ?>
                 <table class="form-table">
@@ -508,6 +496,38 @@ class Love_Coupons_Admin {
                 </table>
                 <?php submit_button( __( 'Send Test Notification', 'love-coupons' ), 'primary', 'love_coupons_send_test_push' ); ?>
             </form>
+
+            <hr style="margin: 40px 0;">
+
+            <h2><?php _e( 'Subscription Status', 'love-coupons' ); ?></h2>
+            <p><?php _e( 'Quick overview of which users have an active saved push subscription. Ask users to refresh their status from the front-end if things look out of date.', 'love-coupons' ); ?></p>
+            <table class="widefat striped" style="max-width: 900px;">
+                <thead>
+                    <tr>
+                        <th><?php _e( 'User', 'love-coupons' ); ?></th>
+                        <th><?php _e( 'Subscription', 'love-coupons' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ( $all_users as $user ) :
+                        $has_sub = get_user_meta( $user->ID, '_love_coupons_push_subscription', true );
+                        $status_text = $has_sub ? __( 'Stored subscription found', 'love-coupons' ) : __( 'No subscription on file', 'love-coupons' );
+                        $status_color = $has_sub ? '#00a32a' : '#d63638';
+                    ?>
+                    <tr>
+                        <td>
+                            <strong><?php echo esc_html( $user->display_name ); ?></strong><br>
+                            <small><?php echo esc_html( $user->user_email ); ?></small>
+                        </td>
+                        <td>
+                            <span style="color: <?php echo esc_attr( $status_color ); ?>; font-weight: 600;">
+                                <?php echo esc_html( $status_text ); ?>
+                            </span>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
         <?php
     }

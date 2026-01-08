@@ -7,15 +7,20 @@
             this.statusEl = $('#love-notification-status-value');
             this.messageEl = $('#love-notification-message');
             this.enableBtn = $('#love-enable-notifications-btn');
+            this.refreshBtn = $('#love-refresh-notifications-btn');
 
             if (!this.statusEl.length) return;
 
             if (!this.isSupported()) {
                 this.setStatus('Not supported', 'Push notifications are not supported in this browser.', true);
+                if (this.refreshBtn.length) { this.refreshBtn.hide(); }
                 return;
             }
 
             this.enableBtn.off('click').on('click', () => this.requestPermission());
+            if (this.refreshBtn.length) {
+                this.refreshBtn.show().off('click').on('click', () => this.refreshStatus());
+            }
             this.checkStatus();
         },
 
@@ -84,6 +89,21 @@
                 const errorMsg = e.message || e.toString();
                 this.setStatus('Error', `Failed: ${errorMsg.substring(0, 80)}`, true);
                 this.enableBtn.prop('disabled', false).text('Enable Notifications');
+            }
+        },
+
+        async refreshStatus() {
+            const btn = this.refreshBtn;
+            const originalText = btn && btn.length ? btn.text() : '';
+            if (btn && btn.length) {
+                btn.prop('disabled', true).text('Refreshing...');
+            }
+            try {
+                await this.checkStatus();
+            } finally {
+                if (btn && btn.length) {
+                    btn.prop('disabled', false).text(originalText || 'Refresh Status');
+                }
             }
         },
 

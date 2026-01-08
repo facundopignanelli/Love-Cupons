@@ -113,6 +113,9 @@ class Love_Coupons_Shortcodes {
                 <button type="button" class="wp-element-button button button-primary" id="love-enable-notifications-btn" style="display:none;">
                     <?php _e( 'Enable Notifications', 'love-coupons' ); ?>
                 </button>
+                <button type="button" class="wp-element-button button button-secondary" id="love-refresh-notifications-btn" style="margin-left: 8px;">
+                    <?php _e( 'Refresh Status', 'love-coupons' ); ?>
+                </button>
                 <p class="love-notification-message" id="love-notification-message" style="display:none;"></p>
             </div>
         </div>
