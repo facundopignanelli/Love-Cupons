@@ -209,9 +209,13 @@ class Love_Coupons_Ajax {
     }
 
     public function ajax_save_push_subscription() {
-        if ( ! check_ajax_referer( 'love_coupons_nonce', 'security', false ) ) {
+        // PWA installs can cache pages and end up with stale nonces.
+        // Allow the request if the user is logged in, even when the nonce is stale, to avoid blocking push opt-in.
+        $nonce_ok = check_ajax_referer( 'love_coupons_nonce', 'security', false );
+        if ( ! $nonce_ok && ! is_user_logged_in() ) {
             wp_send_json_error( __( 'Security check failed.', 'love-coupons' ) );
         }
+
         if ( ! is_user_logged_in() ) {
             wp_send_json_error( __( 'You must be logged in.', 'love-coupons' ) );
         }
