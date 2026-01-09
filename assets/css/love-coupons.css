@@ -33,6 +33,24 @@
     margin: 2rem 0;
 }
 
+/* Ensure all elements with accent background use contrast text color */
+.love-coupons-wrapper [style*="background: var(--love-accent)"],
+.love-coupons-wrapper [style*="background-color: var(--love-accent)"] {
+    color: var(--love-accent-contrast);
+}
+
+/* Global rule: All text inside elements with accent background should use contrast color */
+.love-coupons-wrapper .love-menu-icon-btn,
+.love-coupons-wrapper .love-menu-nav-item,
+.love-coupons-wrapper .button-primary,
+.love-coupons-wrapper .love-tab-button.active,
+[style*="background: var(--love-accent)"],
+[style*="background-color: var(--love-accent)"],
+[style*="--love-accent-contrast: var(--love-accent-contrast)"],
+[style*="color: var(--love-accent-contrast)"] {
+    color: var(--love-accent-contrast, #ffffff) !important;
+}
+
 .love-coupons-tabs {
     display: flex;
     gap: 0.5rem;
@@ -91,6 +109,12 @@
     color: var(--love-accent-contrast, #ffffff);
     border-color: var(--love-accent);
     border-bottom: 2px solid var(--love-accent);
+}
+
+/* Ensure all nested elements in active tab use contrast text */
+.love-tab-button.active,
+.love-tab-button.active * {
+    color: var(--love-accent-contrast, #ffffff) !important;
 }
 
 .love-tab-pane {
@@ -722,6 +746,11 @@
     letter-spacing: 0.5px;
 }
 
+/* Ensure redeemed badge text uses contrast */
+.love-coupon.redeemed::after {
+    color: var(--love-accent-contrast) !important;
+}
+
 .love-coupon.expired::after {
     content: "⏰ EXPIRED";
     position: absolute;
@@ -912,6 +941,17 @@
     box-shadow: 0 4px 12px color-mix(in srgb, var(--love-accent) 35%, transparent);
 }
 
+/* Ensure all content within primary button uses contrast color */
+.button-primary,
+.button-primary * {
+    color: var(--love-accent-contrast) !important;
+}
+
+.button-primary:hover,
+.button-primary:hover * {
+    color: var(--love-accent-contrast) !important;
+}
+
 .button-danger {
     background: #dc3545;
     color: white;
@@ -1100,6 +1140,12 @@
 .love-modal-footer { display: flex; gap: 0.75rem; justify-content: flex-end; flex-shrink: 0; }
 .love-modal-body { padding: 1rem; overflow: auto; flex: 1; }
 .love-modal-close { background: var(--love-accent); color: var(--love-accent-contrast); border: none; font-size: 1.25rem; cursor: pointer; float: right; padding: 0.35rem 0.65rem; border-radius: 15px; }
+
+/* Ensure modal close button icon uses contrast */
+.love-modal-close,
+.love-modal-close * {
+    color: var(--love-accent-contrast) !important;
+}
 .love-cropper-container { width: 100%; max-height: 65vh; }
 .love-cropper-container img { max-width: 100%; display: block; }
 .love-crop-preview { margin-top: 0.5rem; border: 1px dashed #ced4da; padding: 0.5rem; border-radius: 6px; max-width: 480px; }
@@ -1115,6 +1161,12 @@
 .love-modal-close:hover {
     background: var(--love-accent-strong);
     color: var(--love-accent-contrast);
+}
+
+/* Ensure hover state also uses contrast */
+.love-modal-close:hover,
+.love-modal-close:hover * {
+    color: var(--love-accent-contrast) !important;
 }
 
 @media (max-width: 768px) {
@@ -1333,10 +1385,22 @@
     font-size: 1.1rem;
 }
 
+/* Ensure menu icon button content uses contrast */
+.love-menu-icon-btn,
+.love-menu-icon-btn * {
+    color: var(--love-accent-contrast, #ffffff) !important;
+}
+
 .love-menu-icon-btn.love-menu-icon-btn-new {
     background: var(--love-target-accent, var(--love-accent));
     border-color: var(--love-target-accent, var(--love-accent));
     color: var(--love-target-contrast, var(--love-accent-contrast, #ffffff));
+}
+
+/* Ensure new button icon uses contrast */
+.love-menu-icon-btn.love-menu-icon-btn-new,
+.love-menu-icon-btn.love-menu-icon-btn-new * {
+    color: var(--love-target-contrast, var(--love-accent-contrast, #ffffff)) !important;
 }
 
 .love-menu-icon-btn.love-menu-icon-btn-new:hover {
@@ -1350,6 +1414,12 @@
     color: var(--love-accent-contrast, #ffffff);
     transform: scale(1.05);
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+/* Ensure hover state also uses contrast */
+.love-menu-icon-btn:hover,
+.love-menu-icon-btn:hover * {
+    color: var(--love-accent-contrast, #ffffff) !important;
 }
 
 .love-menu-icon-btn i {
@@ -1378,6 +1448,13 @@
     font-size: 0.95rem;
     line-height: 1.2;
     transition: all 0.2s ease;
+}
+
+/* Ensure menu nav item text and all content use contrast */
+.love-menu-nav-item,
+.love-menu-nav-item * {
+    color: var(--love-accent-contrast, #ffffff) !important;
+}
     border: 2px solid var(--love-accent);
 }
 

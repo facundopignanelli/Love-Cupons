@@ -21,6 +21,7 @@
             this.bindEvents();
             this.setupAccessibility();
             this.syncPreferencesUI();
+            this.ensureAccentContrast();
             
             // Check validation on page load for create form
             if ($('#love-create-coupon-form').length) {
@@ -776,6 +777,31 @@
             }
         }
 
+        /**
+         * Ensure all accent-colored elements have proper contrast on page load
+         */
+        ensureAccentContrast() {
+            const wrappers = document.querySelectorAll('.love-coupons-wrapper');
+            wrappers.forEach(wrapper => {
+                const accentStyle = wrapper.style.getPropertyValue('--love-accent');
+                const contrastStyle = wrapper.style.getPropertyValue('--love-accent-contrast');
+                
+                if (accentStyle && contrastStyle) {
+                    this.applyContrastToAccentElements(wrapper, contrastStyle);
+                } else {
+                    // Use computed styles if not set directly
+                    const computedStyle = window.getComputedStyle(wrapper);
+                    const accent = computedStyle.getPropertyValue('--love-accent').trim();
+                    const contrast = computedStyle.getPropertyValue('--love-accent-contrast').trim();
+                    
+                    if (accent) {
+                        const contrastColor = contrast || this.getContrastColor(accent);
+                        this.applyContrastToAccentElements(wrapper, contrastColor);
+                    }
+                }
+            });
+        }
+
         applyAccentToWrappers(accent) {
             if (!accent || !accent.color) return;
             const wrappers = document.querySelectorAll('.love-coupons-wrapper');
@@ -789,7 +815,90 @@
                 if (strong) wrapper.style.setProperty('--love-accent-strong', strong);
                 if (soft) wrapper.style.setProperty('--love-accent-soft', soft);
                 if (contrast) wrapper.style.setProperty('--love-accent-contrast', contrast);
+                
+                // Ensure all buttons and interactive elements use contrast color
+                this.applyContrastToAccentElements(wrapper, contrast);
             });
+        }
+
+        /**
+         * Apply contrast text color to all elements with accent backgrounds
+         */
+        applyContrastToAccentElements(container, contrastColor) {
+            // Find all elements that might have accent backgrounds
+            const selectors = [
+                '.love-tab-button.active',
+                '.button-primary',
+                '.love-menu-icon-btn',
+                '.love-menu-nav-item',
+                '.love-modal-close',
+                '[style*="--love-accent"]'
+            ];
+
+            selectors.forEach(selector => {
+                const elements = container.querySelectorAll(selector);
+                elements.forEach(element => {
+                    const bgColor = window.getComputedStyle(element).backgroundColor;
+                    // Check if element has an accent-based background
+                    if (element.style.background && element.style.background.includes('var(--love-accent')) {
+                        this.ensureElementContrast(element, contrastColor);
+                    } else if (element.classList.contains('love-tab-button') && element.classList.contains('active')) {
+                        this.ensureElementContrast(element, contrastColor);
+                    } else if (element.classList.contains('button-primary')) {
+                        this.ensureElementContrast(element, contrastColor);
+                    } else if (element.classList.contains('love-menu-icon-btn')) {
+                        this.ensureElementContrast(element, contrastColor);
+                    }
+                });
+            });
+        }
+
+        /**
+         * Ensure an element and all its text content use proper contrast color
+         */
+        ensureElementContrast(element, contrastColor) {
+            // Apply to the element itself
+            element.style.color = contrastColor;
+
+            // Apply to all text nodes and child elements
+            const textNodes = this.getAllTextNodes(element);
+            textNodes.forEach(node => {
+                const parent = node.parentElement;
+                if (parent && !parent.style.color) {
+                    parent.style.color = contrastColor;
+                }
+            });
+
+            // Also apply to child elements that might have color
+            element.querySelectorAll('*').forEach(child => {
+                const computedColor = window.getComputedStyle(child).color;
+                // Only override if it's a default or neutral color
+                if (!child.style.color || computedColor === 'rgb(51, 51, 51)' || computedColor === 'rgb(102, 102, 102)') {
+                    child.style.color = contrastColor;
+                }
+            });
+        }
+
+        /**
+         * Get all text nodes within an element
+         */
+        getAllTextNodes(element) {
+            const textNodes = [];
+            const walker = document.createTreeWalker(
+                element,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+
+            let node;
+            while (node = walker.nextNode()) {
+                if (node.nodeValue.trim()) {
+                    textNodes.push(node);
+                }
+            }
+
+            return textNodes;
         }
 
         shiftColor(hex, percent) {
