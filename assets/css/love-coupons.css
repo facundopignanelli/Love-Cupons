@@ -51,6 +51,11 @@
     color: var(--love-accent-contrast, #ffffff) !important;
 }
 
+/* Ensure inactive tabs revert to normal text color */
+.love-tab-button {
+    color: #666 !important;
+}
+
 .love-coupons-tabs {
     display: flex;
     gap: 0.5rem;
@@ -76,6 +81,7 @@
     margin-bottom: 0;
     flex: 1;
     min-width: 150px;
+    opacity: 1;
 }
 
 .love-tab-button.has-error::after {
