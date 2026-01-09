@@ -1602,3 +1602,17 @@
         gap: 0.35rem;
     }
 }
+
+/* ==========================================================================
+   Notification Highlight Animation
+   ========================================================================== */
+.love-coupon.love-coupon-highlight {
+    background: rgba(44, 110, 73, 0.1);
+    box-shadow: 0 0 20px rgba(44, 110, 73, 0.3);
+    animation: love-coupon-pulse 0.5s ease;
+}
+
+@keyframes love-coupon-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+}

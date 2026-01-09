@@ -22,6 +22,7 @@
             this.setupAccessibility();
             this.syncPreferencesUI();
             this.ensureAccentContrast();
+            this.handleCouponFromNotification();
             
             // Check validation on page load for create form
             if ($('#love-create-coupon-form').length) {
@@ -773,6 +774,36 @@
 
         syncPreferencesUI() {
             // No longer needed - removed allow-all toggle
+        }
+
+        /**
+         * Handle navigation to coupon from notification click
+         */
+        handleCouponFromNotification() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const couponId = urlParams.get('coupon');
+            
+            if (couponId) {
+                // Find and scroll to the coupon card
+                const $coupon = $(`.love-coupon[data-coupon-id="${couponId}"]`);
+                if ($coupon.length) {
+                    // Scroll to the coupon
+                    $('html, body').animate({
+                        scrollTop: $coupon.offset().top - 100
+                    }, 500, () => {
+                        // Add a highlight effect
+                        $coupon.addClass('love-coupon-highlight');
+                        setTimeout(() => {
+                            $coupon.removeClass('love-coupon-highlight');
+                        }, 3000);
+                    });
+                    
+                    // Remove the query parameter from URL for cleaner appearance
+                    if (history.replaceState) {
+                        history.replaceState({}, document.title, window.location.pathname);
+                    }
+                }
+            }
         }
 
         handlePreferencesSubmit(event) {

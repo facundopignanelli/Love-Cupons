@@ -99,7 +99,7 @@ class Love_Coupons_Core {
         
         $coupon = get_post( $coupon_id );
         
-        // Prepare notification data
+        // Prepare notification data with direct link to coupon
         $notification_data = array(
             'title' => __( 'Coupon Redeemed!', 'love-coupons' ),
             'body' => sprintf(
@@ -110,7 +110,7 @@ class Love_Coupons_Core {
             'icon' => LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon192.png',
             'badge' => LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon192.png',
             'tag' => 'coupon-redeemed-' . $coupon_id,
-            'url' => home_url( '/coupons/' ),
+            'url' => home_url( '/coupons/?coupon=' . $coupon_id ),
             'requireInteraction' => true
         );
         
