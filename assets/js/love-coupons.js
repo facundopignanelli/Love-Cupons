@@ -23,6 +23,7 @@
             this.syncPreferencesUI();
             this.ensureAccentContrast();
             this.handleCouponFromNotification();
+            this.handleTabFromHash();
             
             // Check if there's stored edit data from a previous navigation
             if ($('#love-create-coupon-form').length) {
@@ -844,7 +845,7 @@
                     // Redirect to created coupons page if available, otherwise reload
                     setTimeout(() => {
                         if (loveCouponsAjax.created_page_url) {
-                            window.location.href = loveCouponsAjax.created_page_url;
+                            window.location.href = loveCouponsAjax.created_page_url + '#created';
                         } else {
                             window.location.reload();
                         }
@@ -866,6 +867,25 @@
 
         syncPreferencesUI() {
             // No longer needed - removed allow-all toggle
+        }
+
+        /**
+         * Handle tab activation from URL hash
+         */
+        handleTabFromHash() {
+            const hash = window.location.hash;
+            
+            // If hash is #created, activate the "By Me" tab
+            if (hash === '#created') {
+                const $createdTab = $('.love-tab-button[data-target="love-tab-created"]');
+                if ($createdTab.length) {
+                    $createdTab.trigger('click');
+                    // Remove hash from URL for cleaner appearance
+                    if (history.replaceState) {
+                        history.replaceState({}, document.title, window.location.pathname + window.location.search);
+                    }
+                }
+            }
         }
 
         /**
