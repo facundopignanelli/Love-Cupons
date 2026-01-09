@@ -70,7 +70,7 @@ class Love_Coupons_Shortcodes {
                 <!-- Logo Row -->
                 <div class="love-menu-logo-row">
                     <div class="love-menu-logo">
-                        <img src="<?php echo esc_url( LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon512.png' ); ?>" alt="Love Coupons" />
+                        <img src="<?php echo esc_url( LOVE_COUPONS_PLUGIN_URL . 'assets/images/logo.svg' ); ?>" alt="Love Coupons" />
                         <span class="love-menu-brand">Love Coupons</span>
                     </div>
                 </div>
