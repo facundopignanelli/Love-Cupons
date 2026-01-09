@@ -290,6 +290,7 @@ class Love_Coupons_Ajax {
             'usage_limit' => get_post_meta( $coupon_id, '_love_coupon_usage_limit', true ),
             'redemption_count' => intval( get_post_meta( $coupon_id, '_love_coupon_redemption_count', true ) ),
             'assigned_to' => (array) get_post_meta( $coupon_id, '_love_coupon_assigned_to', true ),
+            'image_url' => has_post_thumbnail( $coupon_id ) ? get_the_post_thumbnail_url( $coupon_id, 'large' ) : '',
         );
 
         wp_send_json_success( $coupon_data );

@@ -24,6 +24,7 @@ class Love_Coupons_Assets {
             'ajax_url' => admin_url( 'admin-ajax.php' ),
             'nonce'    => wp_create_nonce( 'love_coupons_nonce' ),
             'created_page_url' => $this->get_all_coupons_page_url(),
+            'submit_page_url' => $this->get_submit_page_url(),
             'vapid_public_key' => get_option( 'love_coupons_vapid_public_key', '' ),
             'strings'  => array(
                 'redeeming'    => __( 'Redeeming...', 'love-coupons' ),
@@ -154,6 +155,35 @@ class Love_Coupons_Assets {
             WHERE post_type = 'page' 
             AND post_status = 'publish' 
             AND post_content LIKE '%[love_coupons_all]%' 
+            LIMIT 1"
+        );
+
+        if ( $page_id ) {
+            return get_permalink( $page_id );
+        }
+
+        return '';
+    }
+
+    private function get_submit_page_url() {
+        $pages = get_posts( array(
+            'post_type'   => 'page',
+            'post_status' => 'publish',
+            'numberposts' => 1,
+            's'           => '[love_coupons_submit]',
+        ) );
+
+        if ( ! empty( $pages ) ) {
+            return get_permalink( $pages[0]->ID );
+        }
+
+        // Fallback: search by content
+        global $wpdb;
+        $page_id = $wpdb->get_var(
+            "SELECT ID FROM {$wpdb->posts} 
+            WHERE post_type = 'page' 
+            AND post_status = 'publish' 
+            AND post_content LIKE '%[love_coupons_submit]%' 
             LIMIT 1"
         );
 

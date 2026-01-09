@@ -140,6 +140,23 @@ class Love_Coupons_Shortcodes {
                 </div>
             </div>
         </div>
+
+        <!-- Notification Coupon Modal -->
+        <div id="love-coupon-notification-modal" class="love-modal" style="display:none;">
+            <div class="love-modal-overlay"></div>
+            <div class="love-modal-content">
+                <div class="love-modal-header">
+                    <h3><?php _e( 'Coupon Redeemed!', 'love-coupons' ); ?></h3>
+                    <button type="button" class="love-modal-close" aria-label="<?php esc_attr_e( 'Close', 'love-coupons' ); ?>">&times;</button>
+                </div>
+                <div class="love-modal-body" id="love-notification-coupon-content">
+                    <div class="love-modal-loading">
+                        <span class="dashicons dashicons-update-alt"></span>
+                        <p><?php _e( 'Loading coupon...', 'love-coupons' ); ?></p>
+                    </div>
+                </div>
+            </div>
+        </div>
         <?php
         return ob_get_clean();
     }
@@ -544,15 +561,19 @@ class Love_Coupons_Shortcodes {
                             <label for="coupon_terms"><?php _e( 'Terms & Conditions', 'love-coupons' ); ?> <span class="required">*</span></label>
                             <textarea name="coupon_terms" id="coupon_terms" rows="4" required placeholder="<?php _e( 'Add any details or terms', 'love-coupons' ); ?>"></textarea>
                         </div>
-                        <div class="form-group">
-                            <label for="coupon_usage_limit"><?php _e( 'Usage Limit', 'love-coupons' ); ?></label>
-                            <input type="number" name="coupon_usage_limit" id="coupon_usage_limit" value="1" min="1" />
+                        <div class="form-row" id="usage-limit-row">
+                            <div class="form-group">
+                                <label for="coupon_usage_limit"><?php _e( 'Usage Limit', 'love-coupons' ); ?></label>
+                                <input type="number" name="coupon_usage_limit" id="coupon_usage_limit" value="1" min="1" />
+                            </div>
+                            <div class="form-group" id="coupon_redemption_info" style="display:none;">
+                                <label for="redemption_count_display"><?php _e( 'Redeemed', 'love-coupons' ); ?></label>
+                                <div class="redemption-info-container">
+                                    <input type="text" id="redemption_count_display" value="0" readonly />
+                                    <button type="button" class="wp-element-button button button-primary" id="reset-redemption-count"><?php _e( 'Reset', 'love-coupons' ); ?></button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group" id="coupon_redemption_info" style="display:none;">
-                            <label><?php _e( 'Redeemed Count', 'love-coupons' ); ?></label>
-                            <div class="redemption-info-container" style="display: flex; gap: 0.5rem; align-items: center;">
-                                <span id="redemption_count_display" class="redemption-count">0</span>
-                                <button type="button" class="wp-element-button button button-secondary" id="reset-redemption-count"><?php _e( 'Reset Uses', 'love-coupons' ); ?></button>
                             </div>
                         </div>
                     </div>

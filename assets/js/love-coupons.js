@@ -73,6 +73,9 @@
             // Reset redemption count button
             $(document).on('click', '#reset-redemption-count', this.handleResetRedempionCount.bind(this));
 
+            // Notification coupon modal
+            $(document).on('click', '.love-modal-close, .love-modal-overlay', this.closeModal.bind(this));
+
             // Feedback modal
             $(document).on('click', '#love-feedback-btn', this.openFeedbackModal.bind(this));
             $(document).on('click', '#love-feedback-modal [data-dismiss]', this.closeFeedbackModal.bind(this));
@@ -283,11 +286,14 @@
                         data: response.data
                     }));
                     
-                    // Redirect to the create coupon page
-                    if (loveCouponsAjax.created_page_url) {
+                    // Redirect to the submit coupon page
+                    if (loveCouponsAjax.submit_page_url) {
+                        window.location.href = loveCouponsAjax.submit_page_url;
+                    } else if (loveCouponsAjax.created_page_url) {
+                        // Fallback to created page if submit page not found
                         window.location.href = loveCouponsAjax.created_page_url;
                     } else {
-                        // If no dedicated submit page, try to find it
+                        // If no dedicated submit page, show error
                         this.showError('Please navigate to the Create Coupon page.');
                     }
                 } else {
@@ -351,8 +357,19 @@
 
             // Show redemption count info
             const redemptionCount = couponData.redemption_count || 0;
-            $form.find('#redemption_count_display').text(redemptionCount);
+            $form.find('#redemption_count_display').val(redemptionCount);
             $form.find('#coupon_redemption_info').show();
+
+            // Handle existing image
+            if (couponData.image_url) {
+                const $preview = $('#coupon_hero_preview');
+                const $dropzone = $('#coupon_image_dropzone');
+                $preview.find('img').attr('src', couponData.image_url);
+                $dropzone.hide();
+                $preview.show();
+                // Mark that we don't require a new image when updating
+                $form.find('#coupon_hero_image').removeAttr('required');
+            }
 
             // Store coupon ID for update
             $form.data('editing-coupon-id', couponId);
@@ -860,49 +877,80 @@
             console.log('handleCouponFromNotification called with coupon ID:', couponId);
             
             if (couponId) {
-                // Find and scroll to the coupon card
-                const $coupon = $(`.love-coupon[data-coupon-id="${couponId}"]`);
-                console.log('Found coupon elements:', $coupon.length);
+                // Show modal with coupon details
+                this.showCouponModal(couponId);
                 
-                if ($coupon.length) {
-                    // Find which tab contains the coupon and activate it
-                    const $tabPane = $coupon.closest('.love-tab-pane');
-                    if ($tabPane.length) {
-                        const tabId = $tabPane.attr('id');
-                        console.log('Coupon is in tab:', tabId);
-                        
-                        // Activate the tab
-                        const $tabButton = $(`.love-tab-button[data-tab="${tabId}"]`);
-                        if ($tabButton.length) {
-                            $tabButton.click();
-                            console.log('Activated tab:', tabId);
-                        }
-                    }
-                    
-                    // Scroll to the coupon after a short delay to ensure tab is active
-                    setTimeout(() => {
-                        const $couponElement = $(`.love-coupon[data-coupon-id="${couponId}"]`);
-                        if ($couponElement.length) {
-                            $('html, body').animate({
-                                scrollTop: $couponElement.offset().top - 100
-                            }, 500, () => {
-                                // Add a highlight effect
-                                $couponElement.addClass('love-coupon-highlight');
-                                setTimeout(() => {
-                                    $couponElement.removeClass('love-coupon-highlight');
-                                }, 3000);
-                            });
-                        }
-                    }, 300);
-                    
-                    // Remove the query parameter from URL for cleaner appearance
-                    if (history.replaceState) {
-                        history.replaceState({}, document.title, window.location.pathname);
-                    }
-                } else {
-                    console.log('No coupon found with ID:', couponId);
+                // Remove the query parameter from URL for cleaner appearance
+                if (history.replaceState) {
+                    history.replaceState({}, document.title, window.location.pathname);
                 }
             }
+        }
+
+        showCouponModal(couponId) {
+            const $modal = $('#love-coupon-notification-modal');
+            const $content = $('#love-notification-coupon-content');
+            
+            // Show modal with loading state
+            $modal.fadeIn(300);
+            $content.html('<div class="love-modal-loading"><span class="dashicons dashicons-update-alt"></span><p>Loading coupon...</p></div>');
+            
+            // Find the coupon in the DOM
+            const $coupon = $(`.love-coupon[data-coupon-id="${couponId}"]`);
+            
+            if ($coupon.length) {
+                // Clone the coupon and display it in the modal
+                const $clonedCoupon = $coupon.clone();
+                
+                // Remove edit/delete buttons from cloned coupon
+                $clonedCoupon.find('.edit-coupon, .delete-coupon').remove();
+                
+                // Add a "View in List" button
+                const viewButton = `<button type="button" class="wp-element-button button button-primary view-coupon-in-list" data-coupon-id="${couponId}">View in My Coupons</button>`;
+                $clonedCoupon.find('.coupon-actions').append(viewButton);
+                
+                $content.html($clonedCoupon);
+                
+                // Bind click event for the view button
+                $content.find('.view-coupon-in-list').on('click', (e) => {
+                    this.closeModal();
+                    this.scrollToCoupon(couponId);
+                });
+            } else {
+                $content.html('<div class="love-modal-error"><span class="dashicons dashicons-warning"></span><p>Coupon not found or has been removed.</p></div>');
+            }
+        }
+
+        scrollToCoupon(couponId) {
+            const $coupon = $(`.love-coupon[data-coupon-id="${couponId}"]`);
+            
+            if ($coupon.length) {
+                // Find which tab contains the coupon and activate it
+                const $tabPane = $coupon.closest('.love-tab-pane');
+                if ($tabPane.length) {
+                    const tabId = $tabPane.attr('id');
+                    const $tabButton = $(`.love-tab-button[data-target="${tabId}"]`);
+                    if ($tabButton.length && !$tabButton.hasClass('active')) {
+                        $tabButton.click();
+                    }
+                }
+                
+                // Scroll to the coupon after a short delay
+                setTimeout(() => {
+                    $('html, body').animate({
+                        scrollTop: $coupon.offset().top - 100
+                    }, 500, () => {
+                        $coupon.addClass('love-coupon-highlight');
+                        setTimeout(() => {
+                            $coupon.removeClass('love-coupon-highlight');
+                        }, 3000);
+                    });
+                }, 300);
+            }
+        }
+
+        closeModal() {
+            $('#love-coupon-notification-modal').fadeOut(300);
         }
 
         handlePreferencesSubmit(event) {
@@ -1323,6 +1371,12 @@
             const $dropzone = $('#coupon_image_dropzone');
             $preview.hide().find('img').attr('src', '');
             $dropzone.show();
+            
+            // If editing a coupon, require a new image to be selected
+            const $form = $('#love-create-coupon-form');
+            if ($form.hasClass('love-form-editing')) {
+                $input.attr('required', 'required');
+            }
             
             // Check validation after image is removed
             this.checkFormValidation();
