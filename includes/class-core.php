@@ -40,6 +40,38 @@ class Love_Coupons_Core {
         });
     }
 
+    public static function get_all_coupons_page_url() {
+        $pages = get_posts( array(
+            'post_type'   => 'page',
+            'post_status' => 'publish',
+            'numberposts' => 1,
+            's'           => '[love_coupons_all]',
+        ) );
+
+        if ( ! empty( $pages ) ) {
+            return get_permalink( $pages[0]->ID );
+        }
+
+        // Fallback: search by content
+        global $wpdb;
+        $page_id = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT ID FROM {$wpdb->posts} 
+                WHERE post_type = 'page' 
+                AND post_status = 'publish' 
+                AND post_content LIKE %s 
+                LIMIT 1",
+                '%[love_coupons_all]%'
+            )
+        );
+
+        if ( $page_id ) {
+            return get_permalink( $page_id );
+        }
+
+        return false;
+    }
+
     public static function get_user_ip() {
         $ip_address = '';
         if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
@@ -99,6 +131,12 @@ class Love_Coupons_Core {
         
         $coupon = get_post( $coupon_id );
         
+        // Get the all coupons page URL
+        $coupons_page_url = self::get_all_coupons_page_url();
+        if ( ! $coupons_page_url ) {
+            $coupons_page_url = home_url( '/' );
+        }
+        
         // Prepare notification data with direct link to coupon
         $notification_data = array(
             'title' => __( 'Coupon Redeemed!', 'love-coupons' ),
@@ -110,7 +148,7 @@ class Love_Coupons_Core {
             'icon' => LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon192.png',
             'badge' => LOVE_COUPONS_PLUGIN_URL . 'assets/images/icon192.png',
             'tag' => 'coupon-redeemed-' . $coupon_id,
-            'url' => home_url( '/coupons/?coupon=' . $coupon_id ),
+            'url' => add_query_arg( 'coupon', $coupon_id, $coupons_page_url ),
             'requireInteraction' => true
         );
         

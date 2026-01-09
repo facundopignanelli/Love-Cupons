@@ -260,6 +260,7 @@
             event.preventDefault();
             const $button = $(event.currentTarget);
             const couponId = $button.data('coupon-id');
+            console.log('Edit button clicked, coupon ID:', couponId);
             if (!couponId) {
                 this.showError(loveCouponsAjax.strings.error + ' Invalid coupon.');
                 return;
@@ -271,6 +272,7 @@
                 security: loveCouponsAjax.nonce,
                 coupon_id: couponId
             }).done((response) => {
+                console.log('AJAX response:', response);
                 if (response && response.success && response.data) {
                     this.populateEditForm(response.data, couponId);
                     // Scroll to form or navigate to edit tab
@@ -281,7 +283,8 @@
                 } else {
                     this.showError((response && response.data) || 'Failed to load coupon data.');
                 }
-            }).fail(() => {
+            }).fail((xhr, status, error) => {
+                console.error('AJAX error:', error, xhr);
                 this.showError('Failed to load coupon data.');
             });
         }

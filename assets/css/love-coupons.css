@@ -931,6 +931,7 @@
     gap: 0.5rem;
     text-decoration: none;
     box-sizing: border-box;
+    margin-bottom: 0.75rem;
 }
 
 .button-primary {
