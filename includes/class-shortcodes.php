@@ -121,6 +121,8 @@ class Love_Coupons_Shortcodes {
         ob_start();
         ?>
         <div class="love-coupons-wrapper love-coupons-tabs-wrapper" <?php echo $wrapper_attrs; ?>>
+            <h2 class="love-coupons-section-title"><?php _e( 'Coupons', 'love-coupons' ); ?></h2>
+
             <div class="love-coupons-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Coupons', 'love-coupons' ); ?>">
                 <button type="button" class="love-tab-button active" role="tab" aria-selected="true" aria-controls="love-tab-available" data-target="love-tab-available">
                     <?php esc_html_e( 'For Me', 'love-coupons' ); ?>
@@ -467,7 +469,6 @@ class Love_Coupons_Shortcodes {
         wp_reset_postdata();
 
         echo '<div class="love-coupons-container">';
-        echo '<h3 class="love-coupons-section-title">' . __( 'Created Coupons', 'love-coupons' ) . '</h3>';
 
         if ( empty( $upcoming ) && empty( $available ) && empty( $redeemed ) && empty( $expired ) ) {
             echo '<div class="love-coupons-empty"><p>' . __( 'You haven\'t created any coupons yet.', 'love-coupons' ) . '</p></div>';
