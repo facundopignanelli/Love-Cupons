@@ -34,6 +34,7 @@
          */
         bindEvents() {
             $(document).on('click', '.redeem-button', this.handleRedemption.bind(this));
+            $(document).on('click', '.edit-coupon', this.handleEditCoupon.bind(this));
             $(document).on('click', '.delete-coupon', this.handleDeleteCoupon.bind(this));
             
             // Handle keyboard navigation for terms
@@ -96,6 +97,13 @@
                 const $button = $(this);
                 const couponTitle = $button.closest('.love-coupon').find('.coupon-title').text();
                 $button.attr('aria-label', loveCouponsAjax.strings.delete + ' ' + couponTitle);
+            });
+
+            // Add ARIA labels to edit buttons
+            $('.edit-coupon').each(function() {
+                const $button = $(this);
+                const couponTitle = $button.closest('.love-coupon').find('.coupon-title').text();
+                $button.attr('aria-label', 'Edit ' + couponTitle);
             });
 
             // Add ARIA expanded to terms summaries
@@ -245,6 +253,81 @@
             }
 
             this.processRedemption($button, couponId);
+        }
+
+        handleEditCoupon(event) {
+            event.preventDefault();
+            const $button = $(event.currentTarget);
+            const couponId = $button.data('coupon-id');
+            if (!couponId) {
+                this.showError(loveCouponsAjax.strings.error + ' Invalid coupon.');
+                return;
+            }
+
+            // Fetch coupon data
+            $.post(loveCouponsAjax.ajax_url, {
+                action: 'love_coupons_get_coupon',
+                security: loveCouponsAjax.nonce,
+                coupon_id: couponId
+            }).done((response) => {
+                if (response && response.success && response.data) {
+                    this.populateEditForm(response.data, couponId);
+                    // Scroll to form or navigate to edit tab
+                    const $form = $('#love-create-coupon-form');
+                    if ($form.length) {
+                        $('html, body').animate({ scrollTop: $form.offset().top - 100 }, 300);
+                    }
+                } else {
+                    this.showError((response && response.data) || 'Failed to load coupon data.');
+                }
+            }).fail(() => {
+                this.showError('Failed to load coupon data.');
+            });
+        }
+
+        /**
+         * Populate the create form with coupon data for editing
+         */
+        populateEditForm(couponData, couponId) {
+            const $form = $('#love-create-coupon-form');
+            if (!$form.length) return;
+
+            // Populate basic fields
+            $form.find('#coupon_title').val(couponData.title || '');
+            $form.find('#coupon_terms').val(couponData.terms || '');
+            $form.find('#coupon_description').val(couponData.description || '');
+
+            // Handle recipients
+            if (couponData.assigned_to && Array.isArray(couponData.assigned_to)) {
+                $form.find('input[name="coupon_recipients"]').each(function() {
+                    const $checkbox = $(this);
+                    $checkbox.prop('checked', couponData.assigned_to.includes(parseInt($checkbox.val())));
+                });
+            }
+
+            // Handle dates
+            if (couponData.start_date) {
+                $form.find('#coupon_start_date').val(couponData.start_date);
+            }
+            if (couponData.expiry_date) {
+                $form.find('#coupon_expiry_date').val(couponData.expiry_date);
+            }
+
+            // Handle usage limit
+            if (couponData.usage_limit) {
+                $form.find('#coupon_usage_limit').val(couponData.usage_limit);
+            }
+
+            // Store coupon ID for update
+            $form.data('editing-coupon-id', couponId);
+
+            // Update submit button text
+            const $submitBtn = $form.find('button[type="submit"]');
+            const originalText = loveCouponsAjax.strings.create_coupon || 'Create Coupon';
+            $submitBtn.text('Update Coupon').data('original-text', originalText);
+
+            // Mark form as in edit mode
+            $form.addClass('love-form-editing');
         }
 
         handleDeleteCoupon(event) {
@@ -556,6 +639,7 @@
         handleCreateFormSubmit(event) {
             event.preventDefault();
             const $form = $(event.currentTarget);
+            const editingCouponId = $form.data('editing-coupon-id');
 
             const title = $form.find('#coupon_title').val().trim();
             if (!title) {
@@ -573,9 +657,10 @@
                 return;
             }
 
+            // Only require image for new coupons, not for edits
             const fileInput = $form.find('#coupon_hero_image')[0];
             const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
-            if (!hasFile && !this.croppedBlob) {
+            if (!editingCouponId && !hasFile && !this.croppedBlob) {
                 this.showError(loveCouponsAjax.strings.error + ' An image is required.');
                 return;
             }
@@ -592,10 +677,14 @@
             }
 
             const formData = new FormData($form[0]);
-            formData.append('action', 'love_coupons_create');
+            formData.append('action', editingCouponId ? 'love_coupons_update' : 'love_coupons_create');
             // Include the nonce under key expected by PHP handler
             const nonceVal = $form.find('input[name="love_create_coupon_nonce"]').val();
             formData.append('nonce', nonceVal);
+
+            if (editingCouponId) {
+                formData.append('coupon_id', editingCouponId);
+            }
 
             // If we have a cropped blob, use it instead of the original file
             if (this.croppedBlob) {
@@ -603,18 +692,18 @@
                 formData.append('coupon_hero_image', this.croppedBlob, 'hero-cropped.jpg');
             }
 
-            this.processCreateCoupon($form, formData);
+            this.processCreateCoupon($form, formData, editingCouponId);
         }
 
         /**
          * Submit create coupon AJAX
          */
-        processCreateCoupon($form, formData) {
+        processCreateCoupon($form, formData, editingCouponId) {
             const $submit = $form.find('button[type="submit"]');
             const $message = $form.find('.form-message');
 
             // Loading state
-            this.setFormLoading($submit, true);
+            this.setFormLoading($submit, true, editingCouponId);
             $message.hide().removeClass('success error').text('');
 
             $.ajax({
@@ -626,24 +715,41 @@
                 dataType: 'json',
                 timeout: 60000
             })
-            .done((response) => this.handleCreateSuccess(response, $form))
+            .done((response) => this.handleCreateSuccess(response, $form, editingCouponId))
             .fail((jqXHR, textStatus, errorThrown) => this.handleCreateError(jqXHR, textStatus, errorThrown, $form))
-            .always(() => this.setFormLoading($submit, false));
+            .always(() => this.setFormLoading($submit, false, editingCouponId));
         }
 
-        setFormLoading($button, isLoading) {
+        setFormLoading($button, isLoading, isEditing = false) {
             if (isLoading) {
-                $button.prop('disabled', true).addClass('loading disabled').text(loveCouponsAjax.strings.creating);
+                const text = isEditing ? 'Updating...' : loveCouponsAjax.strings.creating;
+                $button.prop('disabled', true).addClass('loading disabled').text(text);
             } else {
-                $button.prop('disabled', false).removeClass('loading disabled').text(loveCouponsAjax.strings.create_coupon || 'Create Coupon');
+                const text = isEditing 
+                    ? ($button.data('original-text') || 'Update Coupon')
+                    : (loveCouponsAjax.strings.create_coupon || 'Create Coupon');
+                $button.prop('disabled', false).removeClass('loading disabled').text(text);
             }
         }
 
-        handleCreateSuccess(response, $form) {
+        handleCreateSuccess(response, $form, editingCouponId) {
             const $message = $form.find('.form-message');
             if (response && response.success) {
-                $message.addClass('success').removeClass('error').text(loveCouponsAjax.strings.created).show();
-                // Redirect to created coupons page if available, otherwise reload
+                const message = editingCouponId ? 'Coupon updated successfully!' : loveCouponsAjax.strings.created;
+                $message.addClass('success').removeClass('error').text(message).show();
+                
+                if (editingCouponId) {
+                    // Clear edit mode after a short delay
+                    setTimeout(() => {
+                        $form.removeData('editing-coupon-id');
+                        $form.removeClass('love-form-editing');
+                        const $submitBtn = $form.find('button[type="submit"]');
+                        $submitBtn.text(loveCouponsAjax.strings.create_coupon || 'Create Coupon').removeData('original-text');
+                        $form[0].reset();
+                        $message.fadeOut(300);
+                    }, 2000);
+                } else {
+                    // Redirect to created coupons page if available, otherwise reload
                 setTimeout(() => {
                     if (loveCouponsAjax.created_page_url) {
                         window.location.href = loveCouponsAjax.created_page_url;

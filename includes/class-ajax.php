@@ -258,6 +258,153 @@ class Love_Coupons_Ajax {
         wp_send_json_success( __( 'Coupon removed.', 'love-coupons' ) );
     }
 
+    public function ajax_get_coupon() {
+        if ( ! check_ajax_referer( 'love_coupons_nonce', 'security', false ) ) {
+            wp_send_json_error( __( 'Security check failed.', 'love-coupons' ) );
+        }
+        if ( ! is_user_logged_in() ) {
+            wp_send_json_error( __( 'You must be logged in to edit coupons.', 'love-coupons' ) );
+        }
+        $coupon_id = isset( $_POST['coupon_id'] ) ? absint( $_POST['coupon_id'] ) : 0;
+        if ( ! $coupon_id || 'love_coupon' !== get_post_type( $coupon_id ) ) {
+            wp_send_json_error( __( 'Invalid coupon.', 'love-coupons' ) );
+        }
+        $coupon = get_post( $coupon_id );
+        if ( ! $coupon || 'publish' !== $coupon->post_status ) {
+            wp_send_json_error( __( 'Coupon not found or not available.', 'love-coupons' ) );
+        }
+
+        $current_user_id = get_current_user_id();
+        $created_by = get_post_meta( $coupon_id, '_love_coupon_created_by', true );
+        if ( intval( $created_by ) !== $current_user_id && ! current_user_can( 'edit_others_posts' ) ) {
+            wp_send_json_error( __( 'You do not have permission to edit this coupon.', 'love-coupons' ) );
+        }
+
+        $coupon_data = array(
+            'id' => $coupon_id,
+            'title' => $coupon->post_title,
+            'description' => $coupon->post_content,
+            'terms' => get_post_meta( $coupon_id, '_love_coupon_terms', true ),
+            'start_date' => get_post_meta( $coupon_id, '_love_coupon_start_date', true ),
+            'expiry_date' => get_post_meta( $coupon_id, '_love_coupon_expiry_date', true ),
+            'usage_limit' => get_post_meta( $coupon_id, '_love_coupon_usage_limit', true ),
+            'assigned_to' => (array) get_post_meta( $coupon_id, '_love_coupon_assigned_to', true ),
+        );
+
+        wp_send_json_success( $coupon_data );
+    }
+
+    public function ajax_update_coupon() {
+        if ( ! check_ajax_referer( 'love_create_coupon', 'nonce', false ) ) {
+            wp_send_json_error( __( 'Security check failed.', 'love-coupons' ) );
+        }
+        if ( ! is_user_logged_in() ) {
+            wp_send_json_error( __( 'You must be logged in to update coupons.', 'love-coupons' ) );
+        }
+        
+        $coupon_id = isset( $_POST['coupon_id'] ) ? absint( $_POST['coupon_id'] ) : 0;
+        if ( ! $coupon_id || 'love_coupon' !== get_post_type( $coupon_id ) ) {
+            wp_send_json_error( __( 'Invalid coupon.', 'love-coupons' ) );
+        }
+        
+        $coupon = get_post( $coupon_id );
+        if ( ! $coupon || 'publish' !== $coupon->post_status ) {
+            wp_send_json_error( __( 'Coupon not found or not available.', 'love-coupons' ) );
+        }
+        
+        $current_user_id = get_current_user_id();
+        $created_by = get_post_meta( $coupon_id, '_love_coupon_created_by', true );
+        if ( intval( $created_by ) !== $current_user_id && ! current_user_can( 'edit_others_posts' ) ) {
+            wp_send_json_error( __( 'You do not have permission to edit this coupon.', 'love-coupons' ) );
+        }
+        
+        $title = isset( $_POST['coupon_title'] ) ? sanitize_text_field( $_POST['coupon_title'] ) : '';
+        $terms = isset( $_POST['coupon_terms'] ) ? sanitize_textarea_field( $_POST['coupon_terms'] ) : '';
+        $expiry_date = isset( $_POST['coupon_expiry_date'] ) ? sanitize_text_field( $_POST['coupon_expiry_date'] ) : '';
+        $start_date = isset( $_POST['coupon_start_date'] ) ? sanitize_text_field( $_POST['coupon_start_date'] ) : '';
+        $usage_limit = isset( $_POST['coupon_usage_limit'] ) ? absint( $_POST['coupon_usage_limit'] ) : 1;
+        
+        if ( empty( $title ) ) {
+            wp_send_json_error( __( 'Coupon title is required.', 'love-coupons' ) );
+        }
+        if ( empty( $expiry_date ) ) {
+            wp_send_json_error( __( 'Valid until date is required.', 'love-coupons' ) );
+        }
+        
+        // Update post
+        wp_update_post( array(
+            'ID' => $coupon_id,
+            'post_title' => $title,
+            'post_content' => isset( $_POST['coupon_description'] ) ? sanitize_textarea_field( $_POST['coupon_description'] ) : '',
+        ) );
+        
+        // Update meta
+        update_post_meta( $coupon_id, '_love_coupon_terms', $terms );
+        update_post_meta( $coupon_id, '_love_coupon_expiry_date', $expiry_date );
+        
+        if ( ! empty( $start_date ) ) {
+            update_post_meta( $coupon_id, '_love_coupon_start_date', $start_date );
+        } else {
+            delete_post_meta( $coupon_id, '_love_coupon_start_date' );
+        }
+        
+        update_post_meta( $coupon_id, '_love_coupon_usage_limit', $usage_limit );
+        
+        // Handle image upload if new one provided
+        if ( isset( $_FILES['coupon_hero_image'] ) && ! empty( $_FILES['coupon_hero_image']['tmp_name'] ) ) {
+            $uploaded = wp_handle_upload( $_FILES['coupon_hero_image'], array( 'test_form' => false ) );
+            if ( isset( $uploaded['file'] ) && empty( $uploaded['error'] ) ) {
+                $file_path = $uploaded['file'];
+                $editor = wp_get_image_editor( $file_path );
+                if ( ! is_wp_error( $editor ) ) {
+                    $size = $editor->get_size();
+                    if ( isset( $size['width'], $size['height'] ) ) {
+                        $target_ratio = 16 / 9;
+                        $width = (int) $size['width'];
+                        $height = (int) $size['height'];
+                        $ratio = $width / $height;
+                        if ( abs( $ratio - $target_ratio ) > 0.02 ) {
+                            if ( $ratio > $target_ratio ) {
+                                $new_width = (int) round( $height * $target_ratio );
+                                $src_x = (int) max( 0, floor( ( $width - $new_width ) / 2 ) );
+                                $editor->crop( $src_x, 0, $new_width, $height );
+                            } else {
+                                $new_height = (int) round( $width / $target_ratio );
+                                $src_y = (int) max( 0, floor( ( $height - $new_height ) / 2 ) );
+                                $editor->crop( 0, $src_y, $width, $new_height );
+                            }
+                        }
+                        $saved = $editor->save( $file_path );
+                        if ( ! is_wp_error( $saved ) ) {
+                            $filetype = wp_check_filetype( basename( $file_path ), null );
+                            $attachment = array(
+                                'post_mime_type' => $filetype['type'],
+                                'post_title' => sanitize_file_name( basename( $file_path ) ),
+                                'post_content' => '',
+                                'post_status' => 'inherit',
+                            );
+                            // Delete old attachment
+                            $old_attachment = get_post_thumbnail_id( $coupon_id );
+                            if ( $old_attachment ) {
+                                wp_delete_attachment( $old_attachment, true );
+                            }
+                            
+                            $attach_id = wp_insert_attachment( $attachment, $file_path, $coupon_id );
+                            if ( ! is_wp_error( $attach_id ) ) {
+                                require_once ABSPATH . 'wp-admin/includes/image.php';
+                                $attach_data = wp_generate_attachment_metadata( $attach_id, $file_path );
+                                wp_update_attachment_metadata( $attach_id, $attach_data );
+                                set_post_thumbnail( $coupon_id, $attach_id );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        wp_send_json_success( array( 'message' => __( 'Coupon updated successfully!', 'love-coupons' ), 'coupon_id' => $coupon_id ) );
+    }
+
     public function ajax_save_push_subscription() {
         // PWA installs can cache pages and end up with stale nonces.
         // Allow the request if the user is logged in, even when the nonce is stale, to avoid blocking push opt-in.

@@ -650,6 +650,7 @@ class Love_Coupons_Shortcodes {
                         <?php endif; ?>
                     <?php endif; ?>
                     <?php if ( $show_delete ) : ?>
+                        <button type="button" class="wp-element-button button button-primary edit-coupon" data-coupon-id="<?php echo esc_attr( $coupon_id ); ?>"><span class="dashicons dashicons-edit"></span><?php _e( 'Edit', 'love-coupons' ); ?></button>
                         <button class="wp-element-button button button-danger delete-coupon" data-coupon-id="<?php echo esc_attr( $coupon_id ); ?>"><?php _e( 'Remove', 'love-coupons' ); ?></button>
                     <?php endif; ?>
                 </div>
