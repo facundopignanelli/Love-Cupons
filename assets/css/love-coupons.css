@@ -318,12 +318,20 @@
     background: #fff;
 }
 
+.love-image-preview-image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .love-image-preview img {
     width: 100%;
-    height: auto;
+    height: 100%;
     display: block;
     object-fit: cover;
-    aspect-ratio: 16 / 9;
 }
 
 .love-image-remove {

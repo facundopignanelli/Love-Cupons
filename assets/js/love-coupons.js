@@ -439,9 +439,10 @@
             }).done((response) => {
                 if (response && response.success) {
                     this.showSuccess('Redemption count reset to zero!');
-                    // Update display
-                    $form.find('#redemption_count_display').text('0');
-                    this.setButtonLoading($button, false);
+                    // Reload page after a short delay to refresh coupon categorization
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
                 } else {
                     this.showError((response && response.data) || 'Failed to reset redemption count.');
                     this.setButtonLoading($button, false);

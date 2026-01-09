@@ -588,7 +588,9 @@ class Love_Coupons_Shortcodes {
                                 <input type="file" name="coupon_hero_image" id="coupon_hero_image" accept="image/*" required />
                             </div>
                             <div id="coupon_hero_preview" class="love-image-preview" style="display:none;">
-                                <img alt="<?php esc_attr_e('Image preview','love-coupons'); ?>" />
+                                <div class="love-image-preview-image">
+                                    <img alt="<?php esc_attr_e('Image preview','love-coupons'); ?>" />
+                                </div>
                                 <button type="button" class="button love-image-remove" id="love-remove-image"><?php _e( 'Remove Image', 'love-coupons' ); ?></button>
                             </div>
                         </div>

@@ -505,6 +505,9 @@ class Love_Coupons_Ajax {
 
         // Reset the redemption count to 0
         update_post_meta( $coupon_id, '_love_coupon_redemption_count', 0 );
+        
+        // Also clear any legacy redeemed flag so coupon shows as available again
+        delete_post_meta( $coupon_id, '_love_coupon_redeemed' );
 
         wp_send_json_success( __( 'Redemption count has been reset to zero.', 'love-coupons' ) );
     }
