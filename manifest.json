@@ -7,21 +7,15 @@
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#ffffff",
-  "theme_color": "#2c6e49",
+  "theme_color": "#FF416C",
   "categories": ["lifestyle"],
   "lang": "en-US",
   "dir": "ltr",
   "icons": [
     {
-      "src": "/wp-content/plugins/Love-Coupons/assets/images/icon192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/wp-content/plugins/Love-Coupons/assets/images/icon512.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "/wp-content/plugins/Love-Coupons/assets/images/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ],
