@@ -754,13 +754,14 @@
                     }, 2000);
                 } else {
                     // Redirect to created coupons page if available, otherwise reload
-                setTimeout(() => {
-                    if (loveCouponsAjax.created_page_url) {
-                        window.location.href = loveCouponsAjax.created_page_url;
-                    } else {
-                        window.location.reload();
-                    }
-                }, 800);
+                    setTimeout(() => {
+                        if (loveCouponsAjax.created_page_url) {
+                            window.location.href = loveCouponsAjax.created_page_url;
+                        } else {
+                            window.location.reload();
+                        }
+                    }, 800);
+                }
             } else {
                 const msg = (response && response.data) ? response.data : loveCouponsAjax.strings.create_failed;
                 $message.addClass('error').removeClass('success').text(msg).show();
