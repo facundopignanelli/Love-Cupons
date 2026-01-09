@@ -184,6 +184,20 @@ class Love_Coupons_Ajax {
         $recipients      = isset( $_POST['recipients'] ) ? (array) $_POST['recipients'] : array();
         $accent_choice   = isset( $_POST['accent_color'] ) ? sanitize_text_field( wp_unslash( $_POST['accent_color'] ) ) : '';
 
+        // Handle appearance-only updates (when only accent_color is sent)
+        if ( ! empty( $accent_choice ) && empty( $recipients ) ) {
+            $accent_slug = Love_Coupons_Core::sanitize_accent_choice( $accent_choice );
+            if ( $accent_slug ) {
+                update_user_meta( $current_user_id, '_love_coupons_accent_color', $accent_slug );
+            }
+
+            wp_send_json_success( array(
+                'message' => __( 'Appearance saved.', 'love-coupons' ),
+                'accent'  => Love_Coupons_Core::get_user_accent_color( $current_user_id ),
+            ) );
+        }
+
+        // Handle recipients update (requires at least one recipient)
         if ( empty( $recipients ) ) {
             wp_send_json_error( __( 'Please select at least one user.', 'love-coupons' ) );
         }
