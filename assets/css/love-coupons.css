@@ -288,14 +288,15 @@
     border-radius: 12px;
     overflow: hidden;
     background: #fff;
+    aspect-ratio: 16 / 9;
+    position: relative;
 }
 
 .love-image-preview img {
     width: 100%;
-    height: auto;
+    height: 100%;
     display: block;
     object-fit: cover;
-    max-height: 400px;
 }
 
 .love-image-remove {

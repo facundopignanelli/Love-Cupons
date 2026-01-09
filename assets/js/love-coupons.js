@@ -24,8 +24,9 @@
             this.ensureAccentContrast();
             this.handleCouponFromNotification();
             
-            // Check validation on page load for create form
+            // Check if there's stored edit data from a previous navigation
             if ($('#love-create-coupon-form').length) {
+                this.loadEditDataIfPresent();
                 this.checkFormValidation();
             }
         }
@@ -274,11 +275,18 @@
             }).done((response) => {
                 console.log('AJAX response:', response);
                 if (response && response.success && response.data) {
-                    this.populateEditForm(response.data, couponId);
-                    // Scroll to form or navigate to edit tab
-                    const $form = $('#love-create-coupon-form');
-                    if ($form.length) {
-                        $('html, body').animate({ scrollTop: $form.offset().top - 100 }, 300);
+                    // Store the coupon data and ID for the form to use
+                    sessionStorage.setItem('love_coupons_edit_data', JSON.stringify({
+                        coupon_id: couponId,
+                        data: response.data
+                    }));
+                    
+                    // Redirect to the create coupon page
+                    if (loveCouponsAjax.created_page_url) {
+                        window.location.href = loveCouponsAjax.created_page_url;
+                    } else {
+                        // If no dedicated submit page, try to find it
+                        this.showError('Please navigate to the Create Coupon page.');
                     }
                 } else {
                     this.showError((response && response.data) || 'Failed to load coupon data.');
@@ -287,6 +295,23 @@
                 console.error('AJAX error:', error, xhr);
                 this.showError('Failed to load coupon data.');
             });
+        }
+
+        /**
+         * Load edit data from sessionStorage if present
+         */
+        loadEditDataIfPresent() {
+            const editDataJson = sessionStorage.getItem('love_coupons_edit_data');
+            if (editDataJson) {
+                try {
+                    const editData = JSON.parse(editDataJson);
+                    console.log('Loading edit data for coupon:', editData.coupon_id);
+                    this.populateEditForm(editData.data, editData.coupon_id);
+                    sessionStorage.removeItem('love_coupons_edit_data');
+                } catch (e) {
+                    console.error('Failed to parse edit data:', e);
+                }
+            }
         }
 
         /**
@@ -787,25 +812,50 @@
             const urlParams = new URLSearchParams(window.location.search);
             const couponId = urlParams.get('coupon');
             
+            console.log('handleCouponFromNotification called with coupon ID:', couponId);
+            
             if (couponId) {
                 // Find and scroll to the coupon card
                 const $coupon = $(`.love-coupon[data-coupon-id="${couponId}"]`);
+                console.log('Found coupon elements:', $coupon.length);
+                
                 if ($coupon.length) {
-                    // Scroll to the coupon
-                    $('html, body').animate({
-                        scrollTop: $coupon.offset().top - 100
-                    }, 500, () => {
-                        // Add a highlight effect
-                        $coupon.addClass('love-coupon-highlight');
-                        setTimeout(() => {
-                            $coupon.removeClass('love-coupon-highlight');
-                        }, 3000);
-                    });
+                    // Find which tab contains the coupon and activate it
+                    const $tabPane = $coupon.closest('.love-tab-pane');
+                    if ($tabPane.length) {
+                        const tabId = $tabPane.attr('id');
+                        console.log('Coupon is in tab:', tabId);
+                        
+                        // Activate the tab
+                        const $tabButton = $(`.love-tab-button[data-tab="${tabId}"]`);
+                        if ($tabButton.length) {
+                            $tabButton.click();
+                            console.log('Activated tab:', tabId);
+                        }
+                    }
+                    
+                    // Scroll to the coupon after a short delay to ensure tab is active
+                    setTimeout(() => {
+                        const $couponElement = $(`.love-coupon[data-coupon-id="${couponId}"]`);
+                        if ($couponElement.length) {
+                            $('html, body').animate({
+                                scrollTop: $couponElement.offset().top - 100
+                            }, 500, () => {
+                                // Add a highlight effect
+                                $couponElement.addClass('love-coupon-highlight');
+                                setTimeout(() => {
+                                    $couponElement.removeClass('love-coupon-highlight');
+                                }, 3000);
+                            });
+                        }
+                    }, 300);
                     
                     // Remove the query parameter from URL for cleaner appearance
                     if (history.replaceState) {
                         history.replaceState({}, document.title, window.location.pathname);
                     }
+                } else {
+                    console.log('No coupon found with ID:', couponId);
                 }
             }
         }
