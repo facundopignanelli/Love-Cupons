@@ -534,7 +534,7 @@ class Love_Coupons_Shortcodes {
     private function render_create_coupon_form( $user_id ) {
         $wrapper_attrs = Love_Coupons_Core::get_accent_attributes_for_user( $user_id );
         ?>
-        <div class="love-coupons-tabs-wrapper" <?php echo $wrapper_attrs; ?>>
+        <div class="love-coupons-wrapper love-coupons-tabs-wrapper" <?php echo $wrapper_attrs; ?>>
             <div class="love-coupons-tabs" role="tablist" aria-label="<?php esc_attr_e( 'Coupon Form', 'love-coupons' ); ?>">
                 <button type="button" class="love-tab-button active" role="tab" aria-selected="true" aria-controls="love-tab-basic" data-target="love-tab-basic">
                     <?php esc_html_e( 'Basic Info', 'love-coupons' ); ?>
@@ -572,8 +572,6 @@ class Love_Coupons_Shortcodes {
                                     <input type="text" id="redemption_count_display" value="0" readonly />
                                     <button type="button" class="wp-element-button button button-primary" id="reset-redemption-count"><?php _e( 'Reset', 'love-coupons' ); ?></button>
                                 </div>
-                            </div>
-                        </div>
                             </div>
                         </div>
                     </div>
