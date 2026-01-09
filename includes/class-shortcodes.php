@@ -548,6 +548,13 @@ class Love_Coupons_Shortcodes {
                             <label for="coupon_usage_limit"><?php _e( 'Usage Limit', 'love-coupons' ); ?></label>
                             <input type="number" name="coupon_usage_limit" id="coupon_usage_limit" value="1" min="1" />
                         </div>
+                        <div class="form-group" id="coupon_redemption_info" style="display:none;">
+                            <label><?php _e( 'Redeemed Count', 'love-coupons' ); ?></label>
+                            <div class="redemption-info-container" style="display: flex; gap: 0.5rem; align-items: center;">
+                                <span id="redemption_count_display" class="redemption-count">0</span>
+                                <button type="button" class="wp-element-button button button-secondary" id="reset-redemption-count"><?php _e( 'Reset Uses', 'love-coupons' ); ?></button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Image Tab -->

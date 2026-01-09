@@ -57,7 +57,6 @@
 
             // Scheduling toggle
             $(document).on('change', 'input[name="coupon_schedule_option"]', this.toggleScheduleDate.bind(this));
-
             // Dropzone interactions for image upload
             $(document).on('click', '#coupon_image_dropzone', this.handleDropzoneClick.bind(this));
             $(document).on('dragover dragenter', '#coupon_image_dropzone', this.handleDropzoneDrag.bind(this));
@@ -70,6 +69,9 @@
 
             // Remove image button
             $(document).on('click', '#love-remove-image', this.removeImage.bind(this));
+
+            // Reset redemption count button
+            $(document).on('click', '#reset-redemption-count', this.handleResetRedempionCount.bind(this));
 
             // Feedback modal
             $(document).on('click', '#love-feedback-btn', this.openFeedbackModal.bind(this));
@@ -347,8 +349,14 @@
                 $form.find('#coupon_usage_limit').val(couponData.usage_limit);
             }
 
+            // Show redemption count info
+            const redemptionCount = couponData.redemption_count || 0;
+            $form.find('#redemption_count_display').text(redemptionCount);
+            $form.find('#coupon_redemption_info').show();
+
             // Store coupon ID for update
             $form.data('editing-coupon-id', couponId);
+            $form.data('coupon-id', couponId);
 
             // Update submit button text
             const $submitBtn = $form.find('button[type="submit"]');
@@ -386,6 +394,43 @@
                 }
             }).fail(() => {
                 this.showError(loveCouponsAjax.strings.delete_failed);
+                this.setButtonLoading($button, false);
+            });
+        }
+
+        handleResetRedempionCount(event) {
+            event.preventDefault();
+            const $button = $(event.currentTarget);
+            const $form = $('#love-create-coupon-form');
+            const couponId = $form.data('coupon-id');
+            
+            if (!couponId) {
+                this.showError('Could not identify coupon.');
+                return;
+            }
+            
+            if (!confirm('Are you sure you want to reset the redemption count to zero? This will allow the coupon to be redeemed again.')) {
+                return;
+            }
+            
+            this.setButtonLoading($button, true, 'Resetting...');
+            
+            $.post(loveCouponsAjax.ajax_url, {
+                action: 'love_coupons_reset_redemption_count',
+                security: loveCouponsAjax.nonce,
+                coupon_id: couponId
+            }).done((response) => {
+                if (response && response.success) {
+                    this.showSuccess('Redemption count reset to zero!');
+                    // Update display
+                    $form.find('#redemption_count_display').text('0');
+                    this.setButtonLoading($button, false);
+                } else {
+                    this.showError((response && response.data) || 'Failed to reset redemption count.');
+                    this.setButtonLoading($button, false);
+                }
+            }).fail(() => {
+                this.showError('Failed to reset redemption count.');
                 this.setButtonLoading($button, false);
             });
         }

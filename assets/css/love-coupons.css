@@ -219,6 +219,30 @@
     color: #333;
 }
 
+.redemption-info-container {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid var(--love-accent, #2c6e49);
+}
+
+.redemption-count {
+    display: inline-block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--love-accent, #2c6e49);
+    min-width: 2rem;
+}
+
+#reset-redemption-count {
+    white-space: nowrap;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+}
+
 .form-group label .required {
     color: #d63638;
 }

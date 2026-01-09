@@ -288,6 +288,7 @@ class Love_Coupons_Ajax {
             'start_date' => get_post_meta( $coupon_id, '_love_coupon_start_date', true ),
             'expiry_date' => get_post_meta( $coupon_id, '_love_coupon_expiry_date', true ),
             'usage_limit' => get_post_meta( $coupon_id, '_love_coupon_usage_limit', true ),
+            'redemption_count' => intval( get_post_meta( $coupon_id, '_love_coupon_redemption_count', true ) ),
             'assigned_to' => (array) get_post_meta( $coupon_id, '_love_coupon_assigned_to', true ),
         );
 
@@ -476,4 +477,35 @@ class Love_Coupons_Ajax {
             wp_send_json_error( __( 'Failed to send feedback. Please try again.', 'love-coupons' ) );
         }
     }
+
+    public function ajax_reset_redemption_count() {
+        if ( ! check_ajax_referer( 'love_coupons_nonce', 'security', false ) ) {
+            wp_send_json_error( __( 'Security check failed.', 'love-coupons' ) );
+        }
+        if ( ! is_user_logged_in() ) {
+            wp_send_json_error( __( 'You must be logged in to edit coupons.', 'love-coupons' ) );
+        }
+
+        $coupon_id = isset( $_POST['coupon_id'] ) ? absint( $_POST['coupon_id'] ) : 0;
+        if ( ! $coupon_id || 'love_coupon' !== get_post_type( $coupon_id ) ) {
+            wp_send_json_error( __( 'Invalid coupon.', 'love-coupons' ) );
+        }
+
+        $coupon = get_post( $coupon_id );
+        if ( ! $coupon || 'publish' !== $coupon->post_status ) {
+            wp_send_json_error( __( 'Coupon not found or not available.', 'love-coupons' ) );
+        }
+
+        $current_user_id = get_current_user_id();
+        $created_by = get_post_meta( $coupon_id, '_love_coupon_created_by', true );
+        if ( intval( $created_by ) !== $current_user_id && ! current_user_can( 'edit_others_posts' ) ) {
+            wp_send_json_error( __( 'You do not have permission to edit this coupon.', 'love-coupons' ) );
+        }
+
+        // Reset the redemption count to 0
+        update_post_meta( $coupon_id, '_love_coupon_redemption_count', 0 );
+
+        wp_send_json_success( __( 'Redemption count has been reset to zero.', 'love-coupons' ) );
+    }
 }
+

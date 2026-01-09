@@ -102,6 +102,7 @@ class Love_Coupons_Plugin {
         add_action( 'wp_ajax_love_coupons_update', array( $this->ajax, 'ajax_update_coupon' ) );
         add_action( 'wp_ajax_love_coupons_delete', array( $this->ajax, 'ajax_delete_coupon' ) );
         add_action( 'wp_ajax_love_coupons_get_coupon', array( $this->ajax, 'ajax_get_coupon' ) );
+        add_action( 'wp_ajax_love_coupons_reset_redemption_count', array( $this->ajax, 'ajax_reset_redemption_count' ) );
         add_action( 'wp_ajax_love_coupons_save_preferences', array( $this->ajax, 'ajax_save_preferences' ) );
         add_action( 'wp_ajax_love_coupons_save_push_subscription', array( $this->ajax, 'ajax_save_push_subscription' ) );
         add_action( 'wp_ajax_love_coupons_get_nonce', array( $this->ajax, 'ajax_get_nonce' ) );
